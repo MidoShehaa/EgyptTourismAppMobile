@@ -14,21 +14,21 @@ const ONBOARDING_DATA = [
         id: '1',
         titleKey: 'onboarding1Title',
         descKey: 'onboarding1Desc',
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Faf%2FAll_Gizah_Pyramids.jpg%2F800px-All_Gizah_Pyramids.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Faf%2FAll_Gizah_Pyramids.jpg%2F800px-All_Gizah_Pyramids.jpg',
+        image: 'https://i0.wp.com/upload.wikimedia.org/wikipedia/commons/thumb/a/af/All_Gizah_Pyramids.jpg/800px-All_Gizah_Pyramids.jpg?quality=80&w=1000&strip=all',
         fallback: PLACEHOLDER,
     },
     {
         id: '2',
         titleKey: 'onboarding2Title',
         descKey: 'onboarding2Desc',
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F6%2F6d%2FLuxor_Temple_Egypt1.jpg%2F800px-Luxor_Temple_Egypt1.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F6%2F6d%2FLuxor_Temple_Egypt1.jpg%2F800px-Luxor_Temple_Egypt1.jpg',
+        image: 'https://i0.wp.com/upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Luxor_Temple_Egypt1.jpg/800px-Luxor_Temple_Egypt1.jpg?quality=80&w=1000&strip=all',
         fallback: PLACEHOLDER,
     },
     {
         id: '3',
         titleKey: 'onboarding3Title',
         descKey: 'onboarding3Desc',
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fcd%2FRas_Mohammed_National_Park.jpg%2F800px-Ras_Mohammed_National_Park.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fcd%2FRas_Mohammed_National_Park.jpg%2F800px-Ras_Mohammed_National_Park.jpg',
+        image: 'https://i0.wp.com/upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Ras_Mohammed_National_Park.jpg/800px-Ras_Mohammed_National_Park.jpg?quality=80&w=1000&strip=all',
         fallback: PLACEHOLDER,
     }
 ];

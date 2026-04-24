@@ -7,7 +7,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 12500,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fb%2Fb8%2FFour_Seasons_Hotel_in_Cairo.JPG&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fb%2Fb8%2FFour_Seasons_Hotel_in_Cairo.JPG',
+        image: 'https://i0.wp.com/upload.wikimedia.org/wikipedia/commons/b/b8/Four_Seasons_Hotel_in_Cairo.JPG?quality=80&w=1000&strip=all',
         amenities: ['Nile View', 'Rooftop Pool', 'Luxury Spa', 'Fine Dining'],
     },
     {
@@ -17,7 +17,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.8,
         price: 11000,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fcf%2FNile_Ritz-Carlton_Hotel_Cairo_Egypt.jpg%2F800px-Nile_Ritz-Carlton_Hotel_Cairo_Egypt.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fcf%2FNile_Ritz-Carlton_Hotel_Cairo_Egypt.jpg%2F800px-Nile_Ritz-Carlton_Hotel_Cairo_Egypt.jpg',
+        image: 'https://i0.wp.com/upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Nile_Ritz-Carlton_Hotel_Cairo_Egypt.jpg/800px-Nile_Ritz-Carlton_Hotel_Cairo_Egypt.jpg?quality=80&w=1000&strip=all',
         amenities: ['Nile View', 'Outdoor Pool', 'Historic Setting'],
     },
     {
@@ -27,7 +27,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 9800,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1582719478250-c89cae4dc85b%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1582719478250-c89cae4dc85b%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.unsplash.com/photo-1582719478250-c89cae4dc85b?quality=80&w=1000&strip=all',
         amenities: ['Ultra All-Inclusive', 'Private Beach', 'Multiple Pools'],
     },
     {
@@ -37,7 +37,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 7500,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1571896349842-33c89424de2d%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1571896349842-33c89424de2d%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.unsplash.com/photo-1571896349842-33c89424de2d?quality=80&w=1000&strip=all',
         amenities: ['Boutique Design', 'Desert View', 'Premium Spa'],
     },
     {
@@ -47,7 +47,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 11500,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1544124499-183636bc9d9d%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1544124499-183636bc9d9d%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.unsplash.com/photo-1544124499-183636bc9d9d?quality=80&w=1000&strip=all',
         amenities: ['Adults Only', 'Ultra Luxury', 'Gourmet Dining'],
     },
     {
@@ -57,7 +57,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 14000,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F1%2F1a%2FOld_Cataract_Hotel_Aswan.jpg%2F800px-Old_Cataract_Hotel_Aswan.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F1%2F1a%2FOld_Cataract_Hotel_Aswan.jpg%2F800px-Old_Cataract_Hotel_Aswan.jpg',
+        image: 'https://i0.wp.com/upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Old_Cataract_Hotel_Aswan.jpg/800px-Old_Cataract_Hotel_Aswan.jpg?quality=80&w=1000&strip=all',
         amenities: ['Historic Palace', 'Nile View', 'Royal Suite'],
     },
     {
@@ -67,7 +67,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.8,
         price: 9000,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fe%2Fe2%2FMena_House_Hotel_Giza.jpg%2F800px-Mena_House_Hotel_Giza.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fe%2Fe2%2FMena_House_Hotel_Giza.jpg%2F800px-Mena_House_Hotel_Giza.jpg',
+        image: 'https://i0.wp.com/upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Mena_House_Hotel_Giza.jpg/800px-Mena_House_Hotel_Giza.jpg?quality=80&w=1000&strip=all',
         amenities: ['Pyramids View', 'Historic Garden', 'Outdoor Pool'],
     },
 
@@ -79,7 +79,7 @@ export const HOTELS = [
         category: 'mid-range',
         rating: 4.6,
         price: 5500,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1564501049412-61c2a3083791%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1564501049412-61c2a3083791%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1564501049412-61c2a3083791%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1564501049412-61c2a3083791%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80?quality=80&w=1000&strip=all',
         amenities: ['Nile View', 'Pool', 'Business Center'],
     },
     {
@@ -89,7 +89,7 @@ export const HOTELS = [
         category: 'mid-range',
         rating: 4.3,
         price: 3200,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1551882547-ff40c63fe5fa%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1551882547-ff40c63fe5fa%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1551882547-ff40c63fe5fa%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1551882547-ff40c63fe5fa%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80?quality=80&w=1000&strip=all',
         amenities: ['Beach Access', 'Pool', 'Restaurant'],
     },
 
@@ -101,7 +101,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.7,
         price: 1800,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1520250497591-112f2f40a3f4%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1520250497591-112f2f40a3f4%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1520250497591-112f2f40a3f4%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1520250497591-112f2f40a3f4%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80?quality=80&w=1000&strip=all',
         amenities: ['Pyramids View', 'Rooftop Breakfast', 'Airport Shuttle'],
     },
     {
@@ -111,7 +111,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.3,
         price: 1200,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1560185007-c5ca9d2c014d%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1560185007-c5ca9d2c014d%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1560185007-c5ca9d2c014d%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1560185007-c5ca9d2c014d%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80?quality=80&w=1000&strip=all',
         amenities: ['Sphinx View', 'Rooftop Terrace', 'Budget Friendly'],
     },
     {
@@ -121,7 +121,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.6,
         price: 600,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1555854877-bab0e564b8d5%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1555854877-bab0e564b8d5%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1555854877-bab0e564b8d5%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1555854877-bab0e564b8d5%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80?quality=80&w=1000&strip=all',
         amenities: ['Social Vibe', 'City Center', 'Shared Kitchen'],
     },
     {
@@ -131,7 +131,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.5,
         price: 750,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1566073771259-6a8506099945%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1566073771259-6a8506099945%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1566073771259-6a8506099945%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1566073771259-6a8506099945%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80?quality=80&w=1000&strip=all',
         amenities: ['Modern Design', 'Near Zamalek', 'WiFi'],
     },
     {
@@ -141,7 +141,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.8,
         price: 1500,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1544551763-46a013bb70d5%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1544551763-46a013bb70d5%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1544551763-46a013bb70d5%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1544551763-46a013bb70d5%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80?quality=80&w=1000&strip=all',
         amenities: ['Pool', 'Garden', 'Social Events'],
     },
     {
@@ -151,7 +151,7 @@ export const HOTELS = [
         category: 'budget',
         rating: 4.9,
         price: 1200,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1506905925346-21bda4d32df4%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1506905925346-21bda4d32df4%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1506905925346-21bda4d32df4%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1506905925346-21bda4d32df4%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80?quality=80&w=1000&strip=all',
         amenities: ['Eco-Friendly', 'Private Beach', 'Peaceful'],
     },
     {
@@ -161,7 +161,7 @@ export const HOTELS = [
         category: 'budget',
         rating: 4.8,
         price: 2500,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1571896349842-33c89424de2d%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1571896349842-33c89424de2d%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1571896349842-33c89424de2d%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1571896349842-33c89424de2d%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80?quality=80&w=1000&strip=all',
         amenities: ['Sea View', 'Home Cooked Meals', 'Authentic'],
     },
     {
@@ -171,7 +171,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.7,
         price: 800,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1467269204594-9661b134dd2b%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1467269204594-9661b134dd2b%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1467269204594-9661b134dd2b%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1467269204594-9661b134dd2b%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80?quality=80&w=1000&strip=all',
         amenities: ['Artistic Decor', 'Central', 'Friendly Staff'],
     },
     {
@@ -181,7 +181,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.6,
         price: 1000,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1508739773434-c26b3d09e071%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1508739773434-c26b3d09e071%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1508739773434-c26b3d09e071%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1508739773434-c26b3d09e071%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80?quality=80&w=1000&strip=all',
         amenities: ['Nile View', 'Elephantine Island', 'Nubian Style'],
     },
     {
@@ -191,7 +191,7 @@ export const HOTELS = [
         category: 'budget',
         rating: 4.9,
         price: 1800,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1542314831-068cd1dbfeeb%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1542314831-068cd1dbfeeb%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1542314831-068cd1dbfeeb%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1542314831-068cd1dbfeeb%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80?quality=80&w=1000&strip=all',
         amenities: ['Nubian House', 'River Access', 'Traditional'],
     },
     {
@@ -201,7 +201,7 @@ export const HOTELS = [
         category: 'budget',
         rating: 4.5,
         price: 800,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1568084680786-a84f91d1153c%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1568084680786-a84f91d1153c%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1568084680786-a84f91d1153c%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1568084680786-a84f91d1153c%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80?quality=80&w=1000&strip=all',
         amenities: ['Pool', 'East Bank', 'Quiet'],
     },
     {
@@ -211,7 +211,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.2,
         price: 400,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1600585154340-be6161a56a0c%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1600585154340-be6161a56a0c%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80',
+        image: 'https://i0.wp.com/images.weserv.nl/?url=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1600585154340-be6161a56a0c%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80&default=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1600585154340-be6161a56a0c%3Fauto%3Dformat%26fit%3Dcrop%26w%3D800%26q%3D80?quality=80&w=1000&strip=all',
         amenities: ['Social Vibe', 'West Bank', 'Rooftop'],
     },
 ];
