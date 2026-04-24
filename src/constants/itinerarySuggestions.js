@@ -5,7 +5,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Prophets' Trail: Cairo - Sinai - Jerusalem - Jordan",
         "days": 12,
         "rating": 5,
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1548232821-802bcc93666d?auto=format&fit=crop&w=800&q=80",
         "description": "رحلة العمر الروحانية التي تتبع خطى الأنبياء عبر 3 دول.",
         "descriptionEn": "A spiritual journey of a lifetime tracing the footsteps of prophets across 3 countries.",
         "plan": {
@@ -74,7 +74,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Sinai Summits & Depths (Hiking & Diving)",
         "days": 7,
         "rating": 4.9,
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1544124499-183636bc9d9d?auto=format&fit=crop&w=800&q=80",
         "description": "مغامرة لا تنسى تجمع بين تسلق أعلى قمم مصر والغوص في أعمق ثقوبها الزرقاء.",
         "descriptionEn": "An unforgettable adventure combining hiking Egypt's highest peaks and diving into its deepest blue holes.",
         "plan": {
@@ -115,7 +115,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Luxor & Aswan: Tour #1",
         "days": 3,
         "rating": "4.5",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1548232821-802bcc93666d?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف الأقصر وأسوان على مدار 3 أيام.",
         "descriptionEn": "Customized plan to explore Luxor & Aswan over 3 days.",
         "plan": {
@@ -156,7 +156,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Dahab & Sharm: Tour #2",
         "days": 4,
         "rating": "4.5",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1544124499-183636bc9d9d?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف دهب وشرم الشيخ على مدار 4 أيام.",
         "descriptionEn": "Customized plan to explore Dahab & Sharm over 4 days.",
         "plan": {
@@ -206,7 +206,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "St. Catherine: Tour #3",
         "days": 5,
         "rating": "4.7",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف سانت كاترين على مدار 5 أيام.",
         "descriptionEn": "Customized plan to explore St. Catherine over 5 days.",
         "plan": {
@@ -265,7 +265,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Jerusalem & Petra: Tour #4",
         "days": 6,
         "rating": "4.6",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1544551763-47a0159f92ad?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف القدس والبتراء على مدار 6 أيام.",
         "descriptionEn": "Customized plan to explore Jerusalem & Petra over 6 days.",
         "plan": {
@@ -333,7 +333,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Cairo & Giza: Tour #5",
         "days": 7,
         "rating": "4.4",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1539367628448-4bc5c9d171c8?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف القاهرة والجيزة على مدار 7 أيام.",
         "descriptionEn": "Customized plan to explore Cairo & Giza over 7 days.",
         "plan": {
@@ -410,7 +410,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Luxor & Aswan: Tour #6",
         "days": 2,
         "rating": "4.5",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف الأقصر وأسوان على مدار 2 أيام.",
         "descriptionEn": "Customized plan to explore Luxor & Aswan over 2 days.",
         "plan": {
@@ -442,7 +442,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Dahab & Sharm: Tour #7",
         "days": 3,
         "rating": "4.2",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1568322422394-3cb4978a353a?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف دهب وشرم الشيخ على مدار 3 أيام.",
         "descriptionEn": "Customized plan to explore Dahab & Sharm over 3 days.",
         "plan": {
@@ -483,7 +483,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "St. Catherine: Tour #8",
         "days": 4,
         "rating": "4.9",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1548232821-802bcc93666d?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف سانت كاترين على مدار 4 أيام.",
         "descriptionEn": "Customized plan to explore St. Catherine over 4 days.",
         "plan": {
@@ -533,7 +533,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Jerusalem & Petra: Tour #9",
         "days": 5,
         "rating": "4.6",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1544124499-183636bc9d9d?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف القدس والبتراء على مدار 5 أيام.",
         "descriptionEn": "Customized plan to explore Jerusalem & Petra over 5 days.",
         "plan": {
@@ -592,7 +592,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Cairo & Giza: Tour #10",
         "days": 6,
         "rating": "5.0",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف القاهرة والجيزة على مدار 6 أيام.",
         "descriptionEn": "Customized plan to explore Cairo & Giza over 6 days.",
         "plan": {
@@ -660,7 +660,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Luxor & Aswan: Tour #11",
         "days": 7,
         "rating": "4.5",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1544551763-47a0159f92ad?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف الأقصر وأسوان على مدار 7 أيام.",
         "descriptionEn": "Customized plan to explore Luxor & Aswan over 7 days.",
         "plan": {
@@ -737,7 +737,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Dahab & Sharm: Tour #12",
         "days": 2,
         "rating": "4.7",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1539367628448-4bc5c9d171c8?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف دهب وشرم الشيخ على مدار 2 أيام.",
         "descriptionEn": "Customized plan to explore Dahab & Sharm over 2 days.",
         "plan": {
@@ -769,7 +769,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "St. Catherine: Tour #13",
         "days": 3,
         "rating": "4.8",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف سانت كاترين على مدار 3 أيام.",
         "descriptionEn": "Customized plan to explore St. Catherine over 3 days.",
         "plan": {
@@ -810,7 +810,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Jerusalem & Petra: Tour #14",
         "days": 4,
         "rating": "4.4",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1568322422394-3cb4978a353a?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف القدس والبتراء على مدار 4 أيام.",
         "descriptionEn": "Customized plan to explore Jerusalem & Petra over 4 days.",
         "plan": {
@@ -860,7 +860,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Cairo & Giza: Tour #15",
         "days": 5,
         "rating": "4.4",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1548232821-802bcc93666d?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف القاهرة والجيزة على مدار 5 أيام.",
         "descriptionEn": "Customized plan to explore Cairo & Giza over 5 days.",
         "plan": {
@@ -919,7 +919,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Luxor & Aswan: Tour #16",
         "days": 6,
         "rating": "4.5",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1544124499-183636bc9d9d?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف الأقصر وأسوان على مدار 6 أيام.",
         "descriptionEn": "Customized plan to explore Luxor & Aswan over 6 days.",
         "plan": {
@@ -987,7 +987,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Dahab & Sharm: Tour #17",
         "days": 7,
         "rating": "4.6",
-        "image": "https://via.placeholder.com/800x400?text=No+Image+Available",
+        "image": "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=800&q=80",
         "description": "خطة مخصصة لاستكشاف دهب وشرم الشيخ على مدار 7 أيام.",
         "descriptionEn": "Customized plan to explore Dahab & Sharm over 7 days.",
         "plan": {

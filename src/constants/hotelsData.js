@@ -7,7 +7,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 12500,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80',
         amenities: ['Nile View', 'Rooftop Pool', 'Luxury Spa', 'Fine Dining'],
     },
     {
@@ -17,7 +17,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.8,
         price: 11000,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
         amenities: ['Nile View', 'Outdoor Pool', 'Historic Setting'],
     },
     {
@@ -27,7 +27,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 9800,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
         amenities: ['Ultra All-Inclusive', 'Private Beach', 'Multiple Pools'],
     },
     {
@@ -37,7 +37,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 7500,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80',
         amenities: ['Boutique Design', 'Desert View', 'Premium Spa'],
     },
     {
@@ -47,7 +47,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 11500,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1544124499-183636bc9d9d?auto=format&fit=crop&w=800&q=80',
         amenities: ['Adults Only', 'Ultra Luxury', 'Gourmet Dining'],
     },
     {
@@ -57,7 +57,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 14000,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80',
         amenities: ['Historic Palace', 'Nile View', 'Royal Suite'],
     },
     {
@@ -67,7 +67,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.8,
         price: 9000,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1512918766671-ad650b9b732d?auto=format&fit=crop&w=800&q=80',
         amenities: ['Pyramids View', 'Historic Garden', 'Outdoor Pool'],
     },
 
