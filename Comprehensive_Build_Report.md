@@ -39,9 +39,10 @@ Return to stable ground (Expo 51, RN 0.74.5).
     - **Attempted Fixes:**
         - Hardcoding versions in `node_modules` (Failed due to file locks/cache).
         - Injecting `gradle.properties` values (Ignored by some subprojects).
-3.  **Java Version Conflict:**
-    - **Symptom:** `Unsupported class file major version 66`.
-    - **Cause:** Using Java 22 instead of the required Java 17 for Expo 51.
+3.  **Java Version Conflict (Critical Discovery):**
+    - **Symptom:** `Unsupported class file major version 66` or `Dependency requires at least JVM runtime version 11`.
+    - **Discovery:** The system has Java 17 installed, but the environment variable `JAVA_HOME` is pointing to **Java 8**. Since Gradle prioritizes `JAVA_HOME`, it was failing even though `java -version` showed 17.
+    - **Solution:** `JAVA_HOME` must be updated to `C:\Program Files\Eclipse Adoptium\jdk-17.0.18.8-hotspot`.
 
 ---
 
