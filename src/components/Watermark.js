@@ -12,18 +12,19 @@ export default function Watermark() {
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
 
-    // Generate a long repeating string of symbols
+    // Generate a very dense pattern of symbols
     const patternText = useMemo(() => {
         let text = '';
-        for (let i = 0; i < 500; i++) {
-            text += SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)] + '   ';
+        for (let i = 0; i < 2000; i++) {
+            text += SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)] + ' ';
+            if (i % 20 === 0) text += '\n';
         }
         return text;
     }, []);
 
     return (
         <View style={styles.container} pointerEvents="none">
-            <Text style={[styles.pattern, { color: C.textMain }]}>
+            <Text style={[styles.pattern, { color: isDark ? '#4A3B2B' : '#D2C4B0' }]}>
                 {patternText}
             </Text>
         </View>
@@ -34,17 +35,15 @@ const styles = StyleSheet.create({
     container: {
         ...StyleSheet.absoluteFillObject,
         overflow: 'hidden',
-        zIndex: -1, // Keep it behind everything
-        justifyContent: 'center',
-        alignItems: 'center',
-        opacity: 0.15, // Increased visibility
+        zIndex: -1, 
+        opacity: 0.1, // Very subtle
     },
     pattern: {
-        fontSize: 32, // Larger symbols
-        lineHeight: 60,
-        textAlign: 'justify',
-        width: width * 1.5,
-        fontWeight: 'bold', // Thicker lines
-        color: '#8B7355', // Dark brownish-gold tone to match the sand
+        fontSize: 14, // Much smaller symbols for 'engraving' look
+        lineHeight: 22,
+        letterSpacing: 4,
+        textAlign: 'center',
+        width: width * 2,
+        fontFamily: Platform.OS === 'ios' ? 'System' : 'serif',
     }
 });
