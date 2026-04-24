@@ -79,7 +79,7 @@ export const HOTELS = [
         category: 'mid-range',
         rating: 4.6,
         price: 5500,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=800&q=80',
         amenities: ['Nile View', 'Pool', 'Business Center'],
     },
     {
@@ -89,7 +89,7 @@ export const HOTELS = [
         category: 'mid-range',
         rating: 4.3,
         price: 3200,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80',
         amenities: ['Beach Access', 'Pool', 'Restaurant'],
     },
 
@@ -101,7 +101,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.7,
         price: 1800,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80',
         amenities: ['Pyramids View', 'Rooftop Breakfast', 'Airport Shuttle'],
     },
     {
@@ -111,7 +111,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.3,
         price: 1200,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?auto=format&fit=crop&w=800&q=80',
         amenities: ['Sphinx View', 'Rooftop Terrace', 'Budget Friendly'],
     },
     {
@@ -121,7 +121,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.6,
         price: 600,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80',
         amenities: ['Social Vibe', 'City Center', 'Shared Kitchen'],
     },
     {
@@ -131,7 +131,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.5,
         price: 750,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
         amenities: ['Modern Design', 'Near Zamalek', 'WiFi'],
     },
     {
@@ -141,7 +141,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.8,
         price: 1500,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80',
         amenities: ['Pool', 'Garden', 'Social Events'],
     },
     {
@@ -151,7 +151,7 @@ export const HOTELS = [
         category: 'budget',
         rating: 4.9,
         price: 1200,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80',
         amenities: ['Eco-Friendly', 'Private Beach', 'Peaceful'],
     },
     {
@@ -161,7 +161,7 @@ export const HOTELS = [
         category: 'budget',
         rating: 4.8,
         price: 2500,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80',
         amenities: ['Sea View', 'Home Cooked Meals', 'Authentic'],
     },
     {
@@ -171,7 +171,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.7,
         price: 800,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=80',
         amenities: ['Artistic Decor', 'Central', 'Friendly Staff'],
     },
     {
@@ -181,7 +181,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.6,
         price: 1000,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=800&q=80',
         amenities: ['Nile View', 'Elephantine Island', 'Nubian Style'],
     },
     {
@@ -191,7 +191,7 @@ export const HOTELS = [
         category: 'budget',
         rating: 4.9,
         price: 1800,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80',
         amenities: ['Nubian House', 'River Access', 'Traditional'],
     },
     {
@@ -201,7 +201,7 @@ export const HOTELS = [
         category: 'budget',
         rating: 4.5,
         price: 800,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1568084680786-a84f91d1153c?auto=format&fit=crop&w=800&q=80',
         amenities: ['Pool', 'East Bank', 'Quiet'],
     },
     {
@@ -211,7 +211,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.2,
         price: 400,
-        image: 'https://via.placeholder.com/800x400?text=No+Image+Available',
+        image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
         amenities: ['Social Vibe', 'West Bank', 'Rooftop'],
     },
 ];

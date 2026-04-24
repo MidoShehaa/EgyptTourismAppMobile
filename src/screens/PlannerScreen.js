@@ -295,7 +295,12 @@ export default function PlannerScreen({ navigation }) {
                                     [
                                         { text: t('cancel'), style: 'cancel' },
                                         { text: isRTL ? 'تحميل' : 'Load', onPress: () => {
-                                            updateItinerary(item.plan);
+                                            // Wrap plan with required itinerary structure
+                                            const loadedItinerary = {
+                                                name: isRTL ? item.title : item.titleEn,
+                                                days: item.plan?.days || [],
+                                            };
+                                            updateItinerary(loadedItinerary);
                                             showToast(isRTL ? 'تم تحميل الخطة بنجاح!' : 'Plan loaded successfully!', 'success', 'checkmark-circle');
                                         }}
                                     ]

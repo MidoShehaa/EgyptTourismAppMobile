@@ -74,7 +74,7 @@ export const SUGGESTED_PLANS = [
         "titleEn": "Sinai Summits & Depths (Hiking & Diving)",
         "days": 7,
         "rating": 4.9,
-        "image": "https://images.unsplash.com/photo-1544124499-183636bc9d9d?auto=format&fit=crop&w=800&q=80",
+        "image": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80",
         "description": "مغامرة لا تنسى تجمع بين تسلق أعلى قمم مصر والغوص في أعمق ثقوبها الزرقاء.",
         "descriptionEn": "An unforgettable adventure combining hiking Egypt's highest peaks and diving into its deepest blue holes.",
         "plan": {
