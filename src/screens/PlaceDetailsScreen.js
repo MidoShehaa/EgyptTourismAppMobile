@@ -3,12 +3,10 @@ import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Dimensions
 
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
 
 const { width } = Dimensions.get('window');
-const fontFamilyHeavy = Platform.OS === 'ios' ? 'Futura' : 'sans-serif-black';
-const fontFamilyMedium = Platform.OS === 'ios' ? 'San Francisco' : 'sans-serif-medium';
 
 export default function PlaceDetailsScreen({ route, navigation }) {
     const { place } = route.params;
@@ -17,6 +15,7 @@ export default function PlaceDetailsScreen({ route, navigation }) {
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
+    const [imgError, setImgError] = useState(false);
     const placeName = isRTL ? place.name : place.nameEn;
     const placeCity = isRTL ? place.city : place.cityEn;
     const placeDesc = isRTL ? place.description : place.descriptionEn;
@@ -46,13 +45,21 @@ export default function PlaceDetailsScreen({ route, navigation }) {
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
                 {/* Image Header - Full Editorial */}
                 <View style={[styles.imageContainer, { borderColor: '#000' }]}>
-                    <Image
-                        source={place.imageSource ? place.imageSource : { 
-                            uri: place.imageUrl,
-                            headers: { 'User-Agent': 'EgyptTourismApp/1.0' }
-                        }}
-                        style={styles.image}
-                    />
+                    {imgError ? (
+                        <View style={[styles.image, styles.imgFallback, { backgroundColor: C.bgElevated }]}>
+                            <Text style={styles.imgFallbackEmoji}>{place.image}</Text>
+                            <Text style={[styles.imgFallbackText, { color: C.textMuted }]}>{placeName}</Text>
+                        </View>
+                    ) : (
+                        <Image
+                            source={place.imageSource ? place.imageSource : { 
+                                uri: place.imageUrl,
+                                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
+                            }}
+                            style={styles.image}
+                            onError={() => setImgError(true)}
+                        />
+                    )}
                     
                     {/* Header Controls */}
                     <View style={[styles.headerOverlay, { paddingTop: insets.top + 10 }, isRTL && { flexDirection: 'row-reverse' }]}>
@@ -265,7 +272,7 @@ const styles = StyleSheet.create({
         marginTop: -30, // Overlap effect
     },
     title: {
-        fontFamily: fontFamilyHeavy,
+        fontFamily: FONTS.heavy,
         fontSize: 42,
         fontWeight: '900',
         textTransform: 'uppercase',
@@ -347,7 +354,7 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     statValue: {
-        fontFamily: fontFamilyHeavy,
+        fontFamily: FONTS.heavy,
         fontSize: 22,
         fontWeight: '900',
     },
@@ -360,7 +367,7 @@ const styles = StyleSheet.create({
         marginBottom: SPACING.lg,
     },
     sectionTitle: {
-        fontFamily: fontFamilyHeavy,
+        fontFamily: FONTS.heavy,
         fontSize: 24,
         fontWeight: '900',
         textTransform: 'uppercase',
@@ -446,7 +453,7 @@ const styles = StyleSheet.create({
     },
     fabText: {
         color: '#fff',
-        fontFamily: fontFamilyHeavy,
+        fontFamily: FONTS.heavy,
         fontSize: 16,
         fontWeight: '900',
         textTransform: 'uppercase',
@@ -466,7 +473,7 @@ const styles = StyleSheet.create({
         padding: 24,
     },
     modalTitle: {
-        fontFamily: fontFamilyHeavy,
+        fontFamily: FONTS.heavy,
         fontSize: 24,
         fontWeight: '900',
         textTransform: 'uppercase',
@@ -497,5 +504,19 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '900',
         textTransform: 'uppercase',
+    },
+    imgFallback: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    imgFallbackEmoji: {
+        fontSize: 80,
+        marginBottom: 10,
+    },
+    imgFallbackText: {
+        fontSize: 24,
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        textAlign: 'center',
     },
 });

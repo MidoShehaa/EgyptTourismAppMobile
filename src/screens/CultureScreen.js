@@ -2,11 +2,12 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
+import Watermark from '../components/Watermark';
 
-const fontFamilyHeavy = Platform.OS === 'ios' ? 'Futura' : 'sans-serif-black';
-const fontFamilyMedium = Platform.OS === 'ios' ? 'San Francisco' : 'sans-serif-medium';
+const fontFamilyHeavy = FONTS.heavy;
+const fontFamilyMedium = FONTS.medium;
 
 const CULTURE_CATEGORIES = [
     { id: 1, title: 'Language', titleAr: 'اللغة', icon: 'chatbubbles', color: '#3B82F6' },
@@ -50,6 +51,7 @@ export default function CultureScreen() {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top', 'left', 'right']}>
+            <Watermark />
             <View style={[styles.headerBlock, isRTL && { alignItems: 'flex-end' }]}>
                 <Text style={[styles.titleLine, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>
                     {isRTL ? 'الثقافة' : 'CULTURE'}

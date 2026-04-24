@@ -36,17 +36,25 @@ export const UserProvider = ({ children }) => {
         }, 3000);
     }, [fadeAnim, translateYAnim]);
 
-    // Translation Helper
-    const t = useCallback((key) => {
+    // Enhanced Translation Helper
+    const t = useCallback((key, params = {}) => {
         const lang = settings.language || 'en';
         const keys = key.split('.');
         let value = TRANSLATIONS[lang];
 
         for (const k of keys) {
             value = value?.[k];
+            if (value === undefined) break;
         }
 
-        return value || key;
+        if (typeof value !== 'string') return key;
+
+        // Simple placeholder replacement: {{name}}
+        Object.keys(params).forEach(p => {
+            value = value.replace(new RegExp(`{{${p}}}`, 'g'), params[p]);
+        });
+
+        return value;
     }, [settings.language]);
 
     // Load data on mount

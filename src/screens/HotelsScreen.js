@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Modal, TextInput, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
 import { HOTELS } from '../constants/hotelsData';
-
-const fontFamilyHeavy = Platform.OS === 'ios' ? 'Futura' : 'sans-serif-black';
+import Watermark from '../components/Watermark';
 
 export default function HotelsScreen() {
     const { settings, addActivityToPlanner, t, showToast } = useUser();
@@ -78,7 +77,7 @@ export default function HotelsScreen() {
                     </View>
                 ) : (
                     <Image 
-                        source={{ uri: item.image }} 
+                        source={{ uri: item.image, headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' } }} 
                         style={styles.cardImage}
                         onError={() => setImgErrors(prev => ({ ...prev, [item.id]: true }))}
                     />
@@ -131,6 +130,7 @@ export default function HotelsScreen() {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top']}>
+            <Watermark />
             <View style={[styles.header, isRTL && { alignItems: 'flex-end' }]}>
                 <Text style={[styles.title, { color: C.textMain }]}>{t('hotelsAndStays')}</Text>
                 <Text style={[styles.subtitle, { color: C.textMuted }]}>{t('findAccommodation')}</Text>
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
         paddingTop: 10,
     },
     title: {
-        fontFamily: fontFamilyHeavy,
+        fontFamily: FONTS.heavy,
         fontSize: 34,
         fontWeight: '900',
         textTransform: 'uppercase',
@@ -253,6 +253,7 @@ const styles = StyleSheet.create({
     cardImage: {
         width: '100%',
         height: '100%',
+        resizeMode: 'cover',
     },
     categoryBadge: {
         position: 'absolute',
@@ -307,7 +308,7 @@ const styles = StyleSheet.create({
         padding: SPACING.lg,
     },
     cardTitle: {
-        fontFamily: fontFamilyHeavy,
+        fontFamily: FONTS.heavy,
         fontSize: 22,
         fontWeight: '900',
         textTransform: 'uppercase',
@@ -421,7 +422,7 @@ const styles = StyleSheet.create({
         borderColor: '#000',
     },
     modalTitle: {
-        fontFamily: fontFamilyHeavy,
+        fontFamily: FONTS.heavy,
         fontSize: 24,
         fontWeight: '900',
         textTransform: 'uppercase',

@@ -17,11 +17,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { places, CATEGORIES } from '../constants/placesData';
-import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
-
-const fontFamilyHeavy = Platform.OS === 'ios' ? 'Futura' : 'sans-serif-black';
-const fontFamilyMedium = Platform.OS === 'ios' ? 'San Francisco' : 'sans-serif-medium';
+import Watermark from '../components/Watermark';
 
 const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggleFavorite }) => {
     const placeName = isRTL ? item.name : item.nameEn;
@@ -38,11 +36,11 @@ const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggl
                         <Text style={[styles.imgPlaceholderText, { color: C.textMuted }]}>{placeName}</Text>
                     </View>
                 ) : (
-                    <Image
-                        source={item.imageSource ? item.imageSource : {
+                    <Image 
+                        source={item.imageSource ? item.imageSource : { 
                             uri: item.imageUrl,
-                            headers: { 'User-Agent': 'EgyptTourismApp/1.0' }
-                        }}
+                            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
+                        }} 
                         style={[styles.cardImage, { borderColor: C.borderMain || '#000' }]}
                         onError={() => setImgError(true)}
                     />
@@ -220,6 +218,7 @@ export default function PlacesScreen({ navigation }) {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top', 'left', 'right']}>
+            <Watermark />
             <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={C.bgMain} />
 
             <FlatList
@@ -230,6 +229,9 @@ export default function PlacesScreen({ navigation }) {
                 contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: SPACING.md }}
                 showsVerticalScrollIndicator={false}
                 removeClippedSubviews={true}
+                initialNumToRender={5}
+                maxToRenderPerBatch={5}
+                windowSize={5}
             />
         </SafeAreaView>
     );
@@ -266,7 +268,7 @@ const styles = StyleSheet.create({
         paddingBottom: SPACING.lg,
     },
     titleLine: {
-        fontFamily: fontFamilyHeavy,
+        fontFamily: FONTS.heavy,
         fontSize: 62,
         fontWeight: '900',
         letterSpacing: -2,
@@ -355,7 +357,7 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     cardTitle: {
-        fontFamily: fontFamilyHeavy,
+        fontFamily: FONTS.heavy,
         fontSize: 32,
         fontWeight: '900',
         textTransform: 'uppercase',

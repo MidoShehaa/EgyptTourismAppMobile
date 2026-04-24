@@ -5,10 +5,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../store/UserContext';
 import { places, CATEGORIES } from '../constants/placesData';
 import { HOTELS } from '../constants/hotelsData';
-import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
-
-const fontFamilyHeavy = Platform.OS === 'ios' ? 'Futura' : 'sans-serif-black';
-const fontFamilyMedium = Platform.OS === 'ios' ? 'San Francisco' : 'sans-serif-medium';
+import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
+import Watermark from '../components/Watermark';
+import { SUGGESTED_PLANS } from '../constants/itinerarySuggestions';
 
 export default function PlannerScreen({ navigation }) {
     const { itinerary, removeActivityFromPlanner, updateItinerary, t, settings, showToast } = useUser();
@@ -52,48 +51,138 @@ export default function PlannerScreen({ navigation }) {
         }
     };
 
+    const parseDuration = (durationStr) => {
+        if (!durationStr) return 2;
+        if (durationStr.toLowerCase().includes('half day')) return 4;
+        const match = durationStr.match(/(\d+)/);
+        if (match) return parseInt(match[1]);
+        return 2;
+    };
+
     const generateSmartTrip = () => {
         if (selectedInterests.length === 0) {
             showToast(t('selectInterests'), 'error', 'warning');
             return;
         }
 
-        const newItinerary = { name: isRTL ? 'رحلتي الذكية' : 'My Smart Trip', days: [] };
-        const cityPlaces = places.filter(p => selectedInterests.includes(p.category));
+        const interestedPlaces = places.filter(p => selectedInterests.includes(p.category));
         
-        let cityPlaceIndex = 0;
-        for (let d = 1; d <= duration; d++) {
-            let activities = [];
-            let currentTimeStr = "09:00 AM";
-            let currentDayHours = 0;
+        // 1. Group places by city
+        const cityGroups = {};
+        interestedPlaces.forEach(p => {
+            if (!cityGroups[p.cityEn]) cityGroups[p.cityEn] = [];
+            cityGroups[p.cityEn].push(p);
+        });
 
-            while (currentDayHours < 8 && cityPlaceIndex < cityPlaces.length) {
-                const p = cityPlaces[cityPlaceIndex];
-                activities.push({
-                    placeId: p.id,
-                    time: currentTimeStr,
-                });
-                
-                const placeHours = 2; // Default
-                currentTimeStr = addHoursToTime(currentTimeStr, placeHours + 0.5);
-                currentDayHours += placeHours + 0.5;
-                cityPlaceIndex++;
-
-                if (currentDayHours >= 4 && currentDayHours <= 5) {
-                    activities.push({
-                        placeId: 'LUNCH',
-                        time: currentTimeStr,
-                    });
-                    currentTimeStr = addHoursToTime(currentTimeStr, 1.5);
-                    currentDayHours += 1.5;
-                }
-            }
-            if (activities.length > 0) newItinerary.days.push({ activities });
+        // Sort cities by the number of matching places to start where the user has the most interest
+        const cities = Object.keys(cityGroups).sort((a, b) => cityGroups[b].length - cityGroups[a].length);
+        if (cities.length === 0) {
+            showToast(isRTL ? 'لا توجد أماكن تطابق اهتماماتك.' : 'No places match your interests.', 'error', 'warning');
+            return;
         }
 
-        updateItinerary(newItinerary);
-        showToast(t('smartTripGenerated'), 'success', 'sparkles');
-        setIsWizardVisible(false);
+        try {
+            const newItinerary = { name: isRTL ? 'خطتي المثالية' : 'My Perfect Trip', days: [] };
+            
+            let currentCityIndex = 0;
+            let visitedPlaceIds = new Set();
+            let currentCity = cities[currentCityIndex];
+            let placesInCurrentCity = [...cityGroups[currentCity]].sort((a, b) => b.rating - a.rating);
+
+            for (let d = 1; d <= duration; d++) {
+                let activities = [];
+                
+                // Check remaining unvisited places in current city
+                let unvisitedInCity = placesInCurrentCity.filter(p => !visitedPlaceIds.has(p.id));
+
+                // Switch city if we run out of unvisited places, or every 2-3 days based on duration
+                if (unvisitedInCity.length === 0 || (d > 1 && (d - 1) % 3 === 0 && currentCityIndex < cities.length - 1)) {
+                    currentCityIndex = (currentCityIndex + 1) % cities.length;
+                    currentCity = cities[currentCityIndex];
+                    placesInCurrentCity = cityGroups[currentCity] ? [...cityGroups[currentCity]].sort((a, b) => b.rating - a.rating) : [];
+                    unvisitedInCity = placesInCurrentCity.filter(p => !visitedPlaceIds.has(p.id));
+                }
+
+                // Morning / Check-in
+                if (d === 1 || (d > 1 && (d - 1) % 3 === 0 && unvisitedInCity.length > 0) || (unvisitedInCity.length === 0 && currentCityIndex > 0)) {
+                    // Find the best hotel in this city
+                    const cityHotels = HOTELS.filter(h => h.city === currentCity);
+                    if (cityHotels.length > 0 && !activities.some(a => a.type === 'hotel')) {
+                        const bestHotel = cityHotels.sort((a, b) => b.rating - a.rating)[0];
+                        activities.push({
+                            placeId: bestHotel.id,
+                            type: 'hotel',
+                            time: "10:00 AM"
+                        });
+                    }
+                }
+
+                // Morning Activity
+                const morningPlace = unvisitedInCity.shift();
+                if (morningPlace) {
+                    visitedPlaceIds.add(morningPlace.id);
+                    activities.push({
+                        placeId: morningPlace.id,
+                        type: 'place',
+                        time: activities.length > 0 ? "11:30 AM" : "10:00 AM",
+                    });
+                }
+
+                // Lunch (only if we have activities)
+                if (activities.length > 0) {
+                    activities.push({
+                        placeId: 'LUNCH',
+                        type: 'meal',
+                        time: "01:30 PM",
+                    });
+                }
+
+                // Afternoon Activity
+                const afternoonPlace = unvisitedInCity.shift();
+                if (afternoonPlace) {
+                    visitedPlaceIds.add(afternoonPlace.id);
+                    activities.push({
+                        placeId: afternoonPlace.id,
+                        type: 'place',
+                        time: "03:30 PM",
+                    });
+                }
+
+                // Evening Activity / Dinner (Nightlife or Cultural prioritized)
+                const eveningPlace = unvisitedInCity.find(p => p.category === 'Nightlife' || p.category === 'Cultural');
+                if (eveningPlace) {
+                    visitedPlaceIds.add(eveningPlace.id);
+                    unvisitedInCity = unvisitedInCity.filter(p => p.id !== eveningPlace.id); // Remove from unvisited list
+                    activities.push({
+                        placeId: eveningPlace.id,
+                        type: 'place',
+                        time: "07:00 PM",
+                    });
+                } else if (activities.length > 0) {
+                    activities.push({
+                        placeId: 'DINNER',
+                        type: 'meal',
+                        time: "08:00 PM",
+                    });
+                }
+
+                if (activities.length > 0) {
+                    newItinerary.days.push({ activities });
+                }
+            }
+
+            if (newItinerary.days.length === 0) {
+                showToast(isRTL ? 'يرجى تحديد اهتماماتك أولاً!' : 'Please select interests first!', 'error', 'warning');
+                return;
+            }
+
+            updateItinerary(newItinerary);
+            showToast(isRTL ? 'تم إنشاء خطتك الذكية!' : 'Smart Trip Generated!', 'success', 'sparkles');
+            setIsWizardVisible(false);
+        } catch (error) {
+            console.error('Itinerary Generation Error:', error);
+            showToast(isRTL ? 'حدث خطأ أثناء إنشاء الرحلة' : 'Error generating trip', 'error', 'alert');
+        }
     };
 
     const groupedItinerary = useMemo(() => {
@@ -108,17 +197,41 @@ export default function PlannerScreen({ navigation }) {
                                 ...act, 
                                 place: { 
                                     id: 'LUNCH', 
-                                    name: isRTL ? 'استراحة وغداء' : 'Lunch & Rest Time', 
-                                    nameEn: 'Lunch & Rest Time', 
-                                    image: '🍱',
-                                    imageUrl: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg',
-                                    category: 'General'
+                                    name: isRTL ? 'غداء محلي' : 'Local Lunch', 
+                                    nameEn: 'Local Lunch', 
+                                    image: '🍲',
+                                    category: isRTL ? 'استراحة' : 'Break'
                                 }
                             };
                         }
-                        const place = act.type === 'hotel' 
-                                     ? HOTELS.find(h => h.id === act.placeId)
-                                     : places.find(p => p.id === act.placeId);
+                        if (act.placeId === 'DINNER') {
+                            return {
+                                ...act, 
+                                place: { 
+                                    id: 'DINNER', 
+                                    name: isRTL ? 'عشاء فاخر' : 'Fine Dinner', 
+                                    nameEn: 'Fine Dinner', 
+                                    image: '🍽️',
+                                    category: isRTL ? 'استراحة' : 'Break'
+                                }
+                            };
+                        }
+                        
+                        let place;
+                        if (act.type === 'hotel') {
+                            const hotel = HOTELS.find(h => h.id === act.placeId);
+                            if (hotel) {
+                                place = {
+                                    ...hotel,
+                                    nameEn: hotel.name,
+                                    image: '🏨',
+                                    category: isRTL ? 'تسجيل الدخول (فندق)' : 'Check-in (Hotel)'
+                                };
+                            }
+                        } else {
+                            place = places.find(p => p.id === act.placeId);
+                        }
+                        
                         return { ...act, place };
                     })
                     .filter(item => item && item.place)
@@ -147,16 +260,67 @@ export default function PlannerScreen({ navigation }) {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top']}>
+            <Watermark />
             <View style={styles.header}>
-                <Text style={[styles.title, { color: C.textMain }]}>{t('myItinerary')}</Text>
+                <View>
+                    <Text style={[styles.title, { color: C.textMain }]}>{t('myItinerary')}</Text>
+                    <Text style={[styles.subtitle, { color: C.textMuted }]}>{t('planYourPerfectTrip') || 'خطط لرحلتك المثالية'}</Text>
+                </View>
                 <TouchableOpacity 
                     style={[styles.smartBtn, { backgroundColor: C.gold }]}
                     onPress={() => setIsWizardVisible(true)}
                 >
                     <Ionicons name="sparkles" size={20} color="#000" />
-                    <Text style={styles.smartBtnText}>{t('generateSmartTrip')}</Text>
                 </TouchableOpacity>
             </View>
+
+            {/* Suggested Plans Horizontal List */}
+            <View style={styles.suggestedSection}>
+                <View style={styles.sectionHeader}>
+                    <Text style={[styles.sectionTitle, { color: C.textMain }]}>{isRTL ? 'خطط مقترحة (TripAdvisor)' : 'Suggested Plans (TripAdvisor)'}</Text>
+                </View>
+                <FlatList
+                    horizontal
+                    data={SUGGESTED_PLANS}
+                    keyExtractor={item => item.id}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.suggestedList}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity 
+                            style={[styles.suggestedCard, { backgroundColor: C.bgCard, borderColor: '#000', borderWidth: 2 }]}
+                            onPress={() => {
+                                Alert.alert(
+                                    isRTL ? 'تحميل الخطة؟' : 'Load Plan?',
+                                    isRTL ? `هل تريد تحميل خطة "${item.title}"؟ سيؤدي ذلك لاستبدال خطتك الحالية.` : `Load "${item.titleEn}"? This will replace your current plan.`,
+                                    [
+                                        { text: t('cancel'), style: 'cancel' },
+                                        { text: isRTL ? 'تحميل' : 'Load', onPress: () => {
+                                            updateItinerary(item.plan);
+                                            showToast(isRTL ? 'تم تحميل الخطة بنجاح!' : 'Plan loaded successfully!', 'success', 'checkmark-circle');
+                                        }}
+                                    ]
+                                );
+                            }}
+                        >
+                            <Image source={{ uri: item.image }} style={styles.suggestedImg} />
+                            <View style={styles.suggestedInfo}>
+                                <Text style={[styles.suggestedTitle, { color: C.textMain }]} numberOfLines={1}>
+                                    {isRTL ? item.title : item.titleEn}
+                                </Text>
+                                <View style={styles.suggestedMeta}>
+                                    <Text style={[styles.suggestedDays, { color: C.gold }]}>{item.days} {t('days')}</Text>
+                                    <View style={styles.ratingRow}>
+                                        <Ionicons name="star" size={12} color={C.gold} />
+                                        <Text style={[styles.ratingText, { color: C.textMuted }]}>{item.rating}</Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                    )}
+                />
+            </View>
+
+            <View style={styles.divider} />
 
             {groupedItinerary.length === 0 ? (
                 <View style={styles.emptyState}>
@@ -168,6 +332,7 @@ export default function PlannerScreen({ navigation }) {
                     data={groupedItinerary}
                     keyExtractor={item => `day-${item.dayNumber}`}
                     contentContainerStyle={styles.listContent}
+                    initialNumToRender={3}
                     renderItem={({ item: day }) => (
                         <View style={styles.daySection}>
                             <View style={styles.dayHeader}>
@@ -233,11 +398,24 @@ export default function PlannerScreen({ navigation }) {
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
-    header: { padding: SPACING.lg, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    title: { fontFamily: fontFamilyHeavy, fontSize: 28, fontWeight: '900', textTransform: 'uppercase' },
-    smartBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, borderWidth: 2, borderColor: '#000' },
-    smartBtnText: { marginLeft: 8, fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
-    listContent: { padding: SPACING.lg },
+    header: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg, paddingBottom: SPACING.md, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    title: { fontFamily: FONTS.heavy, fontSize: 26, fontWeight: '900', textTransform: 'uppercase' },
+    subtitle: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', marginTop: 2 },
+    smartBtn: { width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: '#000', justifyContent: 'center', alignItems: 'center', elevation: 5 },
+    suggestedSection: { marginBottom: SPACING.md },
+    sectionHeader: { paddingHorizontal: SPACING.lg, marginBottom: 10 },
+    sectionTitle: { fontSize: 14, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
+    suggestedList: { paddingHorizontal: SPACING.lg, paddingBottom: 10 },
+    suggestedCard: { width: 200, borderRadius: 20, marginRight: 16, overflow: 'hidden' },
+    suggestedImg: { width: '100%', height: 110, resizeMode: 'cover' },
+    suggestedInfo: { padding: 12 },
+    suggestedTitle: { fontSize: 13, fontWeight: '800', marginBottom: 6 },
+    suggestedMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    suggestedDays: { fontSize: 11, fontWeight: '900', textTransform: 'uppercase' },
+    ratingRow: { flexDirection: 'row', alignItems: 'center' },
+    ratingText: { fontSize: 11, fontWeight: '700', marginLeft: 4 },
+    divider: { height: 1, backgroundColor: 'rgba(0,0,0,0.1)', marginHorizontal: SPACING.lg, marginBottom: SPACING.md },
+    listContent: { paddingHorizontal: SPACING.lg, paddingBottom: 100 },
     emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', opacity: 0.5 },
     emptyText: { marginTop: 16, fontSize: 18, fontWeight: '700' },
     daySection: { marginBottom: 30 },
@@ -254,7 +432,7 @@ const styles = StyleSheet.create({
     catTagText: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase' },
     modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', padding: 20 },
     modalContent: { borderRadius: 24, padding: 24, borderWidth: 3, borderColor: '#000' },
-    modalTitle: { fontFamily: fontFamilyHeavy, fontSize: 24, fontWeight: '900', textTransform: 'uppercase', marginBottom: 20 },
+    modalTitle: { fontFamily: FONTS.heavy, fontSize: 24, fontWeight: '900', textTransform: 'uppercase', marginBottom: 20 },
     label: { fontSize: 14, fontWeight: '800', textTransform: 'uppercase', marginBottom: 12, marginTop: 16 },
     durationRow: { flexDirection: 'row', gap: 12 },
     durationBox: { width: 50, height: 50, borderRadius: 12, borderWidth: 2, borderColor: '#000', justifyContent: 'center', alignItems: 'center' },

@@ -1,31 +1,30 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, Animated, Platform, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
-const fontFamilyHeavy = Platform.OS === 'ios' ? 'Futura' : 'sans-serif-black';
 
 const ONBOARDING_DATA = [
     {
         id: '1',
         titleKey: 'onboarding1Title',
         descKey: 'onboarding1Desc',
-        image: 'https://images.pexels.com/photos/262780/pexels-photo-262780.jpeg',
+        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Faf%2FAll_Gizah_Pyramids.jpg%2F800px-All_Gizah_Pyramids.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Faf%2FAll_Gizah_Pyramids.jpg%2F800px-All_Gizah_Pyramids.jpg',
     },
     {
         id: '2',
         titleKey: 'onboarding2Title',
         descKey: 'onboarding2Desc',
-        image: 'https://images.pexels.com/photos/2443590/pexels-photo-2443590.jpeg',
+        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F6%2F6d%2FLuxor_Temple_Egypt1.jpg%2F800px-Luxor_Temple_Egypt1.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F6%2F6d%2FLuxor_Temple_Egypt1.jpg%2F800px-Luxor_Temple_Egypt1.jpg',
     },
     {
         id: '3',
         titleKey: 'onboarding3Title',
         descKey: 'onboarding3Desc',
-        image: 'https://images.pexels.com/photos/2041556/pexels-photo-2041556.jpeg',
+        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fcd%2FRas_Mohammed_National_Park.jpg%2F800px-Ras_Mohammed_National_Park.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fcd%2FRas_Mohammed_National_Park.jpg%2F800px-Ras_Mohammed_National_Park.jpg',
     }
 ];
 
@@ -60,7 +59,10 @@ export default function OnboardingScreen({ navigation }) {
             {/* Background Image */}
             <Image 
                 key={currentData.id}
-                source={{ uri: currentData.image }} 
+                source={{ 
+                    uri: currentData.image,
+                    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
+                }} 
                 style={styles.backgroundImage} 
             />
             <View style={styles.darkOverlay} />
@@ -187,7 +189,7 @@ const styles = StyleSheet.create({
         borderColor: '#fff',
     },
     title: {
-        fontFamily: fontFamilyHeavy,
+        fontFamily: FONTS.heavy,
         color: '#fff',
         fontSize: 36,
         fontWeight: '900',

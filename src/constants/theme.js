@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 // App Theme Constants - Brutalist Editorial Dribbble Edition
 export const COLORS = {
     // Primary Colors
@@ -14,9 +16,9 @@ export const COLORS = {
     accentLight: '#666666',
 
     // Background Colors
-    bgMain: '#F2EFE9',       // EXACT Cream background from the design
+    bgMain: '#E4D5B7',       // Temple Sandstone/Beige
     bgCard: '#FFFFFF',       // Pure white for pills and cards
-    bgElevated: '#F9F8F5',
+    bgElevated: '#F2E8D3',
     glassBg: 'rgba(242, 239, 233, 0.9)',
 
     // Text Colors
@@ -51,9 +53,9 @@ export const DARK_COLORS = {
     accent: '#FFFFFF',
     accentLight: '#999999',
 
-    bgMain: '#0D0D0D',       // Deepest Black
-    bgCard: '#1A1A1A',
-    bgElevated: '#262626',
+    bgMain: '#1A1410',       // Deep Dark Temple Stone
+    bgCard: '#241E18',
+    bgElevated: '#332A22',
     glassBg: 'rgba(13, 13, 13, 0.9)',
 
     textMain: '#F2EFE9',     // Cream text on dark bg
@@ -74,8 +76,23 @@ export const DARK_COLORS = {
 };
 
 export const FONTS = {
+    heavy: Platform.OS === 'ios' ? 'Futura' : 'sans-serif-black',
+    medium: Platform.OS === 'ios' ? 'San Francisco' : 'sans-serif-medium',
     heading: 'System',
     body: 'System',
+};
+
+export const COMMON_STYLES = {
+    brutalistCard: {
+        borderWidth: 2,
+        borderColor: '#000',
+        borderRadius: 16,
+    },
+    brutalistPill: {
+        borderWidth: 1.5,
+        borderColor: '#000',
+        borderRadius: 30,
+    }
 };
 
 export const SPACING = {
@@ -95,4 +112,5 @@ export const BORDER_RADIUS = {
     xxl: 32,      // For highly rounded modern cards
     full: 9999,
 };
+
 
