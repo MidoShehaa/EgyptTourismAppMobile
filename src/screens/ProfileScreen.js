@@ -1,64 +1,84 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, StatusBar, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
 
+const fontFamilyHeavy = Platform.OS === 'ios' ? 'Futura' : 'sans-serif-black';
+const fontFamilyMedium = Platform.OS === 'ios' ? 'San Francisco' : 'sans-serif-medium';
+
 export default function ProfileScreen({ navigation }) {
-    const { settings, updateSettings, t } = useUser();
+    const { settings, updateSettings, clearItinerary, t } = useUser();
     const isRTL = settings.language === 'ar';
+    const isDark = settings.darkMode === true;
+    const C = isDark ? DARK_COLORS : COLORS;
 
     const toggleLanguage = () => {
         const newLang = settings.language === 'en' ? 'ar' : 'en';
         updateSettings({ language: newLang });
     };
 
+    const toggleDarkMode = () => {
+        updateSettings({ darkMode: !settings.darkMode });
+    };
+
+    const handleLogout = () => {
+        updateSettings({ hasSeenOnboarding: false });
+        navigation.replace('Onboarding');
+    };
+
     const renderSettingItem = (icon, label, value, onPress = null) => (
-        <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
+        <TouchableOpacity style={[styles.row, { borderBottomColor: C.borderGold }]} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
             <View style={[styles.rowLeft, isRTL && styles.rowLeftRTL]}>
-                <View style={styles.iconBox}>
-                    <Ionicons name={icon} size={20} color={COLORS.primary} />
+                <View style={[styles.iconBox, { backgroundColor: C.bgMain, borderColor: C.borderGold }]}>
+                    <Ionicons name={icon} size={20} color={C.textMain} />
                 </View>
-                <Text style={styles.rowLabel}>{t(label)}</Text>
+                <Text style={[styles.rowLabel, { color: C.textMain }]}>{t(label)}</Text>
             </View>
             {value}
         </TouchableOpacity>
     );
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={[styles.header, isRTL && styles.headerRTL]}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name={isRTL ? "arrow-forward" : "arrow-back"} size={24} color={COLORS.textMain} />
-                </TouchableOpacity>
-                <Text style={styles.title}>{t('settings')}</Text>
-                <View style={{ width: 40 }} />
+        <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top', 'left', 'right']}>
+            <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={C.bgMain} />
+            
+            <View style={[styles.headerBlock, isRTL && { alignItems: 'flex-end' }]}>
+                <Text style={[styles.titleLine, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>
+                    {isRTL ? 'ملفي' : 'PROFILE'}
+                </Text>
+                <Text style={[styles.titleLine, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>
+                    {isRTL ? 'الشخصي' : 'SETTINGS'}
+                </Text>
+                <Text style={[styles.headerSubtitle, { color: C.textMuted, textAlign: isRTL ? 'right' : 'left' }]}>
+                    {t('settings')}
+                </Text>
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, isRTL && styles.textRTL]}>{t('settings')}</Text>
+                <View style={[styles.section, { backgroundColor: C.bgCard, borderColor: C.borderGold }]}>
+                    <Text style={[styles.sectionTitle, { color: C.textMuted }, isRTL && styles.textRTL]}>{t('settings')}</Text>
 
                     {renderSettingItem('language', 'language',
                         <TouchableOpacity onPress={toggleLanguage} style={styles.valueBox}>
-                            <Text style={styles.valueText}>{settings.language === 'en' ? 'English' : 'العربية'}</Text>
-                            <Ionicons name="swap-horizontal" size={16} color={COLORS.textMuted} style={{ marginLeft: 8 }} />
+                            <Text style={[styles.valueText, { color: C.textMain }]}>{settings.language === 'en' ? 'English' : 'العربية'}</Text>
+                            <Ionicons name="swap-horizontal" size={20} color={C.textMain} style={{ marginLeft: 8 }} />
                         </TouchableOpacity>
                         , toggleLanguage)}
 
                     {renderSettingItem('moon', 'darkMode',
                         <Switch
-                            trackColor={{ false: COLORS.borderSubtle, true: COLORS.primary }}
+                            trackColor={{ false: C.borderSubtle, true: C.primary }}
                             thumbColor={'#fff'}
-                            onValueChange={() => { }}
-                            value={false}
+                            onValueChange={toggleDarkMode}
+                            value={settings.darkMode === true}
                         />
                     )}
 
                     {renderSettingItem('notifications', 'notifications',
                         <Switch
-                            trackColor={{ false: COLORS.borderSubtle, true: COLORS.primary }}
+                            trackColor={{ false: C.borderSubtle, true: C.primary }}
                             thumbColor={'#fff'}
                             onValueChange={() => { }}
                             value={true}
@@ -66,18 +86,23 @@ export default function ProfileScreen({ navigation }) {
                     )}
                 </View>
 
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, isRTL && styles.textRTL]}>{t('about')}</Text>
-                    {renderSettingItem('shield-checkmark', 'privacyPolicy', <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={20} color={COLORS.textMuted} />, () => { })}
-                    {renderSettingItem('document-text', 'termsOfService', <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={20} color={COLORS.textMuted} />, () => { })}
+                <View style={[styles.section, { backgroundColor: C.bgCard, borderColor: C.borderGold }]}>
+                    <Text style={[styles.sectionTitle, { color: C.textMuted }, isRTL && styles.textRTL]}>
+                        {isRTL ? 'عن التطبيق' : 'ABOUT'}
+                    </Text>
+                    {renderSettingItem('shield-checkmark', 'privacyPolicy', <Ionicons name={isRTL ? "arrow-back" : "arrow-forward"} size={20} color={C.textMain} />, () => { })}
+                    {renderSettingItem('document-text', 'termsOfService', <Ionicons name={isRTL ? "arrow-back" : "arrow-forward"} size={20} color={C.textMain} />, () => { })}
                 </View>
 
-                <TouchableOpacity style={styles.logoutButton}>
-                    <Text style={styles.logoutText}>{t('logout')}</Text>
+                <TouchableOpacity 
+                    style={[styles.logoutButton, { backgroundColor: C.bgCard, borderColor: COLORS.error || '#EF4444' }]}
+                    onPress={handleLogout}
+                >
+                    <Text style={[styles.logoutText, { color: COLORS.error || '#EF4444' }]}>{t('logout')}</Text>
                 </TouchableOpacity>
 
                 <View style={styles.footer}>
-                    <Text style={styles.versionText}>Version 1.0.0</Text>
+                    <Text style={[styles.versionText, { color: C.textMuted }]}>Version 1.0.0</Text>
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -87,62 +112,60 @@ export default function ProfileScreen({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.bgMain,
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: SPACING.lg,
-        paddingVertical: SPACING.md,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderSubtle,
+    headerBlock: {
+        paddingHorizontal: SPACING.md,
+        paddingTop: SPACING.xl,
+        paddingBottom: SPACING.lg,
     },
-    headerRTL: {
-        flexDirection: 'row-reverse',
+    titleLine: {
+        fontFamily: fontFamilyHeavy,
+        fontSize: 48,
+        fontWeight: '900',
+        letterSpacing: -1.5,
+        lineHeight: 52,
+        textTransform: 'uppercase',
     },
-    backButton: {
-        padding: 8,
-        marginLeft: -8,
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: COLORS.textMain,
+    headerSubtitle: {
+        fontFamily: fontFamilyMedium,
+        fontSize: 16,
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        marginTop: SPACING.sm,
     },
     content: {
-        padding: SPACING.lg,
+        padding: SPACING.md,
+        paddingBottom: 100,
     },
     section: {
         marginBottom: SPACING.xl,
-        backgroundColor: COLORS.bgCard,
-        borderRadius: BORDER_RADIUS.lg,
+        borderWidth: 2,
+        borderRadius: 24,
         padding: SPACING.sm,
-        borderWidth: 1,
-        borderColor: COLORS.borderSubtle,
+        overflow: 'hidden',
     },
     sectionTitle: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: COLORS.textMuted,
-        marginBottom: SPACING.sm,
-        marginLeft: SPACING.sm,
-        marginTop: SPACING.sm,
+        fontFamily: fontFamilyHeavy,
+        fontSize: 16,
+        fontWeight: '900',
+        marginBottom: SPACING.md,
+        marginLeft: SPACING.md,
+        marginTop: SPACING.md,
         textTransform: 'uppercase',
+        letterSpacing: 0.5,
     },
     textRTL: {
         textAlign: 'right',
-        marginRight: SPACING.sm,
+        marginRight: SPACING.md,
         marginLeft: 0,
     },
     row: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingVertical: SPACING.md,
-        paddingHorizontal: SPACING.sm,
+        paddingVertical: 16,
+        paddingHorizontal: SPACING.md,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.borderSubtle,
     },
     rowLeft: {
         flexDirection: 'row',
@@ -152,46 +175,52 @@ const styles = StyleSheet.create({
         flexDirection: 'row-reverse',
     },
     iconBox: {
-        width: 32,
-        height: 32,
-        borderRadius: 8,
-        backgroundColor: COLORS.bgElevated,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        borderWidth: 2,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
     },
     rowLabel: {
+        fontFamily: fontFamilyMedium,
         fontSize: 16,
-        color: COLORS.textMain,
-        marginLeft: 0,
+        fontWeight: '700',
     },
     valueBox: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     valueText: {
-        fontSize: 14,
-        color: COLORS.textMuted,
-        fontWeight: 'bold',
+        fontFamily: fontFamilyHeavy,
+        fontSize: 16,
+        fontWeight: '900',
+        textTransform: 'uppercase',
     },
     logoutButton: {
-        backgroundColor: '#FEE2E2',
-        paddingVertical: SPACING.md,
-        borderRadius: BORDER_RADIUS.lg,
+        flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 18,
+        borderRadius: 30,
+        borderWidth: 2,
         marginBottom: SPACING.xl,
     },
     logoutText: {
-        color: '#EF4444',
-        fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily: fontFamilyHeavy,
+        fontSize: 18,
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
     },
     footer: {
         alignItems: 'center',
         marginBottom: SPACING.xl,
     },
     versionText: {
-        fontSize: 12,
-        color: COLORS.textMuted,
+        fontFamily: fontFamilyMedium,
+        fontSize: 14,
+        fontWeight: '700',
     },
 });

@@ -1,102 +1,213 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Modal, TextInput, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { useUser } from '../store/UserContext';
+import { HOTELS } from '../constants/hotelsData';
 
-const HOTELS = [
-    {
-        id: 1,
-        name: 'Marriott Mena House',
-        city: 'Giza',
-        category: 'luxury',
-        rating: 4.8,
-        price: 4500,
-        image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-        amenities: ['Pool', 'Spa', 'Restaurant'],
-    },
-    {
-        id: 2,
-        name: 'Four Seasons Cairo',
-        city: 'Cairo',
-        category: 'luxury',
-        rating: 4.9,
-        price: 5200,
-        image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80',
-        amenities: ['Nile View', 'Spa', 'Pool'],
-    },
-    {
-        id: 3,
-        name: 'Steigenberger Tahrir',
-        city: 'Cairo',
-        category: 'mid-range',
-        rating: 4.5,
-        price: 2800,
-        image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80',
-        amenities: ['Restaurant', 'Gym', 'WiFi'],
-    },
-];
+const fontFamilyHeavy = Platform.OS === 'ios' ? 'Futura' : 'sans-serif-black';
 
 export default function HotelsScreen() {
+    const { settings, addActivityToPlanner, t, showToast } = useUser();
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [selectedHotel, setSelectedHotel] = useState(null);
+    const [dayNumber, setDayNumber] = useState('1');
+
+    const isRTL = settings?.language === 'ar';
+    const isDark = settings?.darkMode === true;
+    const C = isDark ? DARK_COLORS : COLORS;
+
+    const filteredHotels = HOTELS.filter(hotel => {
+        if (selectedCategory === 'All') return true;
+        if (selectedCategory === 'Hotels') return ['luxury', 'mid-range'].includes(hotel.category);
+        if (selectedCategory === 'Hostels') return ['hostel', 'budget'].includes(hotel.category);
+        return true;
+    });
+
+    const handleAddToPlanner = (hotel) => {
+        setSelectedHotel(hotel);
+        setIsModalVisible(true);
+    };
+
+    const confirmAdd = () => {
+        const day = parseInt(dayNumber);
+        if (isNaN(day) || day < 1) {
+            Alert.alert(t('error'), t('validDayNumber'));
+            return;
+        }
+
+        addActivityToPlanner(day, {
+            placeId: selectedHotel.id,
+            time: "02:00 PM",
+            type: 'hotel'
+        });
+
+        setIsModalVisible(false);
+        setDayNumber('1');
+        showToast(t('addedToDay') + " " + day, 'success');
+    };
+
+    const getBadgeStyle = (category) => {
+        switch (category) {
+            case 'luxury': return styles.luxuryBadge;
+            case 'budget': return styles.budgetBadge;
+            default: return styles.hostelBadge;
+        }
+    };
+
+    const getBadgeLabel = (category) => {
+        switch (category) {
+            case 'luxury': return t('luxury');
+            case 'mid-range': return t('midRange');
+            case 'budget': return t('hostelCamp');
+            default: return category;
+        }
+    };
+
+    const [imgErrors, setImgErrors] = useState({});
+
     const renderHotelCard = ({ item }) => (
-        <TouchableOpacity style={styles.card} activeOpacity={0.9}>
-            <Image source={{ uri: item.image }} style={styles.cardImage} />
+        <TouchableOpacity style={[styles.card, { backgroundColor: C.bgCard, borderColor: '#000', borderWidth: 2 }]} activeOpacity={0.9}>
+            <View style={styles.imageContainer}>
+                {imgErrors[item.id] ? (
+                    <View style={[styles.cardImage, styles.imgFallback, { backgroundColor: C.bgElevated }]}>
+                        <Ionicons name="business" size={48} color={C.textMuted} />
+                        <Text style={[styles.imgFallbackText, { color: C.textMuted }]}>{item.name}</Text>
+                    </View>
+                ) : (
+                    <Image 
+                        source={{ uri: item.image }} 
+                        style={styles.cardImage}
+                        onError={() => setImgErrors(prev => ({ ...prev, [item.id]: true }))}
+                    />
+                )}
+                
+                {/* Category Badge */}
+                <View style={[styles.categoryBadge, getBadgeStyle(item.category)]}>
+                    <Text style={styles.categoryText}>{getBadgeLabel(item.category)}</Text>
+                </View>
 
-            {/* Category Badge */}
-            <View style={[styles.categoryBadge, item.category === 'luxury' && styles.luxuryBadge]}>
-                <Text style={styles.categoryText}>
-                    {item.category === 'luxury' ? 'Luxury' : 'Mid-Range'}
-                </Text>
-            </View>
-
-            {/* Price */}
-            <View style={styles.priceBadge}>
-                <Text style={styles.priceAmount}>{item.price.toLocaleString()}</Text>
-                <Text style={styles.priceUnit}> EGP/night</Text>
+                {/* Price - fixed to bottom of image */}
+                <View style={styles.priceBadge}>
+                    <Text style={styles.priceAmount}>{item.price.toLocaleString()}</Text>
+                    <Text style={styles.priceUnit}> {t('egpPerNight')}</Text>
+                </View>
             </View>
 
             {/* Content */}
             <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>{item.name}</Text>
-                <View style={styles.locationRow}>
-                    <Ionicons name="location" size={12} color={COLORS.textMuted} />
-                    <Text style={styles.locationText}>{item.city}</Text>
+                <Text style={[styles.cardTitle, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>{item.name}</Text>
+                <View style={[styles.locationRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                    <Ionicons name="location" size={14} color={C.textMuted} />
+                    <Text style={[styles.locationText, { color: C.textMuted }, isRTL ? { marginRight: 4 } : { marginLeft: 4 }]}>{item.city}</Text>
                 </View>
 
-                {/* Rating */}
-                <View style={styles.ratingRow}>
-                    <View style={styles.rating}>
+                {/* Rating & Amenities */}
+                <View style={[styles.ratingRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                    <View style={[styles.rating, { backgroundColor: C.bgElevated, borderColor: '#000', borderWidth: 1.5 }]}>
                         <Ionicons name="star" size={14} color="#FFD700" />
-                        <Text style={styles.ratingText}>{item.rating}</Text>
+                        <Text style={[styles.ratingText, { color: C.textMain }]}>{item.rating}</Text>
                     </View>
-                    <View style={styles.amenities}>
-                        {item.amenities.slice(0, 3).map((a, i) => (
-                            <Text key={i} style={styles.amenityText}>{a}</Text>
+                    <View style={[styles.amenities, isRTL && { flexDirection: 'row-reverse' }]}>
+                        {item.amenities.slice(0, 2).map((a, i) => (
+                            <Text key={i} style={[styles.amenityText, { color: C.textMuted, backgroundColor: C.bgElevated, borderColor: '#000', borderWidth: 1 }]}>{a}</Text>
                         ))}
                     </View>
                 </View>
 
-                <TouchableOpacity style={styles.bookButton}>
-                    <Text style={styles.bookButtonText}>Add to Planner</Text>
+                {/* Action Button - Brutalist Style */}
+                <TouchableOpacity
+                    style={[styles.bookButton, { backgroundColor: C.gold }]}
+                    onPress={() => handleAddToPlanner(item)}
+                >
+                    <Ionicons name="calendar-outline" size={20} color="#000" style={isRTL ? { marginLeft: 10 } : { marginRight: 10 }} />
+                    <Text style={styles.bookButtonText}>{t('addToItinerary')}</Text>
                 </TouchableOpacity>
             </View>
         </TouchableOpacity>
     );
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Hotels & Stays</Text>
-                <Text style={styles.subtitle}>Find your perfect accommodation</Text>
+        <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top']}>
+            <View style={[styles.header, isRTL && { alignItems: 'flex-end' }]}>
+                <Text style={[styles.title, { color: C.textMain }]}>{t('hotelsAndStays')}</Text>
+                <Text style={[styles.subtitle, { color: C.textMuted }]}>{t('findAccommodation')}</Text>
+            </View>
+
+            <View style={[styles.filterRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                {['All', 'Hotels', 'Hostels'].map((cat) => (
+                    <TouchableOpacity
+                        key={cat}
+                        style={[
+                            styles.filterTab,
+                            { borderColor: '#000' },
+                            selectedCategory === cat ? styles.filterTabActive : { backgroundColor: C.bgCard }
+                        ]}
+                        onPress={() => setSelectedCategory(cat)}
+                    >
+                        <Text style={[
+                            styles.filterTabText,
+                            selectedCategory === cat ? styles.filterTabTextActive : { color: C.textMain }
+                        ]}>
+                            {cat === 'All' ? t('filterAll') : (cat === 'Hotels' ? t('hotelsOnly') : t('hostelsOnly'))}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
             </View>
 
             <FlatList
-                data={HOTELS}
+                data={filteredHotels}
                 renderItem={renderHotelCard}
                 keyExtractor={item => item.id.toString()}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
             />
+
+            {/* Day Picker Modal */}
+            <Modal
+                visible={isModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setIsModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContent, { backgroundColor: C.bgCard }]}>
+                        <Text style={[styles.modalTitle, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>
+                            {t('addToPlannerPromptTitle')}
+                        </Text>
+                        <Text style={[styles.modalMessage, { color: C.textMuted, textAlign: isRTL ? 'right' : 'left' }]}>
+                            {t('addToPlannerPromptMessage')}
+                        </Text>
+
+                        <TextInput
+                            style={[styles.modalInput, { color: C.textMain, borderColor: '#000', backgroundColor: C.bgElevated }]}
+                            value={dayNumber}
+                            onChangeText={setDayNumber}
+                            keyboardType="number-pad"
+                            placeholder="1"
+                            placeholderTextColor={C.textMuted}
+                            autoFocus
+                        />
+
+                        <View style={[styles.modalActions, isRTL && { flexDirection: 'row-reverse' }]}>
+                            <TouchableOpacity
+                                style={styles.modalCancelBtn}
+                                onPress={() => setIsModalVisible(false)}
+                            >
+                                <Text style={[styles.modalCancelText, { color: C.textMuted }]}>{t('cancel')}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.modalAddBtn}
+                                onPress={confirmAdd}
+                            >
+                                <Text style={styles.modalAddText}>{t('add')}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -104,21 +215,21 @@ export default function HotelsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.bgMain,
     },
     header: {
-        paddingHorizontal: SPACING.lg,
-        paddingTop: SPACING.lg,
-        paddingBottom: SPACING.md,
+        padding: SPACING.lg,
+        paddingTop: 10,
     },
     title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: COLORS.textMain,
+        fontFamily: fontFamilyHeavy,
+        fontSize: 34,
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        letterSpacing: -1,
     },
     subtitle: {
-        fontSize: 14,
-        color: COLORS.textMuted,
+        fontSize: 16,
+        fontWeight: '600',
         marginTop: 4,
     },
     listContent: {
@@ -126,121 +237,236 @@ const styles = StyleSheet.create({
         paddingBottom: 100,
     },
     card: {
-        backgroundColor: COLORS.bgCard,
-        borderRadius: BORDER_RADIUS.xl,
+        borderRadius: 24,
         overflow: 'hidden',
-        marginBottom: SPACING.lg,
+        marginBottom: SPACING.xl,
+        elevation: 5,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 10 },
         shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
+        shadowRadius: 10,
+    },
+    imageContainer: {
+        height: 240,
+        width: '100%',
     },
     cardImage: {
         width: '100%',
-        height: 160,
+        height: '100%',
     },
     categoryBadge: {
         position: 'absolute',
-        top: 12,
-        right: 12,
-        backgroundColor: COLORS.primary,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: BORDER_RADIUS.full,
+        top: 16,
+        right: 16,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: '#000',
     },
     luxuryBadge: {
-        backgroundColor: '#F59E0B',
+        backgroundColor: '#CC9933',
+    },
+    budgetBadge: {
+        backgroundColor: '#000',
+    },
+    hostelBadge: {
+        backgroundColor: '#000',
     },
     categoryText: {
-        fontSize: 10,
-        fontWeight: 'bold',
+        fontSize: 12,
+        fontWeight: '900',
         color: '#fff',
         textTransform: 'uppercase',
     },
     priceBadge: {
         position: 'absolute',
-        top: 120,
-        right: 12,
-        backgroundColor: 'rgba(0,0,0,0.75)',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: BORDER_RADIUS.md,
+        bottom: 16,
+        right: 16,
+        backgroundColor: '#000',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 12,
         flexDirection: 'row',
         alignItems: 'baseline',
+        borderWidth: 1,
+        borderColor: '#fff',
     },
     priceAmount: {
-        fontSize: 16,
-        fontWeight: 'bold',
         color: '#fff',
+        fontSize: 18,
+        fontWeight: '900',
     },
     priceUnit: {
+        color: '#fff',
         fontSize: 10,
-        color: 'rgba(255,255,255,0.8)',
+        fontWeight: '700',
+        textTransform: 'uppercase',
     },
     cardContent: {
-        padding: SPACING.md,
+        padding: SPACING.lg,
     },
     cardTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: COLORS.textMain,
+        fontFamily: fontFamilyHeavy,
+        fontSize: 22,
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        lineHeight: 26,
+        marginBottom: 8,
     },
     locationRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 4,
+        marginBottom: 16,
     },
     locationText: {
-        fontSize: 12,
-        color: COLORS.textMuted,
-        marginLeft: 4,
+        fontSize: 14,
+        fontWeight: '700',
+        textTransform: 'uppercase',
     },
     ratingRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: SPACING.md,
+        marginBottom: 20,
     },
     rating: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.bgElevated,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: BORDER_RADIUS.sm,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 12,
     },
     ratingText: {
         fontSize: 14,
-        fontWeight: 'bold',
-        color: COLORS.textMain,
+        fontWeight: '900',
         marginLeft: 4,
     },
     amenities: {
         flexDirection: 'row',
+        gap: 6,
     },
     amenityText: {
-        fontSize: 10,
-        color: COLORS.textMuted,
-        backgroundColor: COLORS.bgElevated,
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: BORDER_RADIUS.full,
-        overflow: 'hidden',
-        marginLeft: 6,
+        fontSize: 11,
+        fontWeight: '800',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 10,
+        textTransform: 'uppercase',
     },
     bookButton: {
-        backgroundColor: COLORS.primary,
-        paddingVertical: SPACING.md,
-        borderRadius: BORDER_RADIUS.lg,
-        marginTop: SPACING.md,
+        flexDirection: 'row',
+        height: 56,
+        borderRadius: 16,
         alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: '#000',
     },
     bookButtonText: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#fff',
+        fontSize: 15,
+        fontWeight: '900',
+        color: '#000',
         textTransform: 'uppercase',
-        letterSpacing: 1,
+        letterSpacing: 0.5,
+    },
+    imgFallback: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    imgFallbackText: {
+        fontSize: 13,
+        fontWeight: '700',
+        marginTop: 8,
+        textAlign: 'center',
+        paddingHorizontal: 16,
+    },
+    filterRow: {
+        flexDirection: 'row',
+        paddingHorizontal: SPACING.lg,
+        paddingBottom: SPACING.md,
+        gap: SPACING.sm,
+    },
+    filterTab: {
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        borderRadius: 12,
+        borderWidth: 2,
+    },
+    filterTabActive: {
+        backgroundColor: '#000',
+        borderColor: '#000',
+    },
+    filterTabText: {
+        fontSize: 13,
+        fontWeight: '800',
+        textTransform: 'uppercase',
+    },
+    filterTabTextActive: {
+        color: '#fff',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: SPACING.xl,
+    },
+    modalContent: {
+        borderRadius: 24,
+        padding: SPACING.xl,
+        width: '100%',
+        maxWidth: 400,
+        borderWidth: 3,
+        borderColor: '#000',
+    },
+    modalTitle: {
+        fontFamily: fontFamilyHeavy,
+        fontSize: 24,
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        marginBottom: SPACING.md,
+    },
+    modalMessage: {
+        fontSize: 16,
+        fontWeight: '600',
+        marginBottom: SPACING.xl,
+        lineHeight: 22,
+    },
+    modalInput: {
+        borderWidth: 2,
+        borderRadius: 16,
+        padding: SPACING.lg,
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: SPACING.xl,
+    },
+    modalActions: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        gap: SPACING.lg,
+    },
+    modalCancelBtn: {
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+    },
+    modalCancelText: {
+        fontSize: 16,
+        fontWeight: '800',
+        textTransform: 'uppercase',
+    },
+    modalAddBtn: {
+        backgroundColor: '#000',
+        paddingVertical: 14,
+        paddingHorizontal: 28,
+        borderRadius: 30,
+        borderWidth: 2,
+        borderColor: '#fff',
+    },
+    modalAddText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '900',
+        textTransform: 'uppercase',
     },
 });

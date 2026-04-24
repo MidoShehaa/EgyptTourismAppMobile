@@ -1,8 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { useUser } from '../store/UserContext';
+
+const fontFamilyHeavy = Platform.OS === 'ios' ? 'Futura' : 'sans-serif-black';
+const fontFamilyMedium = Platform.OS === 'ios' ? 'San Francisco' : 'sans-serif-medium';
 
 const CULTURE_CATEGORIES = [
     { id: 1, title: 'Language', titleAr: 'اللغة', icon: 'chatbubbles', color: '#3B82F6' },
@@ -11,41 +15,83 @@ const CULTURE_CATEGORIES = [
     { id: 4, title: 'Arts', titleAr: 'الفنون', icon: 'color-palette', color: '#EC4899' },
 ];
 
-const DAILY_TIP = {
-    title: "Tip of the Day",
-    content: "When visiting mosques, always remove your shoes and dress modestly. Women should bring a scarf to cover their hair.",
-};
+const ESSENTIAL_TIPS = [
+    {
+        id: 1,
+        title: "Online Tickets Guide",
+        titleAr: "دليل التذاكر",
+        content: "To avoid long queues, book your tickets online in advance through official portals.",
+        contentAr: "لتجنب الطوابير الطويلة، خاصة في المعالم الرئيسيةاحجز تذاكرك مسبقاً عبر البوابات الرسمية.",
+        icon: "ticket"
+    },
+    {
+        id: 2,
+        title: "Street Food Safety",
+        titleAr: "طعام الشارع",
+        content: "Cairo's street food is delicious. Opt for busy stalls and wash fruits.",
+        contentAr: "اختر الأكشاك المزدحمة، واغسل الفواكه، واشرب المياه المعبأة.",
+        icon: "restaurant"
+    },
+    {
+        id: 3,
+        title: "Modest Dress Code",
+        titleAr: "اللباس المحتشم",
+        content: "When visiting mosques and local areas, dress modestly. Cover shoulders and knees.",
+        contentAr: "عند زيارة المساجد والمناطق المحلية، ارتدِ ملابس محتشمة تغطي الأكتاف والركبتين.",
+        icon: "shirt"
+    }
+];
 
 export default function CultureScreen() {
+    const { t, settings } = useUser();
+    const isRTL = settings?.language === 'ar';
+    const isDark = settings?.darkMode === true;
+    const C = isDark ? DARK_COLORS : COLORS;
+
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={styles.content}>
-                <View style={styles.header}>
-                    <Text style={styles.title}>Egyptian Culture</Text>
-                    <Text style={styles.subtitle}>Traditions, customs & heritage</Text>
-                </View>
+        <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top', 'left', 'right']}>
+            <View style={[styles.headerBlock, isRTL && { alignItems: 'flex-end' }]}>
+                <Text style={[styles.titleLine, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>
+                    {isRTL ? 'الثقافة' : 'CULTURE'}
+                </Text>
+                <Text style={[styles.titleLine, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>
+                    {isRTL ? 'المصرية' : 'EGYPTIAN'}
+                </Text>
+                <Text style={[styles.headerSubtitle, { color: C.textMuted, textAlign: isRTL ? 'right' : 'left' }]}>
+                    {t('cultureSubtitle')}
+                </Text>
+            </View>
 
-                {/* Daily Tip */}
-                <View style={styles.tipCard}>
-                    <View style={styles.tipIcon}>
-                        <Ionicons name="bulb" size={24} color={COLORS.primary} />
-                    </View>
-                    <View style={styles.tipContent}>
-                        <Text style={styles.tipTitle}>{DAILY_TIP.title}</Text>
-                        <Text style={styles.tipText}>{DAILY_TIP.content}</Text>
-                    </View>
-                </View>
-
-                {/* Categories Grid */}
-                <View style={styles.grid}>
+            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+                {/* Categories Grid - Brutalist Pills */}
+                <View style={[styles.categoriesGrid, isRTL && { flexDirection: 'row-reverse' }]}>
                     {CULTURE_CATEGORIES.map((cat) => (
-                        <TouchableOpacity key={cat.id} style={styles.categoryCard}>
-                            <View style={[styles.categoryIcon, { backgroundColor: `${cat.color}20` }]}>
-                                <Ionicons name={cat.icon} size={28} color={cat.color} />
+                        <TouchableOpacity key={cat.id} style={[styles.categoryPill, { backgroundColor: C.bgCard, borderColor: C.borderGold }]}>
+                            <View style={[styles.categoryIconWrap, { borderRightColor: C.borderGold, borderRightWidth: isRTL ? 0 : 2, borderLeftColor: C.borderGold, borderLeftWidth: isRTL ? 2 : 0 }]}>
+                                <Ionicons name={cat.icon} size={24} color={C.textMain} />
                             </View>
-                            <Text style={styles.categoryTitle}>{cat.title}</Text>
-                            <Text style={styles.categoryTitleAr}>{cat.titleAr}</Text>
+                            <View style={styles.categoryTextWrap}>
+                                <Text style={[styles.categoryTitle, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>{isRTL ? cat.titleAr : cat.title}</Text>
+                            </View>
                         </TouchableOpacity>
+                    ))}
+                </View>
+
+                {/* Essential Tips Heading */}
+                <Text style={[styles.sectionTitle, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>{t('essentialTips')}</Text>
+
+                {/* Brutalist Tip List */}
+                <View style={styles.tipsList}>
+                    {ESSENTIAL_TIPS.map((tip) => (
+                        <View key={tip.id} style={[styles.tipCard, { backgroundColor: C.bgCard, borderColor: C.borderGold }, isRTL && { flexDirection: 'row-reverse' }]}>
+                            <View style={[styles.tipIcon, { borderRightColor: C.borderGold, borderRightWidth: isRTL ? 0 : 2, borderLeftColor: C.borderGold, borderLeftWidth: isRTL ? 2 : 0 }]}>
+                                <Ionicons name={tip.icon} size={32} color={C.primary} />
+                            </View>
+                            <View style={styles.tipContent}>
+                                <Text style={[styles.tipTitle, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>{isRTL ? tip.titleAr : tip.title}</Text>
+                                <Text style={[styles.tipText, { color: C.textMuted }, isRTL && { textAlign: 'right' }]}>{isRTL ? tip.contentAr : tip.content}</Text>
+                            </View>
+                        </View>
                     ))}
                 </View>
             </ScrollView>
@@ -56,88 +102,98 @@ export default function CultureScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.bgMain,
+    },
+    headerBlock: {
+        paddingHorizontal: SPACING.md,
+        paddingTop: SPACING.xl,
+        paddingBottom: SPACING.lg,
+    },
+    titleLine: {
+        fontFamily: fontFamilyHeavy,
+        fontSize: 48,
+        fontWeight: '900',
+        letterSpacing: -1.5,
+        lineHeight: 52,
+        textTransform: 'uppercase',
+    },
+    headerSubtitle: {
+        fontFamily: fontFamilyMedium,
+        fontSize: 16,
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        marginTop: SPACING.sm,
     },
     content: {
-        padding: SPACING.lg,
+        padding: SPACING.md,
         paddingBottom: 100,
     },
-    header: {
-        marginBottom: SPACING.lg,
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: COLORS.textMain,
-    },
-    subtitle: {
-        fontSize: 14,
-        color: COLORS.textMuted,
-        marginTop: 4,
-    },
-    tipCard: {
-        flexDirection: 'row',
-        backgroundColor: COLORS.bgCard,
-        padding: SPACING.md,
-        borderRadius: BORDER_RADIUS.lg,
-        borderWidth: 1,
-        borderColor: COLORS.borderGold,
-        marginBottom: SPACING.xl,
-    },
-    tipIcon: {
-        width: 48,
-        height: 48,
-        backgroundColor: `${COLORS.primary}15`,
-        borderRadius: BORDER_RADIUS.md,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: SPACING.md,
-    },
-    tipContent: {
-        flex: 1,
-    },
-    tipTitle: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: COLORS.primary,
-        marginBottom: 4,
-    },
-    tipText: {
-        fontSize: 13,
-        color: COLORS.textMuted,
-        lineHeight: 18,
-    },
-    grid: {
+    categoriesGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
+        marginBottom: SPACING.xxl,
     },
-    categoryCard: {
-        width: '47%',
-        backgroundColor: COLORS.bgCard,
-        padding: SPACING.lg,
-        borderRadius: BORDER_RADIUS.xl,
-        borderWidth: 1,
-        borderColor: COLORS.borderSubtle,
+    categoryPill: {
+        width: '48%',
+        flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: SPACING.md,
+        borderWidth: 2,
+        borderRadius: 30,
+        marginBottom: SPACING.sm,
     },
-    categoryIcon: {
-        width: 60,
-        height: 60,
-        borderRadius: BORDER_RADIUS.lg,
+    categoryIconWrap: {
+        width: 50,
+        height: 50,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: SPACING.md,
+    },
+    categoryTextWrap: {
+        flex: 1,
+        paddingHorizontal: SPACING.sm,
     },
     categoryTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: COLORS.textMain,
+        fontFamily: fontFamilyHeavy,
+        fontSize: 14,
+        fontWeight: '900',
+        textTransform: 'uppercase',
     },
-    categoryTitleAr: {
-        fontSize: 12,
-        color: COLORS.textMuted,
-        marginTop: 2,
+    sectionTitle: {
+        fontFamily: fontFamilyHeavy,
+        fontSize: 24,
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        marginBottom: SPACING.lg,
+    },
+    tipsList: {
+        flexDirection: 'column',
+    },
+    tipCard: {
+        flexDirection: 'row',
+        borderWidth: 2,
+        borderRadius: 16,
+        marginBottom: SPACING.md,
+        overflow: 'hidden',
+    },
+    tipIcon: {
+        width: 80,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    tipContent: {
+        flex: 1,
+        padding: SPACING.md,
+    },
+    tipTitle: {
+        fontFamily: fontFamilyHeavy,
+        fontSize: 16,
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        marginBottom: 8,
+    },
+    tipText: {
+        fontFamily: fontFamilyMedium,
+        fontSize: 14,
+        fontWeight: '600',
+        lineHeight: 22,
     },
 });

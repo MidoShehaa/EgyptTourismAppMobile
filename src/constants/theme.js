@@ -1,40 +1,80 @@
-// App Theme Constants
+// App Theme Constants - Brutalist Editorial Dribbble Edition
 export const COLORS = {
     // Primary Colors
-    primary: '#C87941',      // Terracotta
-    primaryHover: '#A05A2C',
-    primaryGlow: 'rgba(200, 121, 65, 0.3)',
+    primary: '#000000',      // Pure Black for all main CTAs
+    primaryHover: '#333333',
+    primaryGlow: 'rgba(0, 0, 0, 0.2)',
 
-    // Secondary Colors
-    secondary: '#2C5F78',    // Nile Blue
-    secondaryGlow: 'rgba(44, 95, 120, 0.2)',
+    // Secondary
+    secondary: '#EBE3D5',    // Soft Sand/Cream
+    secondaryGlow: 'rgba(235, 227, 213, 0.5)',
 
     // Accent Colors
-    accent: '#D4AF37',       // Gold Leaf
-    accentRed: '#B9382E',    // Coptic Red
+    accent: '#000000',       // Keep it stark
+    accentLight: '#666666',
 
     // Background Colors
-    bgMain: '#FDFBF7',       // Warm Sand
-    bgCard: '#FFFFFF',
-    bgElevated: '#F4F1EA',   // Papyrus
+    bgMain: '#F2EFE9',       // EXACT Cream background from the design
+    bgCard: '#FFFFFF',       // Pure white for pills and cards
+    bgElevated: '#F9F8F5',
+    glassBg: 'rgba(242, 239, 233, 0.9)',
 
     // Text Colors
-    textMain: '#2D2D2D',     // Dark Granite
-    textMuted: '#6B6B6B',    // Weathered Stone
-    textGold: '#8B6B23',     // Antique Gold
+    textMain: '#000000',     // Pitch Black text
+    textMuted: '#555555',    // Deep Grey for secondary
+    textGold: '#8B7355',
+    textLight: '#FFFFFF',    // Text on pure black
+
+    // Solid colors
+    gold: '#CC9933',         // Pharaonic Gold
+    goldHover: '#B3862C',
 
     // Border Colors
-    borderSubtle: 'rgba(0, 0, 0, 0.08)',
-    borderGold: 'rgba(212, 175, 55, 0.4)',
+    borderSubtle: 'rgba(0, 0, 0, 0.1)',
+    borderGold: 'rgba(0, 0, 0, 1)', // Solid black borders for brutalist
 
     // Status Colors
-    success: '#22C55E',
-    error: '#EF4444',
-    warning: '#F59E0B',
+    success: '#000000',
+    error: '#FF3333',
+    warning: '#FF9900',
+};
+
+// Dark Mode Colors
+export const DARK_COLORS = {
+    primary: '#FFFFFF',
+    primaryHover: '#CCCCCC',
+    primaryGlow: 'rgba(255, 255, 255, 0.2)',
+
+    secondary: '#1A1A1A',
+    secondaryGlow: 'rgba(26, 26, 26, 0.5)',
+
+    accent: '#FFFFFF',
+    accentLight: '#999999',
+
+    bgMain: '#0D0D0D',       // Deepest Black
+    bgCard: '#1A1A1A',
+    bgElevated: '#262626',
+    glassBg: 'rgba(13, 13, 13, 0.9)',
+
+    textMain: '#F2EFE9',     // Cream text on dark bg
+    textMuted: '#A3A3A3',
+    textGold: '#D3A350',
+    textLight: '#000000',
+
+    // Solid colors
+    gold: '#D3A350',
+    goldHover: '#B88B42',
+
+    borderSubtle: 'rgba(255, 255, 255, 0.1)',
+    borderGold: 'rgba(255, 255, 255, 1)',
+
+    success: '#FFFFFF',
+    error: '#FF3333',
+    warning: '#FF9900',
 };
 
 export const FONTS = {
-    heading: 'System',  // Will update with custom fonts later
+    heading: 'System',
     body: 'System',
 };
 
@@ -52,5 +92,7 @@ export const BORDER_RADIUS = {
     md: 12,
     lg: 16,
     xl: 24,
+    xxl: 32,      // For highly rounded modern cards
     full: 9999,
 };
+
