@@ -52,7 +52,7 @@ function TabNavigator() {
                         bottom: 30,
                         left: 24,
                         right: 24,
-                        backgroundColor: isDark ? '#1A1A1A' : '#ffffff',
+                        backgroundColor: isDark ? '#1A1A1A' : 'rgba(255, 255, 255, 0.9)',
                         borderColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
                         borderWidth: 1,
                         borderRadius: 32,

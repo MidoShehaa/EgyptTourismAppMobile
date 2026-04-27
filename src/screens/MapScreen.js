@@ -98,29 +98,36 @@ export default function MapScreen() {
 
 
             <View style={styles.mapContainer}>
-                <WebView
-                    source={{ html: mapHtml }}
-                    style={styles.map}
-                    onMessage={handleMessage}
-                    scrollEnabled={false}
-                    bounces={false}
-                />
+                {Platform.OS === 'web' ? (
+                    <iframe 
+                        srcDoc={mapHtml} 
+                        style={{ width: '100%', height: '100%', border: 'none' }} 
+                    />
+                ) : (
+                    <WebView
+                        source={{ html: mapHtml }}
+                        style={styles.map}
+                        onMessage={handleMessage}
+                        scrollEnabled={false}
+                        bounces={false}
+                    />
+                )}
 
                 {selectedPlace && (
-                    <View style={styles.infoCard}>
+                    <View style={[styles.infoCard, { backgroundColor: C.bgCard, borderWidth: 1, borderColor: C.borderSoft || '#e0e0e0' }]}>
                         <TouchableOpacity style={styles.closeButton} onPress={() => setSelectedPlace(null)}>
                             <Ionicons name="close-circle" size={32} color="#555" />
                         </TouchableOpacity>
                         
                         <View style={styles.infoContent}>
                             <View style={styles.infoText}>
-                                <Text style={styles.infoTitle} numberOfLines={1}>
+                                <Text style={[styles.infoTitle, { color: C.textMain }]} numberOfLines={1}>
                                     {isRTL ? selectedPlace.name : selectedPlace.nameEn}
                                 </Text>
                                 <View style={styles.ratingRow}>
                                     <Ionicons name="star" size={14} color={C.primary} />
-                                    <Text style={styles.infoMeta}>{selectedPlace.rating}</Text>
-                                    <Text style={styles.infoCity}> • {isRTL ? selectedPlace.city : selectedPlace.cityEn}</Text>
+                                    <Text style={[styles.infoMeta, { color: C.textMain }]}>{selectedPlace.rating}</Text>
+                                    <Text style={[styles.infoCity, { color: C.textMuted }]}> • {isRTL ? selectedPlace.city : selectedPlace.cityEn}</Text>
                                 </View>
                             </View>
                         </View>
@@ -149,14 +156,14 @@ const styles = StyleSheet.create({
     headerSubtitle: { fontSize: 14, fontWeight: '600', marginTop: 4, opacity: 0.6 },
     mapContainer: { flex: 1 },
     map: { flex: 1 },
-    infoCard: { position: 'absolute', bottom: 120, left: 24, right: 24, borderRadius: 32, padding: 24, backgroundColor: '#1A1A1A' },
+    infoCard: { position: 'absolute', bottom: 120, left: 24, right: 24, borderRadius: 32, padding: 24 },
     closeButton: { position: 'absolute', top: 16, right: 16, zIndex: 1 },
     infoContent: { marginBottom: 20 },
     infoText: { flex: 1 },
-    infoTitle: { fontSize: 22, fontWeight: '900', color: '#fff', marginBottom: 6 },
-    infoCity: { fontSize: 14, fontWeight: '600', color: 'rgba(255,255,255,0.4)' },
+    infoTitle: { fontSize: 22, fontWeight: '900', marginBottom: 6 },
+    infoCity: { fontSize: 14, fontWeight: '600' },
     ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    infoMeta: { fontSize: 14, fontWeight: '900', color: '#fff' },
+    infoMeta: { fontSize: 14, fontWeight: '900' },
     detailsButton: { height: 60, borderRadius: 20, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10 },
     detailsButtonText: { fontSize: 16, fontWeight: '900', color: '#000' },
 });

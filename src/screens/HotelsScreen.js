@@ -103,10 +103,10 @@ export default function HotelsScreen({ route, navigation }) {
                 <View style={styles.cardBottomOverlay}>
                     <View style={styles.glassContent}>
                         <View style={{ flex: 1 }}>
-                            <Text style={[styles.cardTitle, isRTL && { textAlign: 'right' }]} numberOfLines={1}>{item.name}</Text>
+                            <Text style={[styles.cardTitle, isRTL && { textAlign: 'right' }]} numberOfLines={1}>{isRTL ? (item.nameAr || item.name) : (item.nameEn || item.name)}</Text>
                             <View style={[styles.locationRow, isRTL && { flexDirection: 'row-reverse' }]}>
                                 <Ionicons name="location-sharp" size={12} color={C.primary} />
-                                <Text style={[styles.locationText, isRTL && { textAlign: 'right' }]}>{item.city}</Text>
+                                <Text style={[styles.locationText, isRTL && { textAlign: 'right' }]}>{isRTL ? (item.cityAr || item.city) : (item.cityEn || item.city)}</Text>
                             </View>
                         </View>
                         <TouchableOpacity 
@@ -120,7 +120,7 @@ export default function HotelsScreen({ route, navigation }) {
                 
                 <View style={styles.priceTag}>
                     <Text style={styles.priceAmount}>{item.price.toLocaleString()}</Text>
-                    <Text style={styles.priceUnit}> EGP</Text>
+                    <Text style={styles.priceUnit}> {t('currency')}</Text>
                 </View>
             </View>
         </TouchableOpacity>
