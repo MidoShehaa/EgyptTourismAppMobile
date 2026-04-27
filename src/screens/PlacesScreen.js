@@ -16,6 +16,7 @@ import {
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { CATEGORIES } from '../constants/placesData';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
@@ -69,7 +70,7 @@ const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggl
 
                 {/* Bottom Overlay: Title & Price */}
                 <View style={styles.cardBottomOverlay}>
-                    <View style={styles.glassContent}>
+                    <BlurView intensity={30} tint={C === DARK_COLORS ? 'dark' : 'light'} style={styles.glassContent}>
                         <View style={{ flex: 1 }}>
                             <Text style={[styles.cardTitle, isRTL && { textAlign: 'right' }]} numberOfLines={1}>{placeName}</Text>
                             <View style={[styles.locationRow, isRTL && { flexDirection: 'row-reverse' }]}>
@@ -80,7 +81,7 @@ const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggl
                         <View style={styles.priceContainer}>
                             <Text style={styles.cardPrice}>{item.price}</Text>
                         </View>
-                    </View>
+                    </BlurView>
                 </View>
             </View>
         </TouchableOpacity>
@@ -348,13 +349,14 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     glassContent: {
-        backgroundColor: 'rgba(0,0,0,0.7)',
+        backgroundColor: 'rgba(0,0,0,0.4)',
         borderRadius: 24,
         padding: 16,
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: 'rgba(255,255,255,0.2)',
+        overflow: 'hidden',
     },
     cardTitle: {
         color: '#fff',

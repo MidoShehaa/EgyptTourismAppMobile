@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Dimensions
 
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
 import CulturalInsight from '../components/CulturalInsight';
@@ -84,30 +85,28 @@ export default function PlaceDetailsScreen({ route, navigation }) {
                     
                     {/* Header Controls */}
                     <View style={[styles.headerOverlay, { paddingTop: insets.top + 10 }, isRTL && { flexDirection: 'row-reverse' }]}>
-                        <TouchableOpacity
-                            style={styles.actionCircle}
-                            onPress={() => navigation.goBack()}
-                        >
-                            <Ionicons name={isRTL ? "arrow-forward" : "arrow-back"} size={22} color="#fff" />
+                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                            <BlurView intensity={40} tint="dark" style={styles.actionCircle}>
+                                <Ionicons name={isRTL ? "arrow-forward" : "arrow-back"} size={22} color="#fff" />
+                            </BlurView>
                         </TouchableOpacity>
                         
-                        <TouchableOpacity
-                            style={styles.actionCircle}
-                            onPress={() => toggleFavorite(place.id)}
-                        >
-                            <Ionicons
-                                name={isFavorite(place.id) ? "heart" : "heart-outline"}
-                                size={22}
-                                color={isFavorite(place.id) ? '#FF5252' : '#fff'}
-                            />
+                        <TouchableOpacity onPress={() => toggleFavorite(place.id)}>
+                            <BlurView intensity={40} tint="dark" style={styles.actionCircle}>
+                                <Ionicons
+                                    name={isFavorite(place.id) ? "heart" : "heart-outline"}
+                                    size={22}
+                                    color={isFavorite(place.id) ? '#FF5252' : '#fff'}
+                                />
+                            </BlurView>
                         </TouchableOpacity>
                     </View>
 
                     {/* Immersive Rating Overlay */}
-                    <View style={[styles.imageBadge, isRTL ? { left: 20 } : { right: 20 }]}>
+                    <BlurView intensity={50} tint="dark" style={[styles.imageBadge, isRTL ? { left: 20 } : { right: 20 }]}>
                         <Ionicons name="star" size={14} color={C.primary} />
                         <Text style={styles.imageBadgeText}>{place.rating}</Text>
-                    </View>
+                    </BlurView>
                 </View>
 
 
@@ -271,19 +270,21 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: 'rgba(0,0,0,0.3)',
         justifyContent: 'center',
         alignItems: 'center',
+        overflow: 'hidden',
     },
     imageBadge: {
         position: 'absolute',
         bottom: 30,
-        backgroundColor: 'rgba(0,0,0,0.7)',
+        backgroundColor: 'rgba(0,0,0,0.4)',
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 16,
+        overflow: 'hidden',
     },
     imageBadgeText: {
         color: '#fff',
