@@ -7,6 +7,7 @@ import { BlurView } from 'expo-blur';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
 import CulturalInsight from '../components/CulturalInsight';
+import PharaonicBackground from '../components/PharaonicBackground';
 
 const { width } = Dimensions.get('window');
 
@@ -43,6 +44,7 @@ export default function PlaceDetailsScreen({ route, navigation }) {
 
     return (
         <View style={[styles.container, { backgroundColor: C.bgMain }]}>
+            <PharaonicBackground />
             <StatusBar barStyle="light-content" />
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
                 {/* Image Header - Immersive */}
@@ -111,7 +113,7 @@ export default function PlaceDetailsScreen({ route, navigation }) {
 
 
                 {/* Content Block */}
-                <View style={styles.detailsContainer}>
+                <View style={[styles.detailsContainer, { backgroundColor: C.bgMain }]}>
                     <View style={isRTL ? { alignItems: 'flex-end' } : { alignItems: 'flex-start' }}>
                         <Text style={[styles.title, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>
                             {placeName}
@@ -278,7 +280,6 @@ const styles = StyleSheet.create({
     imageBadge: {
         position: 'absolute',
         bottom: 30,
-        backgroundColor: 'rgba(0,0,0,0.4)',
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 16,
@@ -294,7 +295,6 @@ const styles = StyleSheet.create({
     },
     detailsContainer: {
         padding: SPACING.lg,
-        backgroundColor: '#000',
         borderTopLeftRadius: 40,
         borderTopRightRadius: 40,
         marginTop: -40,
