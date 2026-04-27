@@ -256,10 +256,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginHorizontal: SPACING.md,
-        paddingHorizontal: 16,
-        height: 54,
-        borderRadius: 20,
+        paddingHorizontal: 20,
+        height: 56,
+        borderRadius: 24,
         marginBottom: SPACING.xl,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
     },
     searchInput: {
         flex: 1,
@@ -294,9 +296,11 @@ const styles = StyleSheet.create({
     },
     categoryChip: {
         paddingHorizontal: 24,
-        paddingVertical: 10,
+        paddingVertical: 12,
         borderRadius: 9999,
-        backgroundColor: '#1A1A1A',
+        backgroundColor: 'rgba(18, 18, 18, 0.6)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
     },
     categoryChipText: {
         fontSize: 14,
@@ -306,9 +310,11 @@ const styles = StyleSheet.create({
         marginBottom: SPACING.lg,
     },
     card: {
-        height: 420,
-        borderRadius: 32,
+        height: 380,
+        borderRadius: 36,
         overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     cardImage: {
         width: '100%',

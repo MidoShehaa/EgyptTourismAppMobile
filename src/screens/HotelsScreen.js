@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     },
     filterTab: {
         paddingHorizontal: 24,
-        paddingVertical: 10,
+        paddingVertical: 12,
         borderRadius: 9999,
         borderWidth: 1,
     },
@@ -280,9 +280,11 @@ const styles = StyleSheet.create({
     },
     card: {
         height: 380,
-        borderRadius: 32,
+        borderRadius: 36,
         overflow: 'hidden',
         marginBottom: SPACING.xl,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     imageContainer: {
         flex: 1,

@@ -185,7 +185,7 @@ export default function PlaceDetailsScreen({ route, navigation }) {
                                 { id: 2, name: 'AHMED M.', initial: 'A', rate: 4, comment: isRTL ? 'مكان يستحق الزيارة بكل تأكيد.' : 'Absolutely stunning, must visit.' },
                                 { id: 3, name: 'ELENA R.', initial: 'E', rate: 5, comment: isRTL ? 'المرشدين هنا محترفين جداً.' : 'Great staff and very informative tours.' },
                             ].map(review => (
-                                <View key={review.id} style={[styles.reviewCard, { backgroundColor: C.bgCard, borderColor: '#000' }]}>
+                                <View key={review.id} style={[styles.reviewCard, { backgroundColor: C.bgCard }]}>
                                     <View style={[styles.reviewTop, isRTL && { flexDirection: 'row-reverse' }]}>
                                         <View style={styles.ratingStars}>
                                             {[...Array(review.rate)].map((_, i) => (
@@ -217,10 +217,10 @@ export default function PlaceDetailsScreen({ route, navigation }) {
             {/* Planner Modal */}
             <Modal visible={isPlannerModalVisible} animationType="fade" transparent={true} onRequestClose={() => setPlannerModalVisible(false)}>
                 <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, { backgroundColor: C.bgCard, borderColor: '#000' }]}>
+                    <View style={[styles.modalContent, { backgroundColor: 'rgba(18, 18, 18, 0.95)' }]}>
                         <Text style={[styles.modalTitle, isRTL && { textAlign: 'right' }, { color: C.textMain }]}>{t('addToPlannerPromptTitle')}</Text>
                         <TextInput
-                            style={[styles.modalInput, isRTL && { textAlign: 'right' }, { backgroundColor: C.bgMain, borderColor: '#000', color: C.textMain }]}
+                            style={[styles.modalInput, isRTL && { textAlign: 'right' }, { backgroundColor: 'rgba(0,0,0,0.5)', color: C.textMain }]}
                             placeholder={t('dayPlaceholder')}
                             placeholderTextColor={C.textMuted}
                             keyboardType="number-pad"
@@ -354,6 +354,8 @@ const styles = StyleSheet.create({
         borderRadius: 24,
         alignItems: 'center',
         gap: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
     },
     statLabel: {
         fontSize: 11,
@@ -398,6 +400,8 @@ const styles = StyleSheet.create({
         padding: 16,
         borderRadius: 20,
         gap: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
     },
     highlightText: {
         fontSize: 14,
@@ -412,6 +416,8 @@ const styles = StyleSheet.create({
         width: 280,
         padding: 20,
         borderRadius: 32,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
     },
     reviewTop: {
         flexDirection: 'row',
