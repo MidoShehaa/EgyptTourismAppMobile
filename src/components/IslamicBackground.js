@@ -8,8 +8,8 @@ const { width, height } = Dimensions.get('window');
 export default function IslamicBackground() {
     const { settings } = useUser();
     const isDark = settings?.darkMode === true;
-    const opacity = isDark ? 0.05 : 0.03;
-    const strokeColor = isDark ? '#FFFFFF' : '#000000';
+    const opacity = 0.15;
+    const strokeColor = 'rgba(255, 255, 255, 0.3)';
 
     return (
         <View style={StyleSheet.absoluteFillObject} pointerEvents="none">

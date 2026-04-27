@@ -101,7 +101,7 @@ export default function MapScreen() {
                 {Platform.OS === 'web' ? (
                     <iframe 
                         srcDoc={mapHtml} 
-                        style={{ width: '100%', height: '100%', border: 'none' }} 
+                        style={{ width: '100%', height: '100%', borderWidth: 0 }} 
                     />
                 ) : (
                     <WebView
