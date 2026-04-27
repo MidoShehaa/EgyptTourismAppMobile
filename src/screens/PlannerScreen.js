@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../store/UserContext';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { WHATSAPP_NUMBER } from '../constants/config';
-import PharaonicBackground from '../components/PharaonicBackground';
+import DynamicBackground from '../components/DynamicBackground';
 
 export default function PlannerScreen({ navigation }) {
     const { 
@@ -406,9 +406,15 @@ export default function PlannerScreen({ navigation }) {
     };
 
 
+    // Determine dynamic background based on first activity
+    const firstActivityPlace = groupedItinerary?.[0]?.activities?.[0]?.place;
+
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top']}>
-            <PharaonicBackground />
+            <DynamicBackground 
+                category={firstActivityPlace?.category} 
+                city={firstActivityPlace?.cityEn || firstActivityPlace?.city} 
+            />
             <View style={styles.header}>
                 <View style={{ flex: 1 }}>
                     <Text style={[styles.title, { color: C.textMain }]}>{t('myItinerary')}</Text>

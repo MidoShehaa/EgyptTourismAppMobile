@@ -7,7 +7,7 @@ import { BlurView } from 'expo-blur';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
 import CulturalInsight from '../components/CulturalInsight';
-import PharaonicBackground from '../components/PharaonicBackground';
+import DynamicBackground from '../components/DynamicBackground';
 
 const { width } = Dimensions.get('window');
 
@@ -44,7 +44,7 @@ export default function PlaceDetailsScreen({ route, navigation }) {
 
     return (
         <View style={[styles.container, { backgroundColor: C.bgMain }]}>
-            <PharaonicBackground />
+            <DynamicBackground category={place.category} city={place.cityEn || place.city} />
             <StatusBar barStyle="light-content" />
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
                 {/* Image Header - Immersive */}

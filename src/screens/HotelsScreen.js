@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
-import PharaonicBackground from '../components/PharaonicBackground';
+import DynamicBackground from '../components/DynamicBackground';
 import CulturalInsight from '../components/CulturalInsight';
 
 export default function HotelsScreen({ route, navigation }) {
@@ -129,7 +129,7 @@ export default function HotelsScreen({ route, navigation }) {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top']}>
-            <PharaonicBackground />
+            <DynamicBackground city={filterCity} />
             <View style={[styles.header, isRTL && { alignItems: 'flex-end' }]}>
                 <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 12 }}>
                     {/* Back button — only shown when navigated as Stack (from Planner) */}

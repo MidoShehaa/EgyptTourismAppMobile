@@ -12,7 +12,7 @@ import {
   CITY_BASE_RATES, AIRPORTS, INCLUDED_FEATURES
 } from '../constants/ridesData';
 import { WHATSAPP_NUMBER } from '../constants/config';
-import PharaonicBackground from '../components/PharaonicBackground';
+import DynamicBackground from '../components/DynamicBackground';
 
 const CITIES = Object.keys(CITY_BASE_RATES);
 
@@ -190,7 +190,7 @@ export default function RidesScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top']}>
-      <PharaonicBackground />
+      <DynamicBackground city={selectedCity} />
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={C.bgMain} />
 
       <View style={styles.header}>

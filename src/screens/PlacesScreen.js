@@ -20,7 +20,7 @@ import { BlurView } from 'expo-blur';
 import { CATEGORIES } from '../constants/placesData';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
-import PharaonicBackground from '../components/PharaonicBackground';
+import DynamicBackground from '../components/DynamicBackground';
 
 
 const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggleFavorite }) => {
@@ -211,7 +211,7 @@ export default function PlacesScreen({ navigation }) {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top', 'left', 'right']}>
-            <PharaonicBackground />
+            <DynamicBackground category={selectedCategory !== 'All' ? selectedCategory : undefined} />
             <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={C.bgMain} />
 
             <FlatList
