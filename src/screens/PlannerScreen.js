@@ -137,7 +137,7 @@ export default function PlannerScreen({ navigation }) {
             });
 
             // 3. Select top N hubs based on duration to avoid excessive travel
-            const maxHubs = duration <= 3 ? 1 : (duration <= 7 ? 2 : 3);
+            const maxHubs = duration <= 3 ? 1 : (duration <= 7 ? 2 : (duration <= 10 ? 3 : 4));
             const sortedHubs = Object.keys(cityHubsMap)
                 .map(city => ({ city, places: cityHubsMap[city] }))
                 .sort((a, b) => b.places.length - a.places.length)
@@ -220,10 +220,21 @@ export default function PlannerScreen({ navigation }) {
 
                     // If no places were available (free day)
                     if (placesThisDay === 0) {
+                        const fallbacks = [
+                            { type: 'leisure_placeholder', title: isRTL ? `استرخاء واكتشاف حر في ${hub.city}` : `Relax & Explore ${hub.city}`, cat: isRTL ? 'وقت حر' : 'Free Time', img: '🌴' },
+                            { type: 'driver_placeholder', title: isRTL ? `جولة خاصة بسيارة في ${hub.city}` : `Private City Tour in ${hub.city}`, cat: isRTL ? 'جولة سياحية' : 'City Tour', img: '🚗' },
+                            { type: 'dining_placeholder', title: isRTL ? `تجربة طعام محلي في ${hub.city}` : `Local Dining Experience in ${hub.city}`, cat: isRTL ? 'مطاعم' : 'Dining', img: '🍽️' },
+                            { type: 'hidden_gem_placeholder', title: isRTL ? `استكشاف الجواهر الخفية في ${hub.city}` : `Discover Hidden Gems in ${hub.city}`, cat: isRTL ? 'استكشاف' : 'Exploration', img: '💎' }
+                        ];
+                        const randomFallback = fallbacks[d % fallbacks.length];
+
                         dayActivities.push({
-                            placeId: `FREE_TIME_${hub.city}`,
-                            type: 'leisure_placeholder',
-                            title: isRTL ? `وقت حر للاستكشاف في ${hub.city}` : `Free exploration time in ${hub.city}`,
+                            placeId: `${randomFallback.type}_${hub.city}_${d}`,
+                            type: randomFallback.type,
+                            title: randomFallback.title,
+                            category: randomFallback.cat,
+                            image: randomFallback.img,
+                            city: hub.city,
                             time: minutesToTimeStr(currentTime)
                         });
                         currentTime += 180;
@@ -321,14 +332,14 @@ export default function PlannerScreen({ navigation }) {
                                 isPlaceholder: true,
                                 city: act.city
                             };
-                        } else if (act.type === 'leisure_placeholder') {
+                        } else if (act.type.endsWith('_placeholder') && act.type !== 'hotel_placeholder') {
                             place = {
                                 id: act.placeId,
                                 name: act.title,
                                 nameEn: act.title,
-                                image: '🌴',
-                                category: isRTL ? 'وقت حر' : 'Free Time',
-                                isPlaceholder: false,
+                                image: act.image || '✨',
+                                category: act.category,
+                                isActionable: act.type === 'driver_placeholder',
                                 city: act.city
                             };
                         } else if (act.type === 'hotel') {
@@ -380,6 +391,19 @@ export default function PlannerScreen({ navigation }) {
                             >
                                 <Ionicons name="add" size={20} color="#000" />
                             </TouchableOpacity>
+                        ) : item.place.isActionable ? (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                                <TouchableOpacity 
+                                    style={[styles.chooseBtn, { backgroundColor: C.primary, width: 'auto', paddingHorizontal: 12 }]}
+                                    onPress={() => navigation.navigate('Rides')}
+                                >
+                                    <Ionicons name="car" size={18} color="#000" style={{ marginRight: 4 }} />
+                                    <Text style={{ color: '#000', fontSize: 12, fontWeight: 'bold' }}>{isRTL ? 'احجز' : 'Book'}</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => removeActivityFromPlanner(dayNumber, item.placeId)}>
+                                    <Ionicons name="close-circle-outline" size={24} color="#555" />
+                                </TouchableOpacity>
+                            </View>
                         ) : (
                             <TouchableOpacity onPress={() => removeActivityFromPlanner(dayNumber, item.placeId)}>
                                 <Ionicons name="close-circle-outline" size={24} color="#555" />
