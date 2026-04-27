@@ -128,103 +128,73 @@ export default function PlannerScreen({ navigation }) {
                 return;
             }
 
-            // 2. Geographic clustering — group places by proximity
-            // Find distinct city clusters using actual coordinates
-            const clusters = [];
-            const assigned = new Set();
-            
-            for (const place of candidatePlaces) {
-                if (assigned.has(place.id)) continue;
-                
-                // Start a new cluster with this place
-                const cluster = { 
-                    places: [place], 
-                    centerLat: place.lat, 
-                    centerLng: place.lng,
-                    city: place.cityEn 
-                };
-                assigned.add(place.id);
-                
-                // Find all other unassigned places within 30km
-                for (const other of candidatePlaces) {
-                    if (assigned.has(other.id)) continue;
-                    const dist = haversineDistance(place.lat, place.lng, other.lat, other.lng);
-                    if (dist < 30) {
-                        cluster.places.push(other);
-                        assigned.add(other.id);
-                    }
-                }
-                
-                clusters.push(cluster);
-            }
+            // 2. Group places by City (Hub-based approach like TripAdvisor)
+            const cityHubsMap = {};
+            candidatePlaces.forEach(p => {
+                const city = p.cityEn || p.city;
+                if (!cityHubsMap[city]) cityHubsMap[city] = [];
+                cityHubsMap[city].push(p);
+            });
 
-            // 3. Sort clusters geographically (north → south for natural travel flow)
-            clusters.sort((a, b) => b.centerLat - a.centerLat);
+            // 3. Select top N hubs based on duration to avoid excessive travel
+            const maxHubs = duration <= 3 ? 1 : (duration <= 7 ? 2 : 3);
+            const sortedHubs = Object.keys(cityHubsMap)
+                .map(city => ({ city, places: cityHubsMap[city] }))
+                .sort((a, b) => b.places.length - a.places.length)
+                .slice(0, maxHubs);
 
-            // 4. Allocate days to clusters proportionally
+            // 4. Allocate days to hubs
             let totalDays = duration;
-            const clusterDays = clusters.map(c => ({
-                ...c,
-                allocatedDays: Math.max(1, Math.round((c.places.length / candidatePlaces.length) * totalDays))
+            const hubDays = sortedHubs.map(h => ({
+                ...h,
+                allocatedDays: Math.max(1, Math.floor(totalDays / sortedHubs.length))
             }));
             
-            // Adjust to match exact duration
-            let sumDays = clusterDays.reduce((s, c) => s + c.allocatedDays, 0);
-            while (sumDays > totalDays && clusterDays.length > 0) {
-                const largest = clusterDays.reduce((a, b) => a.allocatedDays > b.allocatedDays ? a : b);
-                largest.allocatedDays--;
-                sumDays--;
-            }
-            while (sumDays < totalDays) {
-                const smallest = clusterDays.reduce((a, b) => a.allocatedDays < b.allocatedDays ? a : b);
-                smallest.allocatedDays++;
-                sumDays++;
+            // Adjust remainder days
+            let sumDays = hubDays.reduce((s, h) => s + h.allocatedDays, 0);
+            for (let i = 0; i < totalDays - sumDays; i++) {
+                hubDays[i % hubDays.length].allocatedDays++;
             }
 
-            // 5. Generate daily schedule with realistic timing
+            // 5. Generate daily schedule
             let totalEstimatedCost = 0;
-            const DAY_START = 9 * 60; // 9:00 AM in minutes
-            const DAY_END = 21 * 60;  // 9:00 PM in minutes
-            const TRANSIT_BUFFER = 45; // minutes between activities
-            // Family/solo pace adjustment
+            const DAY_START = 10 * 60; // 10:00 AM
+            const DAY_END = 21 * 60;  // 9:00 PM
+            const TRANSIT_BUFFER = 45; 
             const maxPlacesPerDay = travelerType === 'family' ? 2 : (travelerType === 'solo' ? 4 : 3);
             
             const visitedCities = new Set();
             
-            for (const cluster of clusterDays) {
-                if (cluster.allocatedDays <= 0) continue;
+            for (const hub of hubDays) {
+                let placeQueue = [...hub.places];
                 
-                let placeQueue = [...cluster.places];
-                
-                for (let d = 0; d < cluster.allocatedDays; d++) {
+                for (let d = 0; d < hub.allocatedDays; d++) {
                     const dayActivities = [];
                     let currentTime = DAY_START;
 
-                    // Add hotel placeholder on first day in a new city
-                    if (d === 0 && !visitedCities.has(cluster.city)) {
-                        visitedCities.add(cluster.city);
+                    // Hotel Check-in
+                    if (d === 0 && !visitedCities.has(hub.city)) {
+                        visitedCities.add(hub.city);
                         dayActivities.push({
-                            placeId: `CHOOSE_HOTEL_${cluster.city}`,
+                            placeId: `CHOOSE_HOTEL_${hub.city}`,
                             type: 'hotel_placeholder',
-                            city: cluster.city,
+                            city: hub.city,
                             time: minutesToTimeStr(currentTime)
                         });
-                        currentTime += 60; // 1 hour for check-in
+                        currentTime += 90; // 1.5 hours for transit & check-in
                     }
 
-                    // Fill the day with places
+                    // Fill places
                     let placesThisDay = 0;
-                    let lastPlace = null;
                     
                     while (placeQueue.length > 0 && placesThisDay < maxPlacesPerDay) {
-                        const nextPlace = placeQueue[0];
+                        const nextPlace = placeQueue.shift();
                         const visitDurationMinutes = parseDuration(nextPlace.duration) * 60;
-                        const transit = lastPlace ? estimateTransit(lastPlace, nextPlace) : 0;
                         
-                        // Check if this place fits in the remaining day
-                        if (currentTime + transit + visitDurationMinutes > DAY_END) break;
-                        
-                        currentTime += transit;
+                        if (currentTime + visitDurationMinutes > DAY_END) {
+                            placeQueue.unshift(nextPlace); // Put it back
+                            break;
+                        }
                         
                         dayActivities.push({
                             placeId: nextPlace.id,
@@ -234,50 +204,56 @@ export default function PlannerScreen({ navigation }) {
                         
                         totalEstimatedCost += parsePrice(nextPlace.price);
                         currentTime += visitDurationMinutes + TRANSIT_BUFFER;
-                        lastPlace = nextPlace;
-                        placeQueue.shift();
                         placesThisDay++;
                     }
 
-                    // Add lunch break if day has morning activities
-                    if (placesThisDay > 0) {
-                        const lunchTime = Math.max(currentTime, 13 * 60); // At least 1 PM
-                        if (lunchTime < DAY_END - 60) {
-                            dayActivities.push({
-                                placeId: 'LUNCH',
-                                type: 'meal',
-                                time: minutesToTimeStr(Math.min(lunchTime, 14 * 60))
-                            });
-                        }
+                    // Lunch
+                    const lunchTime = Math.max(currentTime, 13 * 60);
+                    if (lunchTime < 16 * 60) {
+                        dayActivities.push({
+                            placeId: 'LUNCH',
+                            type: 'meal',
+                            time: minutesToTimeStr(lunchTime)
+                        });
+                        currentTime = lunchTime + 60;
                     }
 
-                    // Add dinner
+                    // If no places were available (free day)
+                    if (placesThisDay === 0) {
+                        dayActivities.push({
+                            placeId: `FREE_TIME_${hub.city}`,
+                            type: 'leisure_placeholder',
+                            title: isRTL ? `وقت حر للاستكشاف في ${hub.city}` : `Free exploration time in ${hub.city}`,
+                            time: minutesToTimeStr(currentTime)
+                        });
+                        currentTime += 180;
+                    }
+
+                    // Dinner
                     dayActivities.push({
                         placeId: 'DINNER',
                         type: 'meal',
-                        time: minutesToTimeStr(20 * 60) // 8:00 PM
+                        time: minutesToTimeStr(Math.max(currentTime, 20 * 60))
                     });
 
-                    // Sort activities by time
+                    // Sort by time
                     dayActivities.sort((a, b) => {
-                        const timeToMinutes = (t) => {
+                        const timeToMins = (t) => {
                             const [time, mod] = t.split(' ');
                             let [h, m] = time.split(':').map(Number);
                             if (mod === 'PM' && h !== 12) h += 12;
                             if (mod === 'AM' && h === 12) h = 0;
                             return h * 60 + m;
                         };
-                        return timeToMinutes(a.time) - timeToMinutes(b.time);
+                        return timeToMins(a.time) - timeToMins(b.time);
                     });
 
-                    if (dayActivities.length > 1) { // At least one place + dinner
-                        newItinerary.days.push({ activities: dayActivities });
-                    }
+                    newItinerary.days.push({ activities: dayActivities });
                 }
             }
 
             if (newItinerary.days.length === 0) {
-                showToast(isRTL ? 'يرجى اختيار اهتمامات أكثر!' : 'Please select more interests!', 'error', 'warning');
+                showToast(isRTL ? 'حدث خطأ في التوليد' : 'Failed to generate itinerary', 'error', 'warning');
                 return;
             }
 
@@ -343,6 +319,16 @@ export default function PlannerScreen({ navigation }) {
                                 image: '🏨',
                                 category: 'Selection Required',
                                 isPlaceholder: true,
+                                city: act.city
+                            };
+                        } else if (act.type === 'leisure_placeholder') {
+                            place = {
+                                id: act.placeId,
+                                name: act.title,
+                                nameEn: act.title,
+                                image: '🌴',
+                                category: isRTL ? 'وقت حر' : 'Free Time',
+                                isPlaceholder: false,
                                 city: act.city
                             };
                         } else if (act.type === 'hotel') {
