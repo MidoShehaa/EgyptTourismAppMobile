@@ -1,97 +1,48 @@
 import { Platform } from 'react-native';
 
-// App Theme Constants - Brutalist Editorial Dribbble Edition
+// App Theme Constants - Cyber Travel Premium Edition (Inspired by Dribbble)
 export const COLORS = {
-    // Primary Colors
-    primary: '#000000',      // Pure Black for all main CTAs
-    primaryHover: '#333333',
-    primaryGlow: 'rgba(0, 0, 0, 0.2)',
-
-    // Secondary
-    secondary: '#EBE3D5',    // Soft Sand/Cream
-    secondaryGlow: 'rgba(235, 227, 213, 0.5)',
-
-    // Accent Colors
-    accent: '#000000',       // Keep it stark
-    accentLight: '#666666',
-
-    // Background Colors
-    bgMain: '#E4D5B7',       // Temple Sandstone/Beige
-    bgCard: '#FFFFFF',       // Pure white for pills and cards
-    bgElevated: '#F2E8D3',
-    glassBg: 'rgba(242, 239, 233, 0.9)',
-
-    // Text Colors
-    textMain: '#000000',     // Pitch Black text
-    textMuted: '#555555',    // Deep Grey for secondary
-    textGold: '#8B7355',
-    textLight: '#FFFFFF',    // Text on pure black
-
-    // Solid colors
-    gold: '#CC9933',         // Pharaonic Gold
-    goldHover: '#B3862C',
-
-    // Border Colors
-    borderSubtle: 'rgba(0, 0, 0, 0.1)',
-    borderGold: 'rgba(0, 0, 0, 1)', // Solid black borders for brutalist
-
-    // Status Colors
-    success: '#000000',
-    error: '#FF3333',
-    warning: '#FF9900',
-};
-
-// Dark Mode Colors
-export const DARK_COLORS = {
-    primary: '#FFFFFF',
-    primaryHover: '#CCCCCC',
-    primaryGlow: 'rgba(255, 255, 255, 0.2)',
-
-    secondary: '#1A1A1A',
-    secondaryGlow: 'rgba(26, 26, 26, 0.5)',
-
-    accent: '#FFFFFF',
-    accentLight: '#999999',
-
-    bgMain: '#1A1410',       // Deep Dark Temple Stone
-    bgCard: '#241E18',
-    bgElevated: '#332A22',
-    glassBg: 'rgba(13, 13, 13, 0.9)',
-
-    textMain: '#F2EFE9',     // Cream text on dark bg
-    textMuted: '#A3A3A3',
-    textGold: '#D3A350',
-    textLight: '#000000',
-
-    // Solid colors
-    gold: '#D3A350',
-    goldHover: '#B88B42',
-
+    primary: '#4CD8D0',      // Electric Cyan
+    secondary: '#2BBDB4',    // Muted Cyan
+    bgMain: '#000000',       // Deep Black
+    bgCard: '#121212',       // Dark Charcoal
+    bgElevated: '#1E1E1E',   // Lighter Gray
+    glassBg: 'rgba(0, 0, 0, 0.7)',
+    textMain: '#FFFFFF',     // Crisp White
+    textMuted: '#A0A0A0',    // Soft Gray
+    textGold: '#4CD8D0',     // Overriding gold with Cyan for consistency
+    textLight: '#FFFFFF',
+    gold: '#4CD8D0',
     borderSubtle: 'rgba(255, 255, 255, 0.1)',
-    borderGold: 'rgba(255, 255, 255, 1)',
-
-    success: '#FFFFFF',
-    error: '#FF3333',
-    warning: '#FF9900',
+    borderGold: '#4CD8D0',
+    success: '#00C853',
+    error: '#FF5252',
+    warning: '#FFD600',
 };
+
+// Keeping Dark Mode same as COLORS for now as the design is naturally Dark
+export const DARK_COLORS = { ...COLORS };
 
 export const FONTS = {
-    heavy: Platform.OS === 'ios' ? 'Futura' : 'sans-serif-black',
-    medium: Platform.OS === 'ios' ? 'San Francisco' : 'sans-serif-medium',
+    heavy: Platform.OS === 'ios' ? 'Inter-Black' : 'sans-serif-black',
+    medium: Platform.OS === 'ios' ? 'Inter-Medium' : 'sans-serif-medium',
     heading: 'System',
     body: 'System',
 };
 
 export const COMMON_STYLES = {
-    brutalistCard: {
-        borderWidth: 2,
-        borderColor: '#000',
-        borderRadius: 16,
+    premiumCard: {
+        backgroundColor: '#121212',
+        borderRadius: 24,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
     },
-    brutalistPill: {
-        borderWidth: 1.5,
-        borderColor: '#000',
-        borderRadius: 30,
+    pillButton: {
+        backgroundColor: '#4CD8D0',
+        borderRadius: 9999,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
     }
 };
 
@@ -106,10 +57,10 @@ export const SPACING = {
 
 export const BORDER_RADIUS = {
     sm: 8,
-    md: 12,
-    lg: 16,
-    xl: 24,
-    xxl: 32,      // For highly rounded modern cards
+    md: 16,
+    lg: 24,
+    xl: 32,
+    xxl: 40,
     full: 9999,
 };
 

@@ -7,7 +7,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 12500,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fb%2Fb8%2FFour_Seasons_Hotel_in_Cairo.JPG%2F800px-Four_Seasons_Hotel_in_Cairo.JPG&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fb%2Fb8%2FFour_Seasons_Hotel_in_Cairo.JPG%2F800px-Four_Seasons_Hotel_in_Cairo.JPG',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Four_Seasons_Hotel_in_Cairo.JPG/800px-Four_Seasons_Hotel_in_Cairo.JPG',
         amenities: ['Nile View', 'Rooftop Pool', 'Luxury Spa', 'Fine Dining'],
     },
     {
@@ -17,7 +17,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.8,
         price: 11000,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fcf%2FNile_Ritz-Carlton_Hotel_Cairo_Egypt.jpg%2F800px-Nile_Ritz-Carlton_Hotel_Cairo_Egypt.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fcf%2FNile_Ritz-Carlton_Hotel_Cairo_Egypt.jpg%2F800px-Nile_Ritz-Carlton_Hotel_Cairo_Egypt.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Nile_Ritz-Carlton_Hotel_Cairo_Egypt.jpg/800px-Nile_Ritz-Carlton_Hotel_Cairo_Egypt.jpg',
         amenities: ['Nile View', 'Outdoor Pool', 'Historic Setting'],
     },
     {
@@ -27,7 +27,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 9800,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fb%2Fb3%2FSharm_El_Sheikh_-_Naama_Bay.jpg%2F800px-Sharm_El_Sheikh_-_Naama_Bay.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fb%2Fb3%2FSharm_El_Sheikh_-_Naama_Bay.jpg%2F800px-Sharm_El_Sheikh_-_Naama_Bay.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Sharm_El_Sheikh_-_Naama_Bay.jpg/800px-Sharm_El_Sheikh_-_Naama_Bay.jpg',
         amenities: ['Ultra All-Inclusive', 'Private Beach', 'Multiple Pools'],
     },
     {
@@ -37,7 +37,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 7500,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Fa2%2FBahariya_Oasis.jpg%2F800px-Bahariya_Oasis.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Fa2%2FBahariya_Oasis.jpg%2F800px-Bahariya_Oasis.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Bahariya_Oasis.jpg/800px-Bahariya_Oasis.jpg',
         amenities: ['Boutique Design', 'Desert View', 'Premium Spa'],
     },
     {
@@ -47,7 +47,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 11500,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F5%2F5e%2FSharm_el-Sheikh_-_Naama_Bay_-_beach.jpg%2F800px-Sharm_el-Sheikh_-_Naama_Bay_-_beach.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F5%2F5e%2FSharm_el-Sheikh_-_Naama_Bay_-_beach.jpg%2F800px-Sharm_el-Sheikh_-_Naama_Bay_-_beach.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Sharm_el-Sheikh_-_Naama_Bay_-_beach.jpg/800px-Sharm_el-Sheikh_-_Naama_Bay_-_beach.jpg',
         amenities: ['Adults Only', 'Ultra Luxury', 'Gourmet Dining'],
     },
     {
@@ -57,7 +57,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.9,
         price: 14000,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F1%2F1a%2FOld_Cataract_Hotel_Aswan.jpg%2F800px-Old_Cataract_Hotel_Aswan.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F1%2F1a%2FOld_Cataract_Hotel_Aswan.jpg%2F800px-Old_Cataract_Hotel_Aswan.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Old_Cataract_Hotel_Aswan.jpg/800px-Old_Cataract_Hotel_Aswan.jpg',
         amenities: ['Historic Palace', 'Nile View', 'Royal Suite'],
     },
     {
@@ -67,7 +67,7 @@ export const HOTELS = [
         category: 'luxury',
         rating: 4.8,
         price: 9000,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fe%2Fe2%2FMena_House_Hotel_Giza.jpg%2F800px-Mena_House_Hotel_Giza.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fe%2Fe2%2FMena_House_Hotel_Giza.jpg%2F800px-Mena_House_Hotel_Giza.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Mena_House_Hotel_Giza.jpg/800px-Mena_House_Hotel_Giza.jpg',
         amenities: ['Pyramids View', 'Historic Garden', 'Outdoor Pool'],
     },
 
@@ -79,7 +79,7 @@ export const HOTELS = [
         category: 'mid-range',
         rating: 4.6,
         price: 5500,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Fab%2FCairo_skyline_at_dusk.jpg%2F800px-Cairo_skyline_at_dusk.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Fab%2FCairo_skyline_at_dusk.jpg%2F800px-Cairo_skyline_at_dusk.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Cairo_skyline_at_dusk.jpg/800px-Cairo_skyline_at_dusk.jpg',
         amenities: ['Nile View', 'Pool', 'Business Center'],
     },
     {
@@ -89,7 +89,7 @@ export const HOTELS = [
         category: 'mid-range',
         rating: 4.3,
         price: 3200,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F1%2F1e%2FMahmya_Beach_Hurghada.jpg%2F800px-Mahmya_Beach_Hurghada.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F1%2F1e%2FMahmya_Beach_Hurghada.jpg%2F800px-Mahmya_Beach_Hurghada.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Mahmya_Beach_Hurghada.jpg/800px-Mahmya_Beach_Hurghada.jpg',
         amenities: ['Beach Access', 'Pool', 'Restaurant'],
     },
 
@@ -101,7 +101,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.7,
         price: 1800,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Faf%2FAll_Gizah_Pyramids.jpg%2F800px-All_Gizah_Pyramids.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Faf%2FAll_Gizah_Pyramids.jpg%2F800px-All_Gizah_Pyramids.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/All_Gizah_Pyramids.jpg/800px-All_Gizah_Pyramids.jpg',
         amenities: ['Pyramids View', 'Rooftop Breakfast', 'Airport Shuttle'],
     },
     {
@@ -111,7 +111,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.3,
         price: 1200,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Faf%2FAll_Gizah_Pyramids.jpg%2F800px-All_Gizah_Pyramids.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Faf%2FAll_Gizah_Pyramids.jpg%2F800px-All_Gizah_Pyramids.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/All_Gizah_Pyramids.jpg/800px-All_Gizah_Pyramids.jpg',
         amenities: ['Sphinx View', 'Rooftop Terrace', 'Budget Friendly'],
     },
     {
@@ -121,7 +121,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.6,
         price: 600,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fc8%2FKhan_el-Khalili.jpg%2F800px-Khan_el-Khalili.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fc8%2FKhan_el-Khalili.jpg%2F800px-Khan_el-Khalili.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Khan_el-Khalili.jpg/800px-Khan_el-Khalili.jpg',
         amenities: ['Social Vibe', 'City Center', 'Shared Kitchen'],
     },
     {
@@ -131,7 +131,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.5,
         price: 750,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fe%2Fe6%2FNile_River_and_Cairo_Tower.jpg%2F800px-Nile_River_and_Cairo_Tower.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fe%2Fe6%2FNile_River_and_Cairo_Tower.jpg%2F800px-Nile_River_and_Cairo_Tower.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Nile_River_and_Cairo_Tower.jpg/800px-Nile_River_and_Cairo_Tower.jpg',
         amenities: ['Modern Design', 'Near Zamalek', 'WiFi'],
     },
     {
@@ -141,7 +141,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.8,
         price: 1500,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F3%2F3a%2FDahab_beach.jpg%2F800px-Dahab_beach.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F3%2F3a%2FDahab_beach.jpg%2F800px-Dahab_beach.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Dahab_beach.jpg/800px-Dahab_beach.jpg',
         amenities: ['Pool', 'Garden', 'Social Events'],
     },
     {
@@ -151,7 +151,7 @@ export const HOTELS = [
         category: 'budget',
         rating: 4.9,
         price: 1200,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F3%2F3a%2FDahab_beach.jpg%2F800px-Dahab_beach.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F3%2F3a%2FDahab_beach.jpg%2F800px-Dahab_beach.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Dahab_beach.jpg/800px-Dahab_beach.jpg',
         amenities: ['Eco-Friendly', 'Private Beach', 'Peaceful'],
     },
     {
@@ -161,7 +161,7 @@ export const HOTELS = [
         category: 'budget',
         rating: 4.8,
         price: 2500,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F3%2F3a%2FDahab_beach.jpg%2F800px-Dahab_beach.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F3%2F3a%2FDahab_beach.jpg%2F800px-Dahab_beach.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Dahab_beach.jpg/800px-Dahab_beach.jpg',
         amenities: ['Sea View', 'Home Cooked Meals', 'Authentic'],
     },
     {
@@ -171,7 +171,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.7,
         price: 800,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F8%2F82%2FAlexandria_Corniche_1.jpg%2F800px-Alexandria_Corniche_1.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F8%2F82%2FAlexandria_Corniche_1.jpg%2F800px-Alexandria_Corniche_1.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Alexandria_Corniche_1.jpg/800px-Alexandria_Corniche_1.jpg',
         amenities: ['Artistic Decor', 'Central', 'Friendly Staff'],
     },
     {
@@ -181,7 +181,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.6,
         price: 1000,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fc5%2FAswan_Nile_View.jpg%2F800px-Aswan_Nile_View.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fc5%2FAswan_Nile_View.jpg%2F800px-Aswan_Nile_View.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Aswan_Nile_View.jpg/800px-Aswan_Nile_View.jpg',
         amenities: ['Nile View', 'Elephantine Island', 'Nubian Style'],
     },
     {
@@ -191,7 +191,7 @@ export const HOTELS = [
         category: 'budget',
         rating: 4.9,
         price: 1800,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fc5%2FAswan_Nile_View.jpg%2F800px-Aswan_Nile_View.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fc5%2FAswan_Nile_View.jpg%2F800px-Aswan_Nile_View.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Aswan_Nile_View.jpg/800px-Aswan_Nile_View.jpg',
         amenities: ['Nubian House', 'River Access', 'Traditional'],
     },
     {
@@ -201,7 +201,7 @@ export const HOTELS = [
         category: 'budget',
         rating: 4.5,
         price: 800,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F5%2F52%2FValley_of_the_Kings_-_2019.jpg%2F800px-Valley_of_the_Kings_-_2019.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F5%2F52%2FValley_of_the_Kings_-_2019.jpg%2F800px-Valley_of_the_Kings_-_2019.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Valley_of_the_Kings_-_2019.jpg/800px-Valley_of_the_Kings_-_2019.jpg',
         amenities: ['Pool', 'East Bank', 'Quiet'],
     },
     {
@@ -211,7 +211,7 @@ export const HOTELS = [
         category: 'hostel',
         rating: 4.2,
         price: 400,
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F9%2F9f%2FKarnak_Temple_Complex.jpg%2F800px-Karnak_Temple_Complex.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F9%2F9f%2FKarnak_Temple_Complex.jpg%2F800px-Karnak_Temple_Complex.jpg',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Karnak_Temple_Complex.jpg/800px-Karnak_Temple_Complex.jpg',
         amenities: ['Social Vibe', 'West Bank', 'Rooftop'],
     },
 ];

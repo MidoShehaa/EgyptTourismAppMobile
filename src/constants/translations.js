@@ -16,17 +16,32 @@ export const TRANSLATIONS = {
         tabExplore: 'Explore',
         tabMap: 'Map',
         tabPlanner: 'Planner',
-        tabExperiences: 'Experiences',
+        tabRides: 'Rides',
         tabHotels: 'Hotels',
-        tabCulture: 'Culture',
+
+        // Rides Screen
+        tourismRides: 'Tourism Rides',
+        ridesSubtitle: 'Private cars with professional drivers',
+        selectCity: 'Select City',
+        selectVehicle: 'Choose Vehicle',
+        numberOfHours: 'Number of Hours',
+        numberOfDays: 'Number of Days',
+        vehicleType: 'Vehicle Type',
+        whatsIncluded: "What's Included",
+        estimatedPrice: 'Estimated Price',
+        bookViaWhatsApp: 'Book via WhatsApp',
+        callNow: 'Call Now',
+        popularRoutes: 'Popular Routes',
+        stops: 'Stops',
+        discountApplied: 'Discount Applied!',
 
         // Onboarding
         onboarding1Title: 'Discover Magic',
         onboarding1Desc: 'Explore ancient wonders and hidden gems across Egypt with our comprehensive guide.',
         onboarding2Title: 'Plan Your Journey',
         onboarding2Desc: 'Create personalized itineraries and keep all your activities organized in one place.',
-        onboarding3Title: 'Immersive Experiences',
-        onboarding3Desc: 'Dive into AR, VR, and highly-rated tours to make your trip truly unforgettable.',
+        onboarding3Title: 'Book with Ease',
+        onboarding3Desc: 'Arrange private car rides, browse hotels, and book your full itinerary instantly via WhatsApp.',
         getStarted: 'Get Started',
         next: 'Next',
         chooseLanguage: 'Select Language',
@@ -85,6 +100,8 @@ export const TRANSLATIONS = {
         economy: 'Economy (Public)',
         comfort: 'Comfort (Shared)',
         luxuryTrip: 'Luxury (Private)',
+        myItinerary: 'My Itinerary',
+        planYourPerfectTrip: 'Plan your perfect trip',
         customItinerary: 'Custom Itinerary',
 
         // Map
@@ -135,6 +152,9 @@ export const TRANSLATIONS = {
         // Common
         hours: 'hours',
         currency: 'EGP',
+        noPlanToSubmit: 'Your plan is empty. Please add some places first.',
+        requestSubmitted: 'Your trip request has been submitted for approval!',
+        submissionFailed: 'Failed to submit request. Please try again later.',
     },
     ar: {
         // General
@@ -153,17 +173,32 @@ export const TRANSLATIONS = {
         tabExplore: 'استكشف',
         tabMap: 'الخريطة',
         tabPlanner: 'خطتي',
-        tabExperiences: 'تجارب',
+        tabRides: 'رحلات',
         tabHotels: 'فنادق',
-        tabCulture: 'ثقافة',
+
+        // Rides Screen
+        tourismRides: 'رحلات سياحية',
+        ridesSubtitle: 'سيارات خاصة مع سائق محترف',
+        selectCity: 'اختر المدينة',
+        selectVehicle: 'اختر السيارة',
+        numberOfHours: 'عدد الساعات',
+        numberOfDays: 'عدد الأيام',
+        vehicleType: 'نوع السيارة',
+        whatsIncluded: 'تشمل الخدمة',
+        estimatedPrice: 'السعر التقديري',
+        bookViaWhatsApp: 'احجز عبر واتساب',
+        callNow: 'اتصل الآن',
+        popularRoutes: 'رحلات محددة',
+        stops: 'محطات التوقف',
+        discountApplied: 'تم تطبيق الخصم!',
 
         // Onboarding
         onboarding1Title: 'اكتشف السحر',
         onboarding1Desc: 'استكشف العجائب القديمة والكنوز المخفية في جميع أنحاء مصر من خلال دليلنا الشامل.',
         onboarding2Title: 'خطّط لرحلتك',
         onboarding2Desc: 'قم بإنشاء مسارات مخصصة واحتفظ بجميع أنشطتك منظمة في مكان واحد.',
-        onboarding3Title: 'تجارب غامرة',
-        onboarding3Desc: 'تعمق في الواقع المعزز والافتراضي والجولات الأعلى تقييمًا لجعل رحلتك لا تُنسى حقًا.',
+        onboarding3Title: 'احجز بسهولة',
+        onboarding3Desc: 'رتّب رحلات السيارات الخاصة وتصفح الفنادق واحجز مسارك كاملاً فوراً عبر واتساب.',
         getStarted: 'ابدأ الآن',
         next: 'التالي',
         chooseLanguage: 'اختر اللغة',
@@ -222,6 +257,8 @@ export const TRANSLATIONS = {
         economy: 'اقتصادية (مواصلات عامة)',
         comfort: 'مريحة (جولات مشتركة)',
         luxuryTrip: 'فاخرة (جولات خاصة)',
+        myItinerary: 'خطتي',
+        planYourPerfectTrip: 'خطط لرحلتك المثالية',
         customItinerary: 'خطة مخصصة',
 
         // Map
@@ -272,5 +309,8 @@ export const TRANSLATIONS = {
         // Common
         hours: 'ساعات',
         currency: 'ج.م',
+        noPlanToSubmit: 'خطتك فارغة. يرجى إضافة بعض الأماكن أولاً.',
+        requestSubmitted: 'تم إرسال طلب رحلتك للمراجعة بنجاح!',
+        submissionFailed: 'فشل إرسال الطلب. يرجى المحاولة مرة أخرى لاحقاً.',
     }
 };

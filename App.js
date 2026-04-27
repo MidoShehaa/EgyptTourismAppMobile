@@ -10,7 +10,7 @@ function AppContent() {
   if (!isHydrated) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
-        <ActivityIndicator size="large" color="#CC9933" />
+        <ActivityIndicator size="large" color="#D4AF37" />
       </View>
     );
   }

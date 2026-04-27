@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Modal, TextInput, Platform } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Modal, TextInput, Platform, Dimensions } from 'react-native';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
-import { HOTELS } from '../constants/hotelsData';
-import Watermark from '../components/Watermark';
 
-export default function HotelsScreen() {
-    const { settings, addActivityToPlanner, t, showToast } = useUser();
+import CulturalInsight from '../components/CulturalInsight';
+
+export default function HotelsScreen({ route, navigation }) {
+    const { settings, addActivityToPlanner, t, showToast, hotels, isLoading } = useUser();
+    const filterCity = route?.params?.city;
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedHotel, setSelectedHotel] = useState(null);
@@ -18,7 +21,10 @@ export default function HotelsScreen() {
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
 
-    const filteredHotels = HOTELS.filter(hotel => {
+    const filteredHotels = (hotels || []).filter(hotel => {
+        const matchesCity = !filterCity || hotel.city === filterCity || hotel.cityEn === filterCity;
+        if (!matchesCity) return false;
+
         if (selectedCategory === 'All') return true;
         if (selectedCategory === 'Hotels') return ['luxury', 'mid-range'].includes(hotel.category);
         if (selectedCategory === 'Hostels') return ['hostel', 'budget'].includes(hotel.category);
@@ -68,12 +74,11 @@ export default function HotelsScreen() {
     const [imgErrors, setImgErrors] = useState({});
 
     const renderHotelCard = ({ item }) => (
-        <TouchableOpacity style={[styles.card, { backgroundColor: C.bgCard, borderColor: '#000', borderWidth: 2 }]} activeOpacity={0.9}>
+        <TouchableOpacity style={[styles.card, { backgroundColor: C.bgCard }]} activeOpacity={0.9}>
             <View style={styles.imageContainer}>
                 {imgErrors[item.id] ? (
                     <View style={[styles.cardImage, styles.imgFallback, { backgroundColor: C.bgElevated }]}>
-                        <Ionicons name="business" size={48} color={C.textMuted} />
-                        <Text style={[styles.imgFallbackText, { color: C.textMuted }]}>{item.name}</Text>
+                        <Ionicons name="business-outline" size={48} color={C.textMuted} />
                     </View>
                 ) : (
                     <Image 
@@ -83,57 +88,66 @@ export default function HotelsScreen() {
                     />
                 )}
                 
-                {/* Category Badge */}
-                <View style={[styles.categoryBadge, getBadgeStyle(item.category)]}>
-                    <Text style={styles.categoryText}>{getBadgeLabel(item.category)}</Text>
+                {/* Top Overlays */}
+                <View style={[styles.cardTopOverlay, isRTL && { flexDirection: 'row-reverse' }]}>
+                    <View style={styles.ratingBadge}>
+                        <Ionicons name="star" size={12} color={C.primary} />
+                        <Text style={styles.ratingText}>{item.rating}</Text>
+                    </View>
+                    <View style={[styles.categoryBadge, { backgroundColor: item.category === 'luxury' ? C.primary : 'rgba(0,0,0,0.6)' }]}>
+                        <Text style={[styles.categoryText, { color: item.category === 'luxury' ? '#000' : '#fff' }]}>{getBadgeLabel(item.category)}</Text>
+                    </View>
                 </View>
 
-                {/* Price - fixed to bottom of image */}
-                <View style={styles.priceBadge}>
+                {/* Bottom Overlay - Glassmorphism */}
+                <View style={styles.cardBottomOverlay}>
+                    <View style={styles.glassContent}>
+                        <View style={{ flex: 1 }}>
+                            <Text style={[styles.cardTitle, isRTL && { textAlign: 'right' }]} numberOfLines={1}>{item.name}</Text>
+                            <View style={[styles.locationRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                                <Ionicons name="location-sharp" size={12} color={C.primary} />
+                                <Text style={[styles.locationText, isRTL && { textAlign: 'right' }]}>{item.city}</Text>
+                            </View>
+                        </View>
+                        <TouchableOpacity 
+                            style={styles.addBtnCircle}
+                            onPress={() => handleAddToPlanner(item)}
+                        >
+                            <Ionicons name="add" size={24} color="#000" />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                
+                <View style={styles.priceTag}>
                     <Text style={styles.priceAmount}>{item.price.toLocaleString()}</Text>
-                    <Text style={styles.priceUnit}> {t('egpPerNight')}</Text>
+                    <Text style={styles.priceUnit}> EGP</Text>
                 </View>
-            </View>
-
-            {/* Content */}
-            <View style={styles.cardContent}>
-                <Text style={[styles.cardTitle, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>{item.name}</Text>
-                <View style={[styles.locationRow, isRTL && { flexDirection: 'row-reverse' }]}>
-                    <Ionicons name="location" size={14} color={C.textMuted} />
-                    <Text style={[styles.locationText, { color: C.textMuted }, isRTL ? { marginRight: 4 } : { marginLeft: 4 }]}>{item.city}</Text>
-                </View>
-
-                {/* Rating & Amenities */}
-                <View style={[styles.ratingRow, isRTL && { flexDirection: 'row-reverse' }]}>
-                    <View style={[styles.rating, { backgroundColor: C.bgElevated, borderColor: '#000', borderWidth: 1.5 }]}>
-                        <Ionicons name="star" size={14} color="#FFD700" />
-                        <Text style={[styles.ratingText, { color: C.textMain }]}>{item.rating}</Text>
-                    </View>
-                    <View style={[styles.amenities, isRTL && { flexDirection: 'row-reverse' }]}>
-                        {item.amenities.slice(0, 2).map((a, i) => (
-                            <Text key={i} style={[styles.amenityText, { color: C.textMuted, backgroundColor: C.bgElevated, borderColor: '#000', borderWidth: 1 }]}>{a}</Text>
-                        ))}
-                    </View>
-                </View>
-
-                {/* Action Button - Brutalist Style */}
-                <TouchableOpacity
-                    style={[styles.bookButton, { backgroundColor: C.gold }]}
-                    onPress={() => handleAddToPlanner(item)}
-                >
-                    <Ionicons name="calendar-outline" size={20} color="#000" style={isRTL ? { marginLeft: 10 } : { marginRight: 10 }} />
-                    <Text style={styles.bookButtonText}>{t('addToItinerary')}</Text>
-                </TouchableOpacity>
             </View>
         </TouchableOpacity>
     );
 
+
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top']}>
-            <Watermark />
+
             <View style={[styles.header, isRTL && { alignItems: 'flex-end' }]}>
-                <Text style={[styles.title, { color: C.textMain }]}>{t('hotelsAndStays')}</Text>
-                <Text style={[styles.subtitle, { color: C.textMuted }]}>{t('findAccommodation')}</Text>
+                <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 12 }}>
+                    {/* Back button — only shown when navigated as Stack (from Planner) */}
+                    {route?.params?.city && (
+                        <TouchableOpacity
+                            onPress={() => navigation?.goBack?.()}
+                            style={{ width: 40, height: 40, borderRadius: 12, borderWidth: 2, borderColor: '#000', backgroundColor: C.bgCard, justifyContent: 'center', alignItems: 'center' }}
+                        >
+                            <Ionicons name={isRTL ? 'arrow-forward' : 'arrow-back'} size={20} color={C.textMain} />
+                        </TouchableOpacity>
+                    )}
+                    <View>
+                        <Text style={[styles.title, { color: C.textMain }]}>{t('hotelsAndStays')}</Text>
+                        <Text style={[styles.subtitle, { color: C.textMuted }]}>
+                            {filterCity ? `📍 ${filterCity}` : t('findAccommodation')}
+                        </Text>
+                    </View>
+                </View>
             </View>
 
             <View style={[styles.filterRow, isRTL && { flexDirection: 'row-reverse' }]}>
@@ -165,6 +179,9 @@ export default function HotelsScreen() {
                 showsVerticalScrollIndicator={false}
             />
 
+            {/* Cultural Floating Insight - show only if a specific city is being filtered */}
+            {filterCity && <CulturalInsight city={filterCity} />}
+
             {/* Day Picker Modal */}
             <Modal
                 visible={isModalVisible}
@@ -173,21 +190,17 @@ export default function HotelsScreen() {
                 onRequestClose={() => setIsModalVisible(false)}
             >
                 <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, { backgroundColor: C.bgCard }]}>
-                        <Text style={[styles.modalTitle, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>
+                    <View style={[styles.modalContent, { backgroundColor: '#121212' }]}>
+                        <Text style={[styles.modalTitle, { color: '#fff', textAlign: isRTL ? 'right' : 'left' }]}>
                             {t('addToPlannerPromptTitle')}
                         </Text>
-                        <Text style={[styles.modalMessage, { color: C.textMuted, textAlign: isRTL ? 'right' : 'left' }]}>
-                            {t('addToPlannerPromptMessage')}
-                        </Text>
-
                         <TextInput
-                            style={[styles.modalInput, { color: C.textMain, borderColor: '#000', backgroundColor: C.bgElevated }]}
+                            style={[styles.modalInput, { color: '#fff', backgroundColor: '#1A1A1A' }]}
                             value={dayNumber}
                             onChangeText={setDayNumber}
                             keyboardType="number-pad"
                             placeholder="1"
-                            placeholderTextColor={C.textMuted}
+                            placeholderTextColor="#555"
                             autoFocus
                         />
 
@@ -196,18 +209,19 @@ export default function HotelsScreen() {
                                 style={styles.modalCancelBtn}
                                 onPress={() => setIsModalVisible(false)}
                             >
-                                <Text style={[styles.modalCancelText, { color: C.textMuted }]}>{t('cancel')}</Text>
+                                <Text style={styles.modalCancelText}>{t('cancel')}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                style={styles.modalAddBtn}
+                                style={[styles.modalAddBtn, { backgroundColor: C.primary }]}
                                 onPress={confirmAdd}
                             >
-                                <Text style={styles.modalAddText}>{t('add')}</Text>
+                                <Text style={[styles.modalAddText, { color: '#000' }]}>{t('add')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
                 </View>
             </Modal>
+
         </SafeAreaView>
     );
 }
@@ -217,257 +231,219 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     header: {
-        padding: SPACING.lg,
-        paddingTop: 10,
+        paddingTop: SPACING.lg,
+        paddingBottom: SPACING.md,
+    },
+    headerTop: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: SPACING.md,
+    },
+    backBtn: {
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        backgroundColor: '#1A1A1A',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     title: {
-        fontFamily: FONTS.heavy,
-        fontSize: 34,
+        fontSize: 24,
         fontWeight: '900',
-        textTransform: 'uppercase',
-        letterSpacing: -1,
     },
     subtitle: {
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: '600',
-        marginTop: 4,
+        marginTop: 2,
+    },
+    filterRow: {
+        flexDirection: 'row',
+        paddingHorizontal: SPACING.md,
+        paddingBottom: SPACING.xl,
+        gap: 12,
+    },
+    filterTab: {
+        paddingHorizontal: 24,
+        paddingVertical: 10,
+        borderRadius: 9999,
+        backgroundColor: '#1A1A1A',
+        borderWidth: 2,
+    },
+    filterTabActive: {
+        backgroundColor: '#CC9933',
+        borderColor: '#000',
+    },
+    filterTabText: {
+        fontSize: 14,
+        fontWeight: '700',
+    },
+    filterTabTextActive: {
+        color: '#000',
     },
     listContent: {
-        padding: SPACING.lg,
+        paddingHorizontal: SPACING.md,
         paddingBottom: 100,
     },
     card: {
-        borderRadius: 24,
+        height: 380,
+        borderRadius: 32,
         overflow: 'hidden',
         marginBottom: SPACING.xl,
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
     },
     imageContainer: {
-        height: 240,
-        width: '100%',
+        flex: 1,
     },
     cardImage: {
         width: '100%',
         height: '100%',
-        resizeMode: 'cover',
-    },
-    categoryBadge: {
         position: 'absolute',
-        top: 16,
-        right: 16,
+    },
+    cardTopOverlay: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: 20,
+    },
+    ratingBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.6)',
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 12,
-        borderWidth: 2,
-        borderColor: '#000',
+        gap: 4,
     },
-    luxuryBadge: {
-        backgroundColor: '#CC9933',
-    },
-    budgetBadge: {
-        backgroundColor: '#000',
-    },
-    hostelBadge: {
-        backgroundColor: '#000',
-    },
-    categoryText: {
+    ratingText: {
+        color: '#fff',
         fontSize: 12,
         fontWeight: '900',
-        color: '#fff',
+    },
+    categoryBadge: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 12,
+    },
+    categoryText: {
+        fontSize: 10,
+        fontWeight: '900',
         textTransform: 'uppercase',
     },
-    priceBadge: {
+    cardBottomOverlay: {
         position: 'absolute',
-        bottom: 16,
-        right: 16,
-        backgroundColor: '#000',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 12,
-        flexDirection: 'row',
-        alignItems: 'baseline',
-        borderWidth: 1,
-        borderColor: '#fff',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: 16,
     },
-    priceAmount: {
+    glassContent: {
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        borderRadius: 24,
+        padding: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
+    },
+    cardTitle: {
         color: '#fff',
         fontSize: 18,
         fontWeight: '900',
-    },
-    priceUnit: {
-        color: '#fff',
-        fontSize: 10,
-        fontWeight: '700',
-        textTransform: 'uppercase',
-    },
-    cardContent: {
-        padding: SPACING.lg,
-    },
-    cardTitle: {
-        fontFamily: FONTS.heavy,
-        fontSize: 22,
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        lineHeight: 26,
-        marginBottom: 8,
+        marginBottom: 4,
     },
     locationRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 16,
+        gap: 4,
     },
     locationText: {
-        fontSize: 14,
-        fontWeight: '700',
-        textTransform: 'uppercase',
+        color: 'rgba(255,255,255,0.7)',
+        fontSize: 12,
+        fontWeight: '600',
     },
-    ratingRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+    addBtnCircle: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: '#4CD8D0',
+        justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 20,
     },
-    rating: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 12,
-    },
-    ratingText: {
-        fontSize: 14,
-        fontWeight: '900',
-        marginLeft: 4,
-    },
-    amenities: {
-        flexDirection: 'row',
-        gap: 6,
-    },
-    amenityText: {
-        fontSize: 11,
-        fontWeight: '800',
-        paddingHorizontal: 10,
+    priceTag: {
+        position: 'absolute',
+        top: 20,
+        left: 20,
+        backgroundColor: '#4CD8D0',
+        paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 10,
-        textTransform: 'uppercase',
-    },
-    bookButton: {
         flexDirection: 'row',
-        height: 56,
-        borderRadius: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 2,
-        borderColor: '#000',
+        alignItems: 'baseline',
     },
-    bookButtonText: {
-        fontSize: 15,
+    priceAmount: {
+        fontSize: 16,
         fontWeight: '900',
         color: '#000',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
     },
-    imgFallback: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    imgFallbackText: {
-        fontSize: 13,
-        fontWeight: '700',
-        marginTop: 8,
-        textAlign: 'center',
-        paddingHorizontal: 16,
-    },
-    filterRow: {
-        flexDirection: 'row',
-        paddingHorizontal: SPACING.lg,
-        paddingBottom: SPACING.md,
-        gap: SPACING.sm,
-    },
-    filterTab: {
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 12,
-        borderWidth: 2,
-    },
-    filterTabActive: {
-        backgroundColor: '#000',
-        borderColor: '#000',
-    },
-    filterTabText: {
-        fontSize: 13,
+    priceUnit: {
+        fontSize: 10,
         fontWeight: '800',
-        textTransform: 'uppercase',
-    },
-    filterTabTextActive: {
-        color: '#fff',
+        color: '#000',
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.8)',
+        backgroundColor: 'rgba(0,0,0,0.9)',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: SPACING.xl,
+        padding: 30,
     },
     modalContent: {
-        borderRadius: 24,
-        padding: SPACING.xl,
         width: '100%',
-        maxWidth: 400,
-        borderWidth: 3,
-        borderColor: '#000',
+        borderRadius: 32,
+        padding: 24,
     },
     modalTitle: {
-        fontFamily: FONTS.heavy,
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: '900',
-        textTransform: 'uppercase',
-        marginBottom: SPACING.md,
-    },
-    modalMessage: {
-        fontSize: 16,
-        fontWeight: '600',
-        marginBottom: SPACING.xl,
-        lineHeight: 22,
+        marginBottom: 20,
     },
     modalInput: {
-        borderWidth: 2,
+        height: 60,
         borderRadius: 16,
-        padding: SPACING.lg,
+        paddingHorizontal: 20,
         fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: SPACING.xl,
+        fontWeight: '700',
+        marginBottom: 24,
     },
     modalActions: {
         flexDirection: 'row',
-        justifyContent: 'flex-end',
-        gap: SPACING.lg,
+        gap: 12,
     },
     modalCancelBtn: {
-        paddingVertical: 12,
-        paddingHorizontal: 24,
+        flex: 1,
+        height: 56,
+        borderRadius: 28,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     modalCancelText: {
-        fontSize: 16,
-        fontWeight: '800',
-        textTransform: 'uppercase',
+        fontSize: 14,
+        fontWeight: '900',
+        color: '#555',
     },
     modalAddBtn: {
-        backgroundColor: '#000',
-        paddingVertical: 14,
-        paddingHorizontal: 28,
-        borderRadius: 30,
-        borderWidth: 2,
-        borderColor: '#fff',
+        flex: 1,
+        height: 56,
+        borderRadius: 28,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     modalAddText: {
-        color: '#fff',
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: '900',
-        textTransform: 'uppercase',
+    },
+    imgFallback: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
+

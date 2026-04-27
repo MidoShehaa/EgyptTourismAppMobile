@@ -14,21 +14,21 @@ const ONBOARDING_DATA = [
         id: '1',
         titleKey: 'onboarding1Title',
         descKey: 'onboarding1Desc',
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Faf%2FAll_Gizah_Pyramids.jpg%2F800px-All_Gizah_Pyramids.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Faf%2FAll_Gizah_Pyramids.jpg%2F800px-All_Gizah_Pyramids.jpg',
+        image: 'https://images.unsplash.com/photo-1539650116574-8efeb43e2b45?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Pyramids
         fallback: PLACEHOLDER,
     },
     {
         id: '2',
         titleKey: 'onboarding2Title',
         descKey: 'onboarding2Desc',
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F6%2F6d%2FLuxor_Temple_Egypt1.jpg%2F800px-Luxor_Temple_Egypt1.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F6%2F6d%2FLuxor_Temple_Egypt1.jpg%2F800px-Luxor_Temple_Egypt1.jpg',
+        image: 'https://images.unsplash.com/photo-1596409548398-9fb472c6e61d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Luxor Temple
         fallback: PLACEHOLDER,
     },
     {
         id: '3',
         titleKey: 'onboarding3Title',
         descKey: 'onboarding3Desc',
-        image: 'https://images.weserv.nl/?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fcd%2FRas_Mohammed_National_Park.jpg%2F800px-Ras_Mohammed_National_Park.jpg&default=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fc%2Fcd%2FRas_Mohammed_National_Park.jpg%2F800px-Ras_Mohammed_National_Park.jpg',
+        image: 'https://images.unsplash.com/photo-1682687982501-1e58f8100c8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Red Sea / Coral
         fallback: PLACEHOLDER,
     }
 ];

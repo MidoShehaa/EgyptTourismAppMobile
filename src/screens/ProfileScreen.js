@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, StatusBar, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, StatusBar, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
@@ -24,82 +24,116 @@ export default function ProfileScreen({ navigation }) {
     };
 
     const handleLogout = () => {
-        updateSettings({ hasSeenOnboarding: false });
-        navigation.replace('Onboarding');
+        Alert.alert(
+            isRTL ? 'إعادة ضبط التطبيق' : 'Reset App',
+            isRTL 
+                ? 'سيتم مسح خطتك وإعادة عرض شاشة التعريف. هل أنت متأكد?'
+                : 'This will clear your itinerary and restart the onboarding. Are you sure?',
+            [
+                { text: isRTL ? 'إلغاء' : 'Cancel', style: 'cancel' },
+                {
+                    text: isRTL ? 'إعادة ضبط' : 'Reset',
+                    style: 'destructive',
+                    onPress: () => {
+                        updateSettings({ hasSeenOnboarding: false });
+                        navigation.replace('Onboarding');
+                    },
+                },
+            ]
+        );
+    };
+
+    const handlePrivacyPolicy = () => {
+        Alert.alert(
+            isRTL ? 'سياسة الخصوصية' : 'Privacy Policy',
+            isRTL 
+                ? 'هذا التطبيق لا يجمع أي بيانات شخصية. جميع البيانات مخزنة محلياً على جهازك فقط.'
+                : 'This app does not collect any personal data. All data is stored locally on your device only.',
+            [{ text: 'OK' }]
+        );
+    };
+
+    const handleTerms = () => {
+        Alert.alert(
+            isRTL ? 'شروط الاستخدام' : 'Terms of Service',
+            isRTL 
+                ? 'باستخدام هذا التطبيق، تقر بأن جميع المعلومات المقدمة للأغراض الإرشادية فقط. الأسعار والمواعيد قد تتغير.'
+                : 'By using this app, you acknowledge that all information is for guidance only. Prices and schedules may vary.',
+            [{ text: 'OK' }]
+        );
     };
 
     const renderSettingItem = (icon, label, value, onPress = null) => (
-        <TouchableOpacity style={[styles.row, { borderBottomColor: C.borderGold }]} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
-            <View style={[styles.rowLeft, isRTL && styles.rowLeftRTL]}>
-                <View style={[styles.iconBox, { backgroundColor: C.bgMain, borderColor: C.borderGold }]}>
-                    <Ionicons name={icon} size={20} color={C.textMain} />
+        <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
+            <View style={[styles.rowLeft, isRTL && { flexDirection: 'row-reverse' }]}>
+                <View style={styles.iconBox}>
+                    <Ionicons name={icon} size={22} color={C.primary} />
                 </View>
-                <Text style={[styles.rowLabel, { color: C.textMain }]}>{t(label)}</Text>
+                <Text style={[styles.rowLabel, { color: '#fff' }]}>{t(label)}</Text>
             </View>
             {value}
         </TouchableOpacity>
     );
+
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top', 'left', 'right']}>
             <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={C.bgMain} />
             
             <View style={[styles.headerBlock, isRTL && { alignItems: 'flex-end' }]}>
-                <Text style={[styles.titleLine, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>
-                    {isRTL ? 'ملفي' : 'PROFILE'}
+                <Text style={[styles.titleLine, { color: '#fff' }]}>
+                    {isRTL ? 'الإعدادات' : 'Settings'}
                 </Text>
-                <Text style={[styles.titleLine, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>
-                    {isRTL ? 'الشخصي' : 'SETTINGS'}
-                </Text>
-                <Text style={[styles.headerSubtitle, { color: C.textMuted, textAlign: isRTL ? 'right' : 'left' }]}>
-                    {t('settings')}
+                <Text style={[styles.headerSubtitle, { color: C.textMuted }]}>
+                    {isRTL ? 'تخصيص تجربتك في مصر' : 'Personalize your Egypt experience'}
                 </Text>
             </View>
 
-            <ScrollView contentContainerStyle={styles.content}>
-                <View style={[styles.section, { backgroundColor: C.bgCard, borderColor: C.borderGold }]}>
-                    <Text style={[styles.sectionTitle, { color: C.textMuted }, isRTL && styles.textRTL]}>{t('settings')}</Text>
 
-                    {renderSettingItem('language', 'language',
-                        <TouchableOpacity onPress={toggleLanguage} style={styles.valueBox}>
-                            <Text style={[styles.valueText, { color: C.textMain }]}>{settings.language === 'en' ? 'English' : 'العربية'}</Text>
-                            <Ionicons name="swap-horizontal" size={20} color={C.textMain} style={{ marginLeft: 8 }} />
-                        </TouchableOpacity>
-                        , toggleLanguage)}
-
-                    {renderSettingItem('moon', 'darkMode',
-                        <Switch
-                            trackColor={{ false: C.borderSubtle, true: C.primary }}
-                            thumbColor={'#fff'}
-                            onValueChange={toggleDarkMode}
-                            value={settings.darkMode === true}
-                        />
+            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+                <View style={styles.section}>
+                    {renderSettingItem(
+                        'language-outline', 
+                        'language',
+                        (
+                            <View style={styles.valueBox}>
+                                <Text style={[styles.valueText, { color: C.primary }]}>{settings.language === 'en' ? 'English' : 'العربية'}</Text>
+                            </View>
+                        ), 
+                        toggleLanguage
                     )}
 
-                    {renderSettingItem('notifications', 'notifications',
-                        <Switch
-                            trackColor={{ false: C.borderSubtle, true: C.primary }}
-                            thumbColor={'#fff'}
-                            onValueChange={() => { }}
-                            value={true}
-                        />
+                    <View style={styles.divider} />
+
+                    {renderSettingItem(
+                        'moon-outline', 
+                        'darkMode',
+                        (
+                            <Switch
+                                trackColor={{ false: '#333', true: C.primary }}
+                                thumbColor={'#fff'}
+                                onValueChange={toggleDarkMode}
+                                value={settings.darkMode === true}
+                            />
+                        )
                     )}
                 </View>
 
-                <View style={[styles.section, { backgroundColor: C.bgCard, borderColor: C.borderGold }]}>
-                    <Text style={[styles.sectionTitle, { color: C.textMuted }, isRTL && styles.textRTL]}>
-                        {isRTL ? 'عن التطبيق' : 'ABOUT'}
-                    </Text>
-                    {renderSettingItem('shield-checkmark', 'privacyPolicy', <Ionicons name={isRTL ? "arrow-back" : "arrow-forward"} size={20} color={C.textMain} />, () => { })}
-                    {renderSettingItem('document-text', 'termsOfService', <Ionicons name={isRTL ? "arrow-back" : "arrow-forward"} size={20} color={C.textMain} />, () => { })}
+
+                <View style={styles.section}>
+                    {renderSettingItem('shield-checkmark-outline', 'privacyPolicy', <Ionicons name="chevron-forward" size={20} color="#555" />, handlePrivacyPolicy)}
+                    <View style={styles.divider} />
+                    {renderSettingItem('document-text-outline', 'termsOfService', <Ionicons name="chevron-forward" size={20} color="#555" />, handleTerms)}
                 </View>
 
                 <TouchableOpacity 
-                    style={[styles.logoutButton, { backgroundColor: C.bgCard, borderColor: COLORS.error || '#EF4444' }]}
+                    style={styles.logoutButton}
                     onPress={handleLogout}
                 >
-                    <Text style={[styles.logoutText, { color: COLORS.error || '#EF4444' }]}>{t('logout')}</Text>
+                    <Ionicons name="log-out-outline" size={22} color="#FF4444" />
+                    <Text style={styles.logoutText}>{t('logout')}</Text>
                 </TouchableOpacity>
+
 
                 <View style={styles.footer}>
                     <Text style={[styles.versionText, { color: C.textMuted }]}>Version 1.0.0</Text>
@@ -110,117 +144,22 @@ export default function ProfileScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    headerBlock: {
-        paddingHorizontal: SPACING.md,
-        paddingTop: SPACING.xl,
-        paddingBottom: SPACING.lg,
-    },
-    titleLine: {
-        fontFamily: fontFamilyHeavy,
-        fontSize: 48,
-        fontWeight: '900',
-        letterSpacing: -1.5,
-        lineHeight: 52,
-        textTransform: 'uppercase',
-    },
-    headerSubtitle: {
-        fontFamily: fontFamilyMedium,
-        fontSize: 16,
-        fontWeight: '700',
-        textTransform: 'uppercase',
-        marginTop: SPACING.sm,
-    },
-    content: {
-        padding: SPACING.md,
-        paddingBottom: 100,
-    },
-    section: {
-        marginBottom: SPACING.xl,
-        borderWidth: 2,
-        borderRadius: 24,
-        padding: SPACING.sm,
-        overflow: 'hidden',
-    },
-    sectionTitle: {
-        fontFamily: fontFamilyHeavy,
-        fontSize: 16,
-        fontWeight: '900',
-        marginBottom: SPACING.md,
-        marginLeft: SPACING.md,
-        marginTop: SPACING.md,
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
-    },
-    textRTL: {
-        textAlign: 'right',
-        marginRight: SPACING.md,
-        marginLeft: 0,
-    },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 16,
-        paddingHorizontal: SPACING.md,
-        borderBottomWidth: 1,
-    },
-    rowLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    rowLeftRTL: {
-        flexDirection: 'row-reverse',
-    },
-    iconBox: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        borderWidth: 2,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
-    rowLabel: {
-        fontFamily: fontFamilyMedium,
-        fontSize: 16,
-        fontWeight: '700',
-    },
-    valueBox: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    valueText: {
-        fontFamily: fontFamilyHeavy,
-        fontSize: 16,
-        fontWeight: '900',
-        textTransform: 'uppercase',
-    },
-    logoutButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 18,
-        borderRadius: 30,
-        borderWidth: 2,
-        marginBottom: SPACING.xl,
-    },
-    logoutText: {
-        fontFamily: fontFamilyHeavy,
-        fontSize: 18,
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        letterSpacing: 1,
-    },
-    footer: {
-        alignItems: 'center',
-        marginBottom: SPACING.xl,
-    },
-    versionText: {
-        fontFamily: fontFamilyMedium,
-        fontSize: 14,
-        fontWeight: '700',
-    },
+    container: { flex: 1 },
+    headerBlock: { paddingHorizontal: 24, paddingTop: 40, paddingBottom: 24 },
+    titleLine: { fontSize: 32, fontWeight: '900' },
+    headerSubtitle: { fontSize: 14, fontWeight: '600', marginTop: 8, opacity: 0.6 },
+    content: { padding: 24, paddingBottom: 100 },
+    section: { marginBottom: 24, borderRadius: 32, backgroundColor: '#1A1A1A', padding: 12 },
+    row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 16, paddingHorizontal: 12 },
+    rowLeft: { flexDirection: 'row', alignItems: 'center' },
+    iconBox: { width: 44, height: 44, borderRadius: 12, backgroundColor: '#252525', justifyContent: 'center', alignItems: 'center', marginRight: 16 },
+    rowLabel: { fontSize: 16, fontWeight: '700' },
+    valueBox: { flexDirection: 'row', alignItems: 'center' },
+    valueText: { fontSize: 14, fontWeight: '900' },
+    divider: { height: 1, backgroundColor: 'rgba(255,255,255,0.05)', marginHorizontal: 12 },
+    logoutButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 64, borderRadius: 24, backgroundColor: '#1A1A1A', marginTop: 8, gap: 12 },
+    logoutText: { fontSize: 16, fontWeight: '900', color: '#FF4444' },
+    footer: { alignItems: 'center', marginTop: 24 },
+    versionText: { fontSize: 12, fontWeight: '600', opacity: 0.3 },
 });
+

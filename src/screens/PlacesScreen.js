@@ -16,24 +16,26 @@ import {
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { places, CATEGORIES } from '../constants/placesData';
+import { CATEGORIES } from '../constants/placesData';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
-import Watermark from '../components/Watermark';
+
 
 const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggleFavorite }) => {
     const placeName = isRTL ? item.name : item.nameEn;
     const placeCity = isRTL ? item.city : item.cityEn;
-    const placeDesc = isRTL ? item.description : item.descriptionEn;
     const [imgError, setImgError] = useState(false);
 
     return (
-        <View style={styles.cardWrapper}>
-            <View style={[styles.card, { backgroundColor: C.bgCard, borderColor: C.borderMain || '#000' }]}>
+        <TouchableOpacity 
+            activeOpacity={0.9}
+            style={styles.cardWrapper}
+            onPress={() => navigation.navigate('PlaceDetails', { place: item })}
+        >
+            <View style={[styles.card, { backgroundColor: C.bgCard }]}>
                 {imgError ? (
                     <View style={[styles.cardImage, styles.imgPlaceholder, { backgroundColor: C.bgElevated }]}>
-                        <Text style={styles.imgPlaceholderEmoji}>{item.image}</Text>
-                        <Text style={[styles.imgPlaceholderText, { color: C.textMuted }]}>{placeName}</Text>
+                        <Ionicons name="image-outline" size={48} color={C.textMuted} />
                     </View>
                 ) : (
                     <Image 
@@ -41,68 +43,65 @@ const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggl
                             uri: item.imageUrl,
                             headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
                         }} 
-                        style={[styles.cardImage, { borderColor: C.borderMain || '#000' }]}
+                        style={styles.cardImage}
                         onError={() => setImgError(true)}
                     />
                 )}
 
-                <TouchableOpacity
-                    style={[styles.favoriteButton, isRTL ? { left: 16 } : { right: 16 }]}
-                    onPress={() => toggleFavorite(item.id)}
-                >
-                    <Ionicons
-                        name={isFavorite(item.id) ? 'heart' : 'heart-outline'}
-                        size={24}
-                        color={isFavorite(item.id) ? COLORS.error : '#fff'}
-                    />
-                </TouchableOpacity>
-
-                <View style={styles.cardContent}>
-                    <Text style={[styles.cardTitle, { color: C.textMain }, isRTL && { textAlign: 'right' }]} numberOfLines={2}>{placeName}</Text>
-
-                    <View style={[styles.cardMetaRow, isRTL && { flexDirection: 'row-reverse' }]}>
-                        <View style={[styles.cardPill, { borderColor: C.borderMain || '#000' }]}>
-                            <Text style={[styles.cardPillText, { color: C.textMain }]}>{t('categories.' + item.category)}</Text>
-                        </View>
-                        <View style={[styles.cardPill, { borderColor: C.borderMain || '#000' }]}>
-                            <Ionicons name="star" size={14} color="#FFD700" />
-                            <Text style={[styles.cardPillText, { color: C.textMain, marginLeft: 4 }]}>{item.rating}</Text>
-                        </View>
+                {/* Top Overlay: Favorite & Rating */}
+                <View style={[styles.cardTopOverlay, isRTL && { flexDirection: 'row-reverse' }]}>
+                    <View style={styles.ratingBadge}>
+                        <Ionicons name="star" size={12} color={C.primary} />
+                        <Text style={styles.ratingText}>{item.rating}</Text>
                     </View>
+                    
+                    <TouchableOpacity
+                        style={styles.favoriteCircle}
+                        onPress={() => toggleFavorite(item.id)}
+                    >
+                        <Ionicons
+                            name={isFavorite(item.id) ? 'heart' : 'heart-outline'}
+                            size={20}
+                            color={isFavorite(item.id) ? '#FF5252' : '#fff'}
+                        />
+                    </TouchableOpacity>
+                </View>
 
-                    <Text style={[styles.cardDescription, { color: C.textMuted }, isRTL && { textAlign: 'right' }]} numberOfLines={2}>
-                        {placeDesc}
-                    </Text>
-
-                    <View style={[styles.cardFooter, { borderTopColor: C.borderSubtle }, isRTL && { flexDirection: 'row-reverse' }]}>
-                        <View style={isRTL ? { alignItems: 'flex-end' } : { alignItems: 'flex-start' }}>
-                            <Text style={[styles.priceLabel, { color: C.textMuted }]}>{t('price')}</Text>
-                            <Text style={[styles.priceText, { color: C.textMain }]}>{item.price}</Text>
+                {/* Bottom Overlay: Title & Price */}
+                <View style={styles.cardBottomOverlay}>
+                    <View style={styles.glassContent}>
+                        <View style={{ flex: 1 }}>
+                            <Text style={[styles.cardTitle, isRTL && { textAlign: 'right' }]} numberOfLines={1}>{placeName}</Text>
+                            <View style={[styles.locationRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                                <Ionicons name="location-sharp" size={12} color={C.primary} />
+                                <Text style={[styles.locationText, isRTL && { textAlign: 'right' }]}>{placeCity}</Text>
+                            </View>
                         </View>
-
-                        <TouchableOpacity
-                            style={[styles.bookButton, { backgroundColor: '#CC9933', borderColor: '#000' }]}
-                            onPress={() => navigation.navigate('PlaceDetails', { place: item })}
-                        >
-                            <Text style={[styles.bookButtonText, { color: '#000' }]}>{isRTL ? 'تفاصيل أكثر' : 'VIEW DETAILS'}</Text>
-                        </TouchableOpacity>
+                        <View style={styles.priceContainer}>
+                            <Text style={styles.cardPrice}>{item.price}</Text>
+                        </View>
                     </View>
                 </View>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 });
+
 
 export default function PlacesScreen({ navigation }) {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
-    const { toggleFavorite, isFavorite, t, settings } = useUser();
+    const { toggleFavorite, isFavorite, t, settings, places, isLoading } = useUser();
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
 
+    const handleTitleTap = () => {
+        navigation.navigate('AdminAuth');
+    };
+
     const filteredPlaces = useMemo(() => {
-        return places.filter(place => {
+        return (places || []).filter(place => {
             const matchesCategory = selectedCategory === 'All' || place.category === selectedCategory;
             const matchesSearch = searchQuery === '' ||
                 place.nameEn?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -110,7 +109,7 @@ export default function PlacesScreen({ navigation }) {
                 place.name?.toLowerCase().includes(searchQuery.toLowerCase());
             return matchesCategory && matchesSearch;
         });
-    }, [searchQuery, selectedCategory]);
+    }, [searchQuery, selectedCategory, places]);
 
     useEffect(() => {
         if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -136,54 +135,39 @@ export default function PlacesScreen({ navigation }) {
     );
 
     const renderHeader = () => (
-        <View>
-            {/* Search Bar - Brutalist Style */}
-            <View style={[styles.topBar, isRTL && { flexDirection: 'row-reverse' }]}>
-                <View style={[styles.searchPill, { backgroundColor: C.bgCard, borderColor: C.borderMain || '#000' }]}>
-                    <Ionicons name="search" size={20} color={C.textMuted} style={isRTL ? { marginLeft: 12 } : { marginRight: 12 }} />
-                    <TextInput
-                        style={[styles.searchInput, { color: C.textMain }, isRTL && { textAlign: 'right' }]}
-                        placeholder={t('searchPlaceholder')}
-                        placeholderTextColor={C.textMuted}
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                    />
+        <View style={styles.headerContainer}>
+            {/* Header Top: Greeting & Search Toggle */}
+            <View style={[styles.headerTop, isRTL && { flexDirection: 'row-reverse' }]}>
+                <View>
+                    <Text style={[styles.greetingText, { color: C.textMuted }]}>{t('welcome')},</Text>
+                    <TouchableOpacity onPress={handleTitleTap}>
+                        <Text style={[styles.userNameText, { color: C.textMain }]}>Explorer</Text>
+                    </TouchableOpacity>
                 </View>
+                <TouchableOpacity 
+                    style={styles.headerIconBtn}
+                    onPress={() => navigation.navigate('Profile')}
+                >
+                    <Ionicons name="person-circle-outline" size={32} color={C.textMain} />
+                </TouchableOpacity>
             </View>
 
-            {/* Brutalist Header Block */}
-            <View style={[styles.headerBlock, isRTL && { alignItems: 'flex-end' }]}>
-                <Text 
-                    style={[styles.titleLine, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}
-                    adjustsFontSizeToFit
-                    numberOfLines={1}
-                >
-                    {isRTL ? 'استكشف' : 'EXPLORING'}
-                </Text>
-                <Text 
-                    style={[styles.titleLine, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}
-                    adjustsFontSizeToFit
-                    numberOfLines={1}
-                >
-                    {isRTL ? 'مصر' : 'EGYPT'}
-                </Text>
-
-                <View style={[styles.headerSubBlock, isRTL && { flexDirection: 'row-reverse' }]}>
-                    <Text style={[styles.headerBody, { color: C.textMain }, isRTL && { textAlign: 'right', marginRight: 0, marginLeft: 16 }]}>
-                        {isRTL ? 'رحلة لا تُنسى عبر أبرز معالم البلاد التاريخية والسياحية المميزة.' : 'An unforgettable journey through the country\'s main attractions.'}
-                    </Text>
-                    <View style={styles.headerMeta}>
-                        <Text style={[styles.headerMetaText, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>
-                            {isRTL ? 'اكتشف ٤٤ مَعلماً' : 'UNCOVER 44'}
-                        </Text>
-                        <Text style={[styles.headerMetaText, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>
-                            {isRTL ? 'ابدأ الآن.' : 'HIDDEN GEMS.'}
-                        </Text>
-                    </View>
-                </View>
+            {/* Immersive Search Section */}
+            <View style={[styles.searchSection, { backgroundColor: C.bgElevated }]}>
+                <Ionicons name="search" size={20} color={C.textMuted} />
+                <TextInput
+                    style={[styles.searchInput, { color: C.textMain }, isRTL && { textAlign: 'right' }]}
+                    placeholder={t('searchPlaceholder')}
+                    placeholderTextColor={C.textMuted}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
+                <TouchableOpacity style={styles.filterBtn}>
+                    <Ionicons name="options-outline" size={20} color={C.primary} />
+                </TouchableOpacity>
             </View>
 
-            {/* Categories */}
+            {/* Premium Categories */}
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -195,17 +179,14 @@ export default function PlacesScreen({ navigation }) {
                         key={category.id}
                         style={[
                             styles.categoryChip,
-                            { 
-                                backgroundColor: selectedCategory === category.id ? '#000' : C.bgCard, 
-                                borderColor: selectedCategory === category.id ? '#000' : C.borderMain || '#000' 
-                            }
+                            selectedCategory === category.id && { backgroundColor: C.primary }
                         ]}
                         onPress={() => handleCategoryChange(category.id)}
                     >
                         <Text
                             style={[
                                 styles.categoryChipText,
-                                { color: selectedCategory === category.id ? '#fff' : C.textMain }
+                                { color: selectedCategory === category.id ? '#000' : C.textMuted }
                             ]}
                         >
                             {t('categories.' + category.id)}
@@ -213,12 +194,22 @@ export default function PlacesScreen({ navigation }) {
                     </TouchableOpacity>
                 ))}
             </ScrollView>
+
+            <View style={[styles.sectionHeader, isRTL && { flexDirection: 'row-reverse' }]}>
+                <Text style={[styles.sectionTitle, { color: C.textMain }]}>
+                    {isRTL ? 'الوجهات المميزة' : 'Popular Destinations'}
+                </Text>
+                <TouchableOpacity>
+                    <Text style={[styles.viewAllText, { color: C.primary }]}>{isRTL ? 'عرض الكل' : 'View all'}</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 
+
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top', 'left', 'right']}>
-            <Watermark />
+
             <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={C.bgMain} />
 
             <FlatList
@@ -241,177 +232,162 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    topBar: {
-        flexDirection: 'row',
-        paddingHorizontal: SPACING.md,
+    headerContainer: {
         paddingTop: SPACING.lg,
-        alignItems: 'center',
     },
-    searchPill: {
-        flex: 1,
-        height: 56,
-        borderRadius: 16,
-        borderWidth: 2,
+    headerTop: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: SPACING.md,
+        marginBottom: SPACING.xl,
+    },
+    greetingText: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    userNameText: {
+        fontSize: 24,
+        fontWeight: '900',
+    },
+    searchSection: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: SPACING.lg,
+        marginHorizontal: SPACING.md,
+        paddingHorizontal: 16,
+        height: 54,
+        borderRadius: 20,
+        marginBottom: SPACING.xl,
     },
     searchInput: {
         flex: 1,
+        marginLeft: 12,
         fontSize: 16,
-        fontWeight: '700',
-        textTransform: 'uppercase',
+        fontWeight: '600',
     },
-    headerBlock: {
-        paddingHorizontal: SPACING.md,
-        paddingTop: SPACING.xl,
-        paddingBottom: SPACING.lg,
+    filterBtn: {
+        padding: 8,
     },
-    titleLine: {
-        fontFamily: FONTS.heavy,
-        fontSize: 62,
-        fontWeight: '900',
-        letterSpacing: -2,
-        lineHeight: 64,
-        textTransform: 'uppercase',
-    },
-    headerSubBlock: {
+    sectionHeader: {
         flexDirection: 'row',
-        marginTop: SPACING.lg,
         justifyContent: 'space-between',
-        alignItems: 'flex-start',
+        alignItems: 'center',
+        paddingHorizontal: SPACING.md,
+        marginBottom: SPACING.md,
     },
-    headerBody: {
-        flex: 1.2,
-        fontSize: 15,
-        lineHeight: 22,
-        marginRight: 16,
-        fontWeight: '700',
-    },
-    headerMeta: {
-        flex: 0.8,
-    },
-    headerMetaText: {
-        fontSize: 12,
+    sectionTitle: {
+        fontSize: 22,
         fontWeight: '900',
-        lineHeight: 18,
-        textTransform: 'uppercase',
+    },
+    viewAllText: {
+        fontSize: 14,
+        fontWeight: '700',
     },
     categoriesContainer: {
-        paddingBottom: SPACING.md,
+        marginBottom: SPACING.xl,
     },
     categoriesContent: {
         paddingHorizontal: SPACING.md,
-        gap: 8,
+        gap: 12,
     },
     categoryChip: {
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 12,
-        borderWidth: 2,
+        paddingHorizontal: 24,
+        paddingVertical: 10,
+        borderRadius: 9999,
+        backgroundColor: '#1A1A1A',
     },
     categoryChipText: {
-        fontSize: 13,
-        fontWeight: '900',
-        textTransform: 'uppercase',
+        fontSize: 14,
+        fontWeight: '700',
     },
     cardWrapper: {
         marginBottom: SPACING.lg,
     },
     card: {
-        borderRadius: 24,
-        borderWidth: 3,
+        height: 420,
+        borderRadius: 32,
         overflow: 'hidden',
     },
     cardImage: {
         width: '100%',
-        height: 300,
-        borderBottomWidth: 3,
-    },
-    imgPlaceholder: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    imgPlaceholderEmoji: {
-        fontSize: 48,
-    },
-    imgPlaceholderText: {
-        fontSize: 14,
-        fontWeight: '600',
-        marginTop: 8,
-    },
-    favoriteButton: {
+        height: '100%',
         position: 'absolute',
-        top: 16,
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        width: 48,
-        height: 48,
-        borderRadius: 12,
-        borderWidth: 1.5,
-        borderColor: '#fff',
-        justifyContent: 'center',
-        alignItems: 'center',
     },
-    cardContent: {
-        padding: SPACING.lg,
-        gap: 12,
-    },
-    cardTitle: {
-        fontFamily: FONTS.heavy,
-        fontSize: 32,
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        letterSpacing: -1,
-        lineHeight: 36,
-    },
-    cardMetaRow: {
-        flexDirection: 'row',
-        gap: 8,
-    },
-    cardPill: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderRadius: 8,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-    },
-    cardPillText: {
-        fontSize: 11,
-        fontWeight: '900',
-        textTransform: 'uppercase',
-    },
-    cardDescription: {
-        fontSize: 14,
-        lineHeight: 20,
-        fontWeight: '600',
-    },
-    cardFooter: {
+    cardTopOverlay: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        padding: 20,
+    },
+    ratingBadge: {
+        flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 8,
-        paddingTop: 16,
-        borderTopWidth: 2,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 12,
+        gap: 4,
     },
-    priceLabel: {
-        fontSize: 11,
-        fontWeight: '900',
-        textTransform: 'uppercase',
-    },
-    priceText: {
-        fontSize: 22,
+    ratingText: {
+        color: '#fff',
+        fontSize: 12,
         fontWeight: '900',
     },
-    bookButton: {
-        paddingHorizontal: 20,
-        paddingVertical: 14,
-        borderRadius: 30,
-        borderWidth: 2,
+    favoriteCircle: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    bookButtonText: {
-        fontSize: 13,
+    cardBottomOverlay: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: 16,
+    },
+    glassContent: {
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        borderRadius: 24,
+        padding: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
+    },
+    cardTitle: {
+        color: '#fff',
+        fontSize: 20,
         fontWeight: '900',
-        textTransform: 'uppercase',
+        marginBottom: 4,
+    },
+    locationRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    locationText: {
+        color: 'rgba(255,255,255,0.7)',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    priceContainer: {
+        backgroundColor: '#4CD8D0',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 16,
+    },
+    cardPrice: {
+        color: '#000',
+        fontSize: 16,
+        fontWeight: '900',
+    },
+    imgPlaceholder: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
+

@@ -5,6 +5,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
+import CulturalInsight from '../components/CulturalInsight';
 
 const { width } = Dimensions.get('window');
 
@@ -43,109 +44,130 @@ export default function PlaceDetailsScreen({ route, navigation }) {
         <View style={[styles.container, { backgroundColor: C.bgMain }]}>
             <StatusBar barStyle="light-content" />
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-                {/* Image Header - Full Editorial */}
-                <View style={[styles.imageContainer, { borderColor: '#000' }]}>
+                {/* Image Header - Immersive */}
+                <View style={styles.imageContainer}>
                     {imgError ? (
                         <View style={[styles.image, styles.imgFallback, { backgroundColor: C.bgElevated }]}>
-                            <Text style={styles.imgFallbackEmoji}>{place.image}</Text>
-                            <Text style={[styles.imgFallbackText, { color: C.textMuted }]}>{placeName}</Text>
+                            <Ionicons name="image-outline" size={80} color={C.textMuted} />
                         </View>
                     ) : (
-                        <Image
-                            source={place.imageSource ? place.imageSource : { 
-                                uri: place.imageUrl,
-                                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
-                            }}
-                            style={styles.image}
-                            onError={() => setImgError(true)}
-                        />
+                        place.images && place.images.length > 1 ? (
+                            <ScrollView
+                                horizontal
+                                pagingEnabled
+                                showsHorizontalScrollIndicator={false}
+                                style={styles.image}
+                            >
+                                {place.images.map((imgUrl, idx) => (
+                                    <Image
+                                        key={idx}
+                                        source={{ 
+                                            uri: imgUrl,
+                                            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
+                                        }}
+                                        style={{ width: width, height: 500, resizeMode: 'cover' }}
+                                        onError={() => setImgError(true)}
+                                    />
+                                ))}
+                            </ScrollView>
+                        ) : (
+                            <Image
+                                source={place.imageSource ? place.imageSource : { 
+                                    uri: place.imageUrl,
+                                    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
+                                }}
+                                style={styles.image}
+                                onError={() => setImgError(true)}
+                            />
+                        )
                     )}
                     
                     {/* Header Controls */}
                     <View style={[styles.headerOverlay, { paddingTop: insets.top + 10 }, isRTL && { flexDirection: 'row-reverse' }]}>
                         <TouchableOpacity
-                            style={[styles.actionCircle, { backgroundColor: '#000', borderColor: '#fff', borderWidth: 2 }]}
+                            style={styles.actionCircle}
                             onPress={() => navigation.goBack()}
                         >
-                            <Ionicons name={isRTL ? "arrow-forward" : "arrow-back"} size={24} color="#fff" />
+                            <Ionicons name={isRTL ? "arrow-forward" : "arrow-back"} size={22} color="#fff" />
                         </TouchableOpacity>
                         
                         <TouchableOpacity
-                            style={[styles.actionCircle, { backgroundColor: '#fff', borderColor: '#000', borderWidth: 2 }]}
+                            style={styles.actionCircle}
                             onPress={() => toggleFavorite(place.id)}
                         >
                             <Ionicons
                                 name={isFavorite(place.id) ? "heart" : "heart-outline"}
-                                size={24}
-                                color={isFavorite(place.id) ? COLORS.error : '#000'}
+                                size={22}
+                                color={isFavorite(place.id) ? '#FF5252' : '#fff'}
                             />
                         </TouchableOpacity>
                     </View>
 
-                    {/* Floating Info Badge on Image */}
+                    {/* Immersive Rating Overlay */}
                     <View style={[styles.imageBadge, isRTL ? { left: 20 } : { right: 20 }]}>
-                        <Ionicons name="star" size={14} color="#FFD700" />
+                        <Ionicons name="star" size={14} color={C.primary} />
                         <Text style={styles.imageBadgeText}>{place.rating}</Text>
                     </View>
                 </View>
 
+
                 {/* Content Block */}
                 <View style={styles.detailsContainer}>
                     <View style={isRTL ? { alignItems: 'flex-end' } : { alignItems: 'flex-start' }}>
-                        <Text 
-                            style={[styles.title, { color: C.textMain }, isRTL && { textAlign: 'right' }]} 
-                            numberOfLines={2}
-                            adjustsFontSizeToFit={true}
-                            minimumFontScale={0.7}
-                        >
+                        <Text style={[styles.title, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>
                             {placeName}
                         </Text>
                         
                         <View style={[styles.locationRow, isRTL && { flexDirection: 'row-reverse' }]}>
-                            <View style={[styles.cityPill, { backgroundColor: '#CC9933' }]}>
-                                <Text style={styles.cityPillText}>{placeCity}</Text>
-                            </View>
+                            <Ionicons name="location-sharp" size={16} color={C.primary} />
+                            <Text style={[styles.locationText, { color: C.textMuted }]}>{placeCity}</Text>
                         </View>
                     </View>
+
 
                     <Text style={[styles.description, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>{placeDesc}</Text>
 
                     {/* Traveler Tip Section - TripAdvisor Inspired */}
                     {place.tip && (
-                        <View style={[styles.tipCard, { backgroundColor: isDark ? '#1A1500' : '#F9F5EB', borderColor: '#CC9933' }]}>
+                        <View style={[styles.tipCard, { backgroundColor: C.bgElevated }]}>
                             <View style={[styles.tipHeader, isRTL && { flexDirection: 'row-reverse' }]}>
-                                <Ionicons name="bulb" size={20} color="#CC9933" />
-                                <Text style={[styles.tipTitle, { color: '#CC9933' }]}>{isRTL ? 'نصيحة المسافر' : 'TRAVELER TIP'}</Text>
+                                <Ionicons name="bulb" size={20} color={C.primary} />
+                                <Text style={[styles.tipTitle, { color: C.primary }]}>{isRTL ? 'نصيحة المسافر' : 'TRAVELER TIP'}</Text>
                             </View>
-                            <Text style={[styles.tipText, { color: isDark ? '#E5D5A0' : '#000' }, isRTL && { textAlign: 'right' }]}>{place.tip}</Text>
+                            <Text style={[styles.tipText, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>{place.tip}</Text>
                         </View>
                     )}
 
-                    {/* Editorial Stats Grid */}
-                    <View style={[styles.statsGrid, { borderColor: '#000' }]}>
-                        <View style={[styles.statItem, { backgroundColor: C.bgCard }]}>
-                            <Text style={[styles.statLabel, { color: C.textMuted }]}>{t('duration')}</Text>
+
+                    {/* Stats Grid - Premium Cards */}
+                    <View style={styles.statsGrid}>
+                        <View style={[styles.statItem, { backgroundColor: C.bgElevated }]}>
+                            <Ionicons name="time-outline" size={20} color={C.primary} />
                             <Text style={[styles.statValue, { color: C.textMain }]}>{place.duration}</Text>
+                            <Text style={[styles.statLabel, { color: C.textMuted }]}>{t('duration')}</Text>
                         </View>
-                        <View style={[styles.statItem, { backgroundColor: '#CC9933', borderColor: '#000', borderLeftWidth: 3 }]}>
-                            <Text style={[styles.statLabel, { color: '#000' }]}>{t('price')}</Text>
-                            <Text style={[styles.statValue, { color: '#000' }]}>{place.price}</Text>
+                        <View style={[styles.statItem, { backgroundColor: C.bgElevated }]}>
+                            <Ionicons name="ticket-outline" size={20} color={C.primary} />
+                            <Text style={[styles.statValue, { color: C.textMain }]}>{place.price}</Text>
+                            <Text style={[styles.statLabel, { color: C.textMuted }]}>{t('price')}</Text>
                         </View>
                     </View>
+
 
                     {place.highlights && (
                         <View style={styles.section}>
                             <Text style={[styles.sectionTitle, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>{t('highlights')}</Text>
                             <View style={styles.highlightsList}>
                                 {place.highlights.map((highlight, index) => (
-                                    <View key={index} style={[styles.highlightCard, { borderColor: '#000', backgroundColor: C.bgCard }, isRTL && { flexDirection: 'row-reverse' }]}>
-                                        <View style={styles.highlightBullet} />
-                                        <Text style={[styles.highlightText, { color: C.textMain }]}>{highlight}</Text>
+                                    <View key={index} style={[styles.highlightCard, { backgroundColor: C.bgElevated }, isRTL && { flexDirection: 'row-reverse' }]}>
+                                        <Ionicons name="checkmark-circle" size={18} color={C.primary} />
+                                        <Text style={[styles.highlightText, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>{highlight}</Text>
                                     </View>
                                 ))}
                             </View>
                         </View>
                     )}
+
 
                     {/* Community Reviews Section */}
                     <View style={styles.section}>
@@ -181,11 +203,15 @@ export default function PlaceDetailsScreen({ route, navigation }) {
 
             {/* Floating Action Bar */}
             <SafeAreaView style={styles.fabWrapper} edges={['bottom']}>
-                <TouchableOpacity style={[styles.fab, { backgroundColor: '#000', borderColor: '#fff' }]} onPress={handleAddToPlanner}>
-                    <Text style={styles.fabText}>{t('addToItinerary')}</Text>
-                    <Ionicons name="sparkles" size={20} color="#CC9933" style={{ marginLeft: 12 }} />
+                <TouchableOpacity style={[styles.fab, { backgroundColor: C.primary }]} onPress={handleAddToPlanner}>
+                    <Text style={[styles.fabText, { color: '#000' }]}>{t('addToItinerary')}</Text>
+                    <Ionicons name="calendar-outline" size={20} color="#000" style={{ marginLeft: 12 }} />
                 </TouchableOpacity>
             </SafeAreaView>
+
+
+            {/* Cultural Floating Insight */}
+            <CulturalInsight city={place.cityEn} />
 
             {/* Planner Modal */}
             <Modal visible={isPlannerModalVisible} animationType="fade" transparent={true} onRequestClose={() => setPlannerModalVisible(false)}>
@@ -226,7 +252,6 @@ const styles = StyleSheet.create({
     imageContainer: {
         height: 500,
         width: '100%',
-        borderBottomWidth: 4,
     },
     image: {
         width: '100%',
@@ -243,23 +268,22 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     actionCircle: {
-        width: 54,
-        height: 54,
-        borderRadius: 16,
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     imageBadge: {
         position: 'absolute',
-        bottom: 24,
-        backgroundColor: '#000',
+        bottom: 30,
+        backgroundColor: 'rgba(0,0,0,0.7)',
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 12,
+        paddingHorizontal: 16,
         paddingVertical: 8,
-        borderRadius: 8,
-        borderWidth: 1.5,
-        borderColor: '#fff',
+        borderRadius: 16,
     },
     imageBadgeText: {
         color: '#fff',
@@ -269,58 +293,43 @@ const styles = StyleSheet.create({
     },
     detailsContainer: {
         padding: SPACING.lg,
-        marginTop: -30, // Overlap effect
+        backgroundColor: '#000',
+        borderTopLeftRadius: 40,
+        borderTopRightRadius: 40,
+        marginTop: -40,
     },
     title: {
-        fontFamily: FONTS.heavy,
-        fontSize: 42,
+        fontSize: 32,
         fontWeight: '900',
-        textTransform: 'uppercase',
-        letterSpacing: -1.5,
-        lineHeight: 44,
-        backgroundColor: '#fff', 
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderWidth: 3,
-        borderColor: '#000',
-        alignSelf: 'flex-start',
-        maxWidth: width - 40,
+        lineHeight: 38,
+        marginBottom: 8,
     },
     locationRow: {
-        marginTop: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
         marginBottom: SPACING.xl,
     },
-    cityPill: {
-        paddingHorizontal: 16,
-        paddingVertical: 6,
-        borderRadius: 4,
-        borderWidth: 2,
-        borderColor: '#000',
-    },
-    cityPillText: {
-        color: '#000',
+    locationText: {
         fontSize: 14,
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        letterSpacing: 1,
+        fontWeight: '700',
     },
     description: {
         fontSize: 16,
-        lineHeight: 24,
-        fontWeight: '600',
-        marginBottom: SPACING.lg,
+        lineHeight: 26,
+        fontWeight: '500',
+        opacity: 0.8,
+        marginBottom: SPACING.xl,
     },
     tipCard: {
         padding: 20,
-        borderRadius: 16,
-        borderWidth: 2,
-        borderStyle: 'dashed',
+        borderRadius: 24,
         marginBottom: SPACING.xl,
     },
     tipHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 10,
     },
     tipTitle: {
         fontSize: 12,
@@ -329,33 +338,30 @@ const styles = StyleSheet.create({
         marginLeft: 8,
     },
     tipText: {
-        fontSize: 14,
-        fontWeight: '600',
-        lineHeight: 20,
-        fontStyle: 'italic',
+        fontSize: 15,
+        fontWeight: '500',
+        lineHeight: 22,
     },
     statsGrid: {
         flexDirection: 'row',
-        borderWidth: 3,
-        borderRadius: 20,
-        overflow: 'hidden',
+        gap: 12,
         marginBottom: SPACING.xl,
     },
     statItem: {
         flex: 1,
         padding: 20,
+        borderRadius: 24,
         alignItems: 'center',
+        gap: 8,
     },
     statLabel: {
-        fontSize: 10,
-        fontWeight: '900',
+        fontSize: 11,
+        fontWeight: '700',
         textTransform: 'uppercase',
-        letterSpacing: 1,
-        marginBottom: 4,
+        opacity: 0.6,
     },
     statValue: {
-        fontFamily: FONTS.heavy,
-        fontSize: 22,
+        fontSize: 18,
         fontWeight: '900',
     },
     section: {
@@ -367,21 +373,15 @@ const styles = StyleSheet.create({
         marginBottom: SPACING.lg,
     },
     sectionTitle: {
-        fontFamily: FONTS.heavy,
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: '900',
-        textTransform: 'uppercase',
     },
     reviewCount: {
-        backgroundColor: '#000',
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: '#1A1A1A',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
         marginLeft: 10,
-        borderWidth: 1.5,
-        borderColor: '#fff',
     },
     reviewCountText: {
         color: '#fff',
@@ -389,24 +389,18 @@ const styles = StyleSheet.create({
         fontWeight: '900',
     },
     highlightsList: {
-        gap: 10,
+        gap: 12,
     },
     highlightCard: {
         flexDirection: 'row',
         alignItems: 'center',
         padding: 16,
-        borderWidth: 2,
-        borderRadius: 12,
-    },
-    highlightBullet: {
-        width: 8,
-        height: 8,
-        backgroundColor: '#CC9933',
-        marginHorizontal: 12,
+        borderRadius: 20,
+        gap: 12,
     },
     highlightText: {
         fontSize: 14,
-        fontWeight: '800',
+        fontWeight: '600',
         flex: 1,
     },
     reviewsScroll: {
@@ -416,8 +410,7 @@ const styles = StyleSheet.create({
     reviewCard: {
         width: 280,
         padding: 20,
-        borderRadius: 24,
-        borderWidth: 3,
+        borderRadius: 32,
     },
     reviewTop: {
         flexDirection: 'row',
@@ -433,9 +426,10 @@ const styles = StyleSheet.create({
         fontWeight: '900',
     },
     reviewText: {
-        fontSize: 13,
-        fontWeight: '600',
-        lineHeight: 18,
+        fontSize: 14,
+        fontWeight: '500',
+        lineHeight: 20,
+        opacity: 0.7,
     },
     fabWrapper: {
         position: 'absolute',
@@ -449,43 +443,40 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        borderWidth: 2,
+        shadowColor: '#4CD8D0',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+        elevation: 10,
     },
     fabText: {
-        color: '#fff',
-        fontFamily: FONTS.heavy,
         fontSize: 16,
         fontWeight: '900',
         textTransform: 'uppercase',
-        letterSpacing: 1,
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.85)',
+        backgroundColor: 'rgba(0,0,0,0.9)',
         justifyContent: 'center',
         alignItems: 'center',
         padding: 30,
     },
     modalContent: {
         width: '100%',
-        borderWidth: 3,
-        borderRadius: 24,
+        borderRadius: 32,
         padding: 24,
     },
     modalTitle: {
-        fontFamily: FONTS.heavy,
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: '900',
-        textTransform: 'uppercase',
         marginBottom: 20,
     },
     modalInput: {
         height: 60,
-        borderWidth: 2,
-        borderRadius: 12,
+        borderRadius: 16,
         paddingHorizontal: 20,
         fontSize: 18,
-        fontWeight: '900',
+        fontWeight: '700',
         marginBottom: 24,
     },
     modalActions: {
@@ -494,29 +485,18 @@ const styles = StyleSheet.create({
     },
     modalBtn: {
         flex: 1,
-        height: 54,
-        borderRadius: 27,
-        borderWidth: 2,
+        height: 56,
+        borderRadius: 28,
         justifyContent: 'center',
         alignItems: 'center',
     },
     modalBtnText: {
         fontSize: 14,
         fontWeight: '900',
-        textTransform: 'uppercase',
     },
     imgFallback: {
         justifyContent: 'center',
         alignItems: 'center',
     },
-    imgFallbackEmoji: {
-        fontSize: 80,
-        marginBottom: 10,
-    },
-    imgFallbackText: {
-        fontSize: 24,
-        fontWeight: '900',
-        textTransform: 'uppercase',
-        textAlign: 'center',
-    },
 });
+

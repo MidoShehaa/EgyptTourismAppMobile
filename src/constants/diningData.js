@@ -6,7 +6,7 @@ export const RESTAURANTS = [
         cuisine: "Mediterranean",
         highlightDish: "Artisan Pizza & Seafood Risotto",
         rating: 4.9,
-        image: "https://media-cdn.tripadvisor.com/media/photo-s/29/e5/5e/5c/solis.jpg",
+        image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80",
         description: "A high-end Mediterranean dining experience with breathtaking Nile views."
     },
     {
@@ -16,7 +16,7 @@ export const RESTAURANTS = [
         cuisine: "Egyptian",
         highlightDish: "Lamb Shank & Grilled Kofta",
         rating: 4.9,
-        image: "https://media-cdn.tripadvisor.com/media/photo-s/1a/0a/6e/6e/al-khal-egyptian-restaurant.jpg",
+        image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80",
         description: "Authentic Egyptian flavors served in a sophisticated, traditional atmosphere."
     },
     {
@@ -26,7 +26,7 @@ export const RESTAURANTS = [
         cuisine: "Greek & Seafood",
         highlightDish: "Seafood Platter",
         rating: 4.9,
-        image: "https://media-cdn.tripadvisor.com/media/photo-s/1a/0a/6e/6e/santorini.jpg",
+        image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80",
         description: "The best of Greek hospitality and fresh Mediterranean seafood in Alexandria."
     },
     {
@@ -36,7 +36,7 @@ export const RESTAURANTS = [
         cuisine: "Egyptian",
         highlightDish: "Traditional Koshary",
         rating: 4.6,
-        image: "https://media-cdn.tripadvisor.com/media/photo-s/0e/0a/6e/6e/abou-tarek.jpg",
+        image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80",
         description: "The world-famous destination for Egypt's national dish, Koshary."
     },
     {
@@ -46,7 +46,7 @@ export const RESTAURANTS = [
         cuisine: "Egyptian",
         highlightDish: "Molokhia & Grilled Meat",
         rating: 4.5,
-        image: "https://media-cdn.tripadvisor.com/media/photo-s/1a/0a/6e/6e/sobhy-kaber.jpg",
+        image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&q=80",
         description: "A legendary local spot famous for its grilled meats and traditional Egyptian Molokhia."
     },
     {
@@ -56,7 +56,7 @@ export const RESTAURANTS = [
         cuisine: "Italian",
         highlightDish: "Breakfast Buffet & Authentic Pizza",
         rating: 4.9,
-        image: "https://media-cdn.tripadvisor.com/media/photo-s/23/e5/5e/5c/la-zisa.jpg",
+        image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80",
         description: "Authentic Italian cuisine with a focus on fresh ingredients and traditional recipes."
     }
 ];
@@ -68,7 +68,7 @@ export const CRUISES = [
         route: "Luxor - Aswan",
         keyHighlight: "Boutique design with private balconies",
         rating: 5.0,
-        image: "https://media-cdn.tripadvisor.com/media/photo-s/21/e5/5e/5c/historia.jpg",
+        image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&q=80",
         description: "A modern boutique approach to the classic Nile cruise experience."
     },
     {
@@ -77,7 +77,7 @@ export const CRUISES = [
         route: "Luxor - Aswan",
         keyHighlight: "Spacious luxury suites and fine dining",
         rating: 5.0,
-        image: "https://media-cdn.tripadvisor.com/media/photo-s/0e/0a/6e/6e/oberoi-zahra.jpg",
+        image: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&q=80",
         description: "Widely considered the most luxurious cruise on the Nile."
     },
     {
@@ -86,7 +86,7 @@ export const CRUISES = [
         route: "Luxor - Aswan",
         keyHighlight: "Classic luxury and extensive spa facilities",
         rating: 5.0,
-        image: "https://media-cdn.tripadvisor.com/media/photo-s/0e/0a/6e/6e/oberoi-philae.jpg",
+        image: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=80",
         description: "A legendary vessel offering a slower, more refined pace of travel."
     },
     {
@@ -95,7 +95,7 @@ export const CRUISES = [
         route: "Luxor - Aswan",
         keyHighlight: "High luxury standards and elegant sun deck",
         rating: 5.0,
-        image: "https://media-cdn.tripadvisor.com/media/photo-s/0e/0a/6e/6e/sanctuary-sun-boat.jpg",
+        image: "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=600&q=80",
         description: "An intimate and elegant cruise focusing on history and comfort."
     }
 ];
