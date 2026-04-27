@@ -52,8 +52,8 @@ function TabNavigator() {
                         bottom: 30,
                         left: 24,
                         right: 24,
-                        backgroundColor: '#121212',
-                        borderColor: 'rgba(255, 255, 255, 0.05)',
+                        backgroundColor: isDark ? '#1A1A1A' : '#ffffff',
+                        borderColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
                         borderWidth: 1,
                         borderRadius: 32,
                         height: 70,
@@ -61,11 +61,11 @@ function TabNavigator() {
                         elevation: 15,
                         shadowColor: '#000',
                         shadowOffset: { width: 0, height: 10 },
-                        shadowOpacity: 0.5,
+                        shadowOpacity: isDark ? 0.5 : 0.1,
                         shadowRadius: 20,
                     },
                     tabBarActiveTintColor: C.primary,
-                    tabBarInactiveTintColor: '#555',
+                    tabBarInactiveTintColor: isDark ? '#555' : '#888',
                 };
 
             }}

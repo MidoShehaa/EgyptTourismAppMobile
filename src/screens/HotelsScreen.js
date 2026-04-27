@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
-
+import PharaonicBackground from '../components/PharaonicBackground';
 import CulturalInsight from '../components/CulturalInsight';
 
 export default function HotelsScreen({ route, navigation }) {
@@ -129,7 +129,7 @@ export default function HotelsScreen({ route, navigation }) {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top']}>
-
+            <PharaonicBackground />
             <View style={[styles.header, isRTL && { alignItems: 'flex-end' }]}>
                 <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 12 }}>
                     {/* Back button — only shown when navigated as Stack (from Planner) */}
@@ -156,8 +156,8 @@ export default function HotelsScreen({ route, navigation }) {
                         key={cat}
                         style={[
                             styles.filterTab,
-                            { borderColor: '#000' },
-                            selectedCategory === cat ? styles.filterTabActive : { backgroundColor: C.bgCard }
+                            { borderColor: C.borderSoft || (isDark ? '#333' : '#e0e0e0') },
+                            selectedCategory === cat ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }
                         ]}
                         onPress={() => setSelectedCategory(cat)}
                     >
@@ -182,7 +182,6 @@ export default function HotelsScreen({ route, navigation }) {
             {/* Cultural Floating Insight - show only if a specific city is being filtered */}
             {filterCity && <CulturalInsight city={filterCity} />}
 
-            {/* Day Picker Modal */}
             <Modal
                 visible={isModalVisible}
                 transparent={true}
@@ -190,17 +189,17 @@ export default function HotelsScreen({ route, navigation }) {
                 onRequestClose={() => setIsModalVisible(false)}
             >
                 <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, { backgroundColor: '#121212' }]}>
-                        <Text style={[styles.modalTitle, { color: '#fff', textAlign: isRTL ? 'right' : 'left' }]}>
+                    <View style={[styles.modalContent, { backgroundColor: C.bgCard }]}>
+                        <Text style={[styles.modalTitle, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>
                             {t('addToPlannerPromptTitle')}
                         </Text>
                         <TextInput
-                            style={[styles.modalInput, { color: '#fff', backgroundColor: '#1A1A1A' }]}
+                            style={[styles.modalInput, { color: C.textMain, backgroundColor: C.bgMain, borderColor: C.borderSoft || '#e0e0e0', borderWidth: 1 }]}
                             value={dayNumber}
                             onChangeText={setDayNumber}
                             keyboardType="number-pad"
                             placeholder="1"
-                            placeholderTextColor="#555"
+                            placeholderTextColor={C.textMuted}
                             autoFocus
                         />
 
@@ -266,12 +265,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingVertical: 10,
         borderRadius: 9999,
-        backgroundColor: '#1A1A1A',
-        borderWidth: 2,
-    },
-    filterTabActive: {
-        backgroundColor: '#CC9933',
-        borderColor: '#000',
+        borderWidth: 1,
     },
     filterTabText: {
         fontSize: 14,

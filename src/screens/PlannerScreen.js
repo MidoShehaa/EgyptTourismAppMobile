@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../store/UserContext';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { WHATSAPP_NUMBER } from '../constants/config';
+import PharaonicBackground from '../components/PharaonicBackground';
 
 export default function PlannerScreen({ navigation }) {
     const { 
@@ -376,11 +377,11 @@ export default function PlannerScreen({ navigation }) {
                     <View style={styles.timelineLine} />
                 </View>
                 
-                <View style={[styles.activityCard, { backgroundColor: '#1A1A1A' }]}>
+                <View style={[styles.activityCard, { backgroundColor: C.bgCard, borderWidth: 1, borderColor: C.borderSoft || '#e0e0e0' }]}>
                     <View style={styles.activityContent}>
                         <View style={{ flex: 1 }}>
                             <Text style={styles.timeText}>{item.time}</Text>
-                            <Text style={[styles.activityTitle, { color: '#fff' }]} numberOfLines={1}>
+                            <Text style={[styles.activityTitle, { color: C.textMain }]} numberOfLines={1}>
                                 {isRTL ? item.place.name : (item.place.nameEn || item.place.name)}
                             </Text>
                             <Text style={styles.catTagText}>{item.place.category}</Text>
@@ -407,7 +408,7 @@ export default function PlannerScreen({ navigation }) {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top']}>
-
+            <PharaonicBackground />
             <View style={styles.header}>
                 <View style={{ flex: 1 }}>
                     <Text style={[styles.title, { color: C.textMain }]}>{t('myItinerary')}</Text>
@@ -416,7 +417,7 @@ export default function PlannerScreen({ navigation }) {
                 <View style={{ flexDirection: 'row', gap: 12 }}>
                     {groupedItinerary.length > 0 && (
                         <TouchableOpacity 
-                            style={styles.iconBtn}
+                            style={[styles.iconBtn, { backgroundColor: C.bgCard, borderWidth: 1, borderColor: C.borderSoft || '#e0e0e0' }]}
                             onPress={async () => {
                                 try {
                                     let text = `✨ ${itinerary?.name || 'My Egypt Trip'}\n\n`;
@@ -460,7 +461,7 @@ export default function PlannerScreen({ navigation }) {
                     renderItem={({ item: day }) => (
                         <View style={styles.daySection}>
                             <View style={styles.dayHeader}>
-                                <Text style={[styles.dayTitle, { color: '#fff' }]}>{t('day')} {day.dayNumber}</Text>
+                                <Text style={[styles.dayTitle, { color: C.textMain }]}>{t('day')} {day.dayNumber}</Text>
                                 <View style={[styles.dayLine, { backgroundColor: C.primary }]} />
                             </View>
                             {day.activities.map((act, idx) => (
@@ -518,11 +519,11 @@ export default function PlannerScreen({ navigation }) {
                             ].map(tt => (
                                 <TouchableOpacity 
                                     key={tt.key} 
-                                    style={[styles.travelerChip, travelerType === tt.key && { backgroundColor: C.gold, borderColor: '#000' }]}
+                                    style={[styles.travelerChip, { backgroundColor: C.bgCard, borderWidth: 1, borderColor: C.borderSoft || '#e0e0e0' }, travelerType === tt.key && { backgroundColor: C.gold, borderColor: C.gold }]}
                                     onPress={() => setTravelerType(tt.key)}
                                 >
                                     <Text style={styles.travelerEmoji}>{tt.icon}</Text>
-                                    <Text style={[styles.travelerLabel, travelerType === tt.key && { color: '#000' }]}>{tt.label}</Text>
+                                    <Text style={[styles.travelerLabel, { color: C.textMain }, travelerType === tt.key && { color: '#000' }]}>{tt.label}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -532,10 +533,10 @@ export default function PlannerScreen({ navigation }) {
                             {[3, 5, 7, 10, 15].map(d => (
                                 <TouchableOpacity 
                                     key={d} 
-                                    style={[styles.durationBox, duration === d && { backgroundColor: C.gold, borderColor: '#000' }]}
+                                    style={[styles.durationBox, { backgroundColor: C.bgCard, borderWidth: 1, borderColor: C.borderSoft || '#e0e0e0' }, duration === d && { backgroundColor: C.gold, borderColor: C.gold }]}
                                     onPress={() => setDuration(d)}
                                 >
-                                    <Text style={[styles.durationText, duration === d && { color: '#000' }]}>{d}</Text>
+                                    <Text style={[styles.durationText, { color: C.textMain }, duration === d && { color: '#000' }]}>{d}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -545,10 +546,10 @@ export default function PlannerScreen({ navigation }) {
                             {['Pharaonic', 'Islamic', 'Beach', 'Nature', 'Diving', 'Cultural', 'Medical', 'Nightlife'].map(cat => (
                                 <TouchableOpacity 
                                     key={cat}
-                                    style={[styles.interestChip, selectedInterests.includes(cat) && { backgroundColor: '#000', borderColor: C.gold }]}
+                                    style={[styles.interestChip, { backgroundColor: C.bgCard, borderWidth: 1, borderColor: C.borderSoft || '#e0e0e0' }, selectedInterests.includes(cat) && { backgroundColor: C.primary, borderColor: C.primary }]}
                                     onPress={() => toggleInterest(cat)}
                                 >
-                                    <Text style={[styles.interestText, selectedInterests.includes(cat) && { color: '#fff' }]}>{t('categories.' + cat) || cat}</Text>
+                                    <Text style={[styles.interestText, { color: C.textMain }, selectedInterests.includes(cat) && { color: '#000' }]}>{t('categories.' + cat) || cat}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>

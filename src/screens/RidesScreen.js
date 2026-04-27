@@ -12,6 +12,7 @@ import {
   CITY_BASE_RATES, AIRPORTS, INCLUDED_FEATURES
 } from '../constants/ridesData';
 import { WHATSAPP_NUMBER } from '../constants/config';
+import PharaonicBackground from '../components/PharaonicBackground';
 
 const CITIES = Object.keys(CITY_BASE_RATES);
 
@@ -69,7 +70,7 @@ export default function RidesScreen() {
       <TouchableOpacity
         style={[
           styles.chip,
-          { backgroundColor: active ? C.primary : '#1A1A1A' }
+          { backgroundColor: active ? C.primary : C.bgCard, borderWidth: 1, borderColor: active ? C.primary : (C.borderSoft || '#e0e0e0') }
         ]}
         onPress={() => setServiceType(item.id)}
       >
@@ -88,12 +89,12 @@ export default function RidesScreen() {
         key={v.id}
         style={[
           styles.vehicleCard,
-          { backgroundColor: active ? C.primary : '#1A1A1A' }
+          { backgroundColor: active ? C.primary : C.bgCard, borderWidth: 1, borderColor: active ? C.primary : (C.borderSoft || '#e0e0e0') }
         ]}
         onPress={() => setSelectedVehicle(v.id)}
       >
         <Text style={styles.vehicleIcon}>{v.icon}</Text>
-        <Text style={[styles.vehicleName, { color: active ? '#000' : '#fff' }]}>{isRTL ? v.nameAr : v.nameEn}</Text>
+        <Text style={[styles.vehicleName, { color: active ? '#000' : C.textMain }]}>{isRTL ? v.nameAr : v.nameEn}</Text>
         <Text style={[styles.vehiclePax, { color: active ? 'rgba(0,0,0,0.5)' : C.textMuted }]}>👥 {v.passengers}</Text>
       </TouchableOpacity>
 
@@ -101,11 +102,11 @@ export default function RidesScreen() {
   };
 
   const renderCityChip = (city) => (
-    <TouchableOpacity
+      <TouchableOpacity
       key={city}
       style={[
         styles.cityChip,
-        { backgroundColor: selectedCity === city ? C.primary : '#1A1A1A' }
+        { backgroundColor: selectedCity === city ? C.primary : C.bgCard, borderWidth: 1, borderColor: selectedCity === city ? C.primary : (C.borderSoft || '#e0e0e0') }
       ]}
       onPress={() => setSelectedCity(city)}
     >
@@ -145,7 +146,7 @@ export default function RidesScreen() {
   const renderHourStep = (step) => (
     <TouchableOpacity
       key={step}
-      style={[styles.stepBtn, { borderColor: '#000', backgroundColor: hours === step ? C.gold : C.bgCard }]}
+      style={[styles.stepBtn, { borderWidth: 1, borderColor: hours === step ? C.primary : (C.borderSoft || '#e0e0e0'), backgroundColor: hours === step ? C.gold : C.bgCard }]}
       onPress={() => setHours(step)}
     >
       <Text style={[styles.stepText, { color: hours === step ? '#000' : C.textMain }]}>{step}h</Text>
@@ -155,7 +156,7 @@ export default function RidesScreen() {
   const renderDayStep = (step) => (
     <TouchableOpacity
       key={step}
-      style={[styles.stepBtn, { borderColor: '#000', backgroundColor: days === step ? C.gold : C.bgCard }]}
+      style={[styles.stepBtn, { borderWidth: 1, borderColor: days === step ? C.primary : (C.borderSoft || '#e0e0e0'), backgroundColor: days === step ? C.gold : C.bgCard }]}
       onPress={() => setDays(step)}
     >
       <Text style={[styles.stepText, { color: days === step ? '#000' : C.textMain }]}>{step}d</Text>
@@ -165,12 +166,12 @@ export default function RidesScreen() {
   const PriceBar = ({ serviceId, trip }) => {
     const p = calcPrice(serviceId, selectedCity, selectedVehicle, hours, days, trip);
     return (
-      <View style={[styles.priceBar, { backgroundColor: '#121212' }]}>
+      <View style={[styles.priceBar, { backgroundColor: C.bgCard, borderWidth: 1, borderColor: C.borderSoft || '#e0e0e0' }]}>
         <View>
           {p.discountPct > 0 && (
             <Text style={styles.originalPrice}>{p.base.toLocaleString()} EGP</Text>
           )}
-          <Text style={[styles.finalPrice, { color: '#fff' }]}>{p.final.toLocaleString()} EGP</Text>
+          <Text style={[styles.finalPrice, { color: C.textMain }]}>{p.final.toLocaleString()} EGP</Text>
           {p.discountPct > 0 && (
             <Text style={styles.savingText}>-{p.discountPct}% off</Text>
           )}
@@ -189,7 +190,8 @@ export default function RidesScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top']}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <PharaonicBackground />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={C.bgMain} />
 
       <View style={styles.header}>
         <Text style={[styles.title, { color: C.textMain }]}>{isRTL ? 'رحلات سياحية' : 'Tourism Rides'}</Text>
@@ -278,7 +280,7 @@ export default function RidesScreen() {
             </View>
 
             <Text style={[styles.sectionLabel, { color: C.textMuted }]}>{isRTL ? 'تشمل الخدمة' : 'WHAT\'S INCLUDED'}</Text>
-            <View style={[styles.includesCard, { backgroundColor: C.bgCard, borderColor: '#000' }]}>
+            <View style={[styles.includesCard, { backgroundColor: C.bgCard, borderWidth: 1, borderColor: C.borderSoft || '#e0e0e0' }]}>
               {INCLUDED_FEATURES.map((f, i) => (
                 <View key={i} style={styles.includeRow}>
                   <Ionicons name={f.icon} size={18} color={C.gold} />
