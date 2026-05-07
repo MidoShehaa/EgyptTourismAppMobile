@@ -5,8 +5,8 @@ export const COLORS = {
     primary: '#4CD8D0',      // Electric Cyan
     secondary: '#2BBDB4',    // Muted Cyan
     bgMain: '#000000',       // Deep Black
-    bgCard: '#121212',       // Dark Charcoal
-    bgElevated: '#1E1E1E',   // Lighter Gray
+    bgCard: 'rgba(18, 18, 18, 0.6)',       // Dark Charcoal Glass
+    bgElevated: 'rgba(30, 30, 30, 0.7)',   // Lighter Gray Glass
     glassBg: 'rgba(0, 0, 0, 0.7)',
     textMain: '#FFFFFF',     // Crisp White
     textMuted: '#A0A0A0',    // Soft Gray
@@ -14,6 +14,7 @@ export const COLORS = {
     textLight: '#FFFFFF',
     gold: '#4CD8D0',
     borderSubtle: 'rgba(255, 255, 255, 0.1)',
+    borderSoft: 'rgba(255, 255, 255, 0.08)',
     borderGold: '#4CD8D0',
     success: '#00C853',
     error: '#FF5252',
@@ -32,11 +33,11 @@ export const FONTS = {
 
 export const COMMON_STYLES = {
     premiumCard: {
-        backgroundColor: '#121212',
+        backgroundColor: 'rgba(18, 18, 18, 0.6)',
         borderRadius: 24,
         padding: 16,
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.05)',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     pillButton: {
         backgroundColor: '#4CD8D0',

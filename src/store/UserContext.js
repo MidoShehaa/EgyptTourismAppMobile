@@ -6,6 +6,7 @@ import storage from '../utils/storage';
 import { TRANSLATIONS } from '../constants/translations';
 import { places as localPlaces } from '../constants/placesData';
 import { HOTELS as localHotels } from '../constants/hotelsData';
+import { RESTAURANTS } from '../constants/diningData';
 import {
     getAdminPlaces,
     getAdminHotels,
@@ -22,6 +23,8 @@ import {
     exportAllAdminData,
     importAdminData,
     clearAllAdminData,
+    getOverrides,
+    saveOverride
 } from '../utils/adminDataManager';
 
 const UserContext = createContext(null);
@@ -36,24 +39,43 @@ export const UserProvider = ({ children }) => {
     const [adminPlaces, setAdminPlaces] = useState([]);
     const [adminHotels, setAdminHotels] = useState([]);
     const [adminTrips, setAdminTrips] = useState([]);
+    const [overrides, setOverrides] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
     // Merged views exposed to screens
-    const places = useMemo(() => [...localPlaces, ...adminPlaces], [adminPlaces]);
-    const hotels = useMemo(() => [...localHotels, ...adminHotels], [adminHotels]);
+    const places = useMemo(() => {
+        const base = localPlaces.map(p => {
+            const override = overrides.find(o => o.id === p.id);
+            return override ? { ...p, ...override } : p;
+        });
+        return [...base, ...adminPlaces];
+    }, [adminPlaces, overrides]);
+
+    const hotels = useMemo(() => {
+        const base = localHotels.map(h => {
+            const override = overrides.find(o => o.id === h.id);
+            return override ? { ...h, ...override } : h;
+        });
+        return [...base, ...adminHotels];
+    }, [adminHotels, overrides]);
 
     // ── Toast ────────────────────────────────────────────────────
     const [toast, setToast] = useState({ visible: false, message: '', type: 'success', icon: 'checkmark-circle' });
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const translateYAnim = useRef(new Animated.Value(-50)).current;
 
+    const toastTimer = useRef(null);
+
     const showToast = useCallback((message, type = 'success', icon = 'checkmark-circle') => {
+        if (toastTimer.current) clearTimeout(toastTimer.current);
+
         setToast({ visible: true, message, type, icon });
         Animated.parallel([
             Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
             Animated.timing(translateYAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
         ]).start();
-        setTimeout(() => {
+        
+        toastTimer.current = setTimeout(() => {
             Animated.parallel([
                 Animated.timing(fadeAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
                 Animated.timing(translateYAnim, { toValue: -50, duration: 400, useNativeDriver: true }),
@@ -81,7 +103,7 @@ export const UserProvider = ({ children }) => {
     useEffect(() => {
         const loadInitialData = async () => {
             try {
-                const [savedFavorites, savedItinerary, savedSettings, aPlaces, aHotels, aTrips] =
+                const [savedFavorites, savedItinerary, savedSettings, aPlaces, aHotels, aTrips, aOverrides] =
                     await Promise.all([
                         storage.load(storage.keys.FAVORITES),
                         storage.load(storage.keys.ITINERARY),
@@ -89,6 +111,7 @@ export const UserProvider = ({ children }) => {
                         getAdminPlaces(),
                         getAdminHotels(),
                         getAdminTrips(),
+                        getOverrides(),
                     ]);
 
                 if (savedFavorites) setFavorites(savedFavorites);
@@ -97,6 +120,7 @@ export const UserProvider = ({ children }) => {
                 setAdminPlaces(aPlaces);
                 setAdminHotels(aHotels);
                 setAdminTrips(aTrips);
+                setOverrides(aOverrides || []);
             } catch (error) {
                 console.warn('Data load failed, using defaults:', error);
             } finally {
@@ -190,10 +214,25 @@ export const UserProvider = ({ children }) => {
     const adminEditPlace = useCallback(async (id, updates) => {
         setIsLoading(true);
         try {
-            const saved = await editAdminPlace(id, updates);
-            setAdminPlaces(prev => prev.map(p => p.id === id ? saved : p));
-            showToast('Place updated!', 'success');
-            return { ok: true };
+            if (localPlaces.some(p => p.id === id)) {
+                const saved = await saveOverride(id, updates);
+                setOverrides(prev => {
+                    const idx = prev.findIndex(o => o.id === id);
+                    if (idx >= 0) {
+                        const next = [...prev];
+                        next[idx] = saved;
+                        return next;
+                    }
+                    return [...prev, saved];
+                });
+                showToast('Built-in Place updated!', 'success');
+                return { ok: true };
+            } else {
+                const saved = await editAdminPlace(id, updates);
+                setAdminPlaces(prev => prev.map(p => p.id === id ? saved : p));
+                showToast('Place updated!', 'success');
+                return { ok: true };
+            }
         } catch (e) {
             showToast(e.message, 'error', 'alert-circle');
             return { ok: false, error: e.message };
@@ -227,10 +266,25 @@ export const UserProvider = ({ children }) => {
     const adminEditHotel = useCallback(async (id, updates) => {
         setIsLoading(true);
         try {
-            const saved = await editAdminHotel(id, updates);
-            setAdminHotels(prev => prev.map(h => h.id === id ? saved : h));
-            showToast('Hotel updated!', 'success');
-            return { ok: true };
+            if (localHotels.some(h => h.id === id)) {
+                const saved = await saveOverride(id, updates);
+                setOverrides(prev => {
+                    const idx = prev.findIndex(o => o.id === id);
+                    if (idx >= 0) {
+                        const next = [...prev];
+                        next[idx] = saved;
+                        return next;
+                    }
+                    return [...prev, saved];
+                });
+                showToast('Built-in Hotel updated!', 'success');
+                return { ok: true };
+            } else {
+                const saved = await editAdminHotel(id, updates);
+                setAdminHotels(prev => prev.map(h => h.id === id ? saved : h));
+                showToast('Hotel updated!', 'success');
+                return { ok: true };
+            }
         } catch (e) {
             showToast(e.message, 'error', 'alert-circle');
             return { ok: false, error: e.message };
@@ -313,6 +367,7 @@ export const UserProvider = ({ children }) => {
         // Data
         places,
         hotels,
+        restaurants: RESTAURANTS,
         adminTrips,
         isLoading,
         // User

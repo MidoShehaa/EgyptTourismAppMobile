@@ -13,6 +13,7 @@ const KEYS = {
     HOTELS:      '@egypt_admin_hotels',
     TRIPS:       '@egypt_admin_trips',
     RESTAURANTS: '@egypt_admin_restaurants',
+    OVERRIDES:   '@egypt_admin_overrides',
 };
 
 // ─── Generic helpers ─────────────────────────────────────────
@@ -28,6 +29,22 @@ async function loadList(key) {
 
 async function saveList(key, list) {
     await AsyncStorage.setItem(key, JSON.stringify(list));
+}
+
+// ─── OVERRIDES (Built-in data modifications) ─────────────────
+
+export async function getOverrides() {
+    return loadList(KEYS.OVERRIDES);
+}
+
+export async function saveOverride(id, updates) {
+    const list = await getOverrides();
+    const idx = list.findIndex(o => o.id === id);
+    const entry = { id, ...updates, _overrideAt: Date.now() };
+    if (idx >= 0) list[idx] = entry;
+    else list.push(entry);
+    await saveList(KEYS.OVERRIDES, list);
+    return entry;
 }
 
 // ─── PLACES ─────────────────────────────────────────────────

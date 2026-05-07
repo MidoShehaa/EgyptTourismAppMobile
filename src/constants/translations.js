@@ -13,11 +13,28 @@ export const TRANSLATIONS = {
         add: 'Add',
 
         // Tabs
+        tabHome: 'Home',
         tabExplore: 'Explore',
         tabMap: 'Map',
         tabPlanner: 'Planner',
         tabRides: 'Rides',
         tabHotels: 'Hotels',
+
+        // Home Screen
+        searchPlaceholder: 'Where to?',
+        trendingNow: 'Trending Now',
+        recommendedForYou: 'Recommended for You',
+        categories: 'Categories',
+        seeAll: 'See All',
+        randomSuggestion: 'Daily Suggestion',
+
+        // Search Screen
+        searchTitle: 'Universal Search',
+        searchHint: 'Search places, hotels, or restaurants...',
+        noResults: 'No results found',
+        filterPlaces: 'Places',
+        filterHotels: 'Hotels',
+        filterDining: 'Dining',
 
         // Rides Screen
         tourismRides: 'Tourism Rides',
@@ -170,11 +187,28 @@ export const TRANSLATIONS = {
         add: 'إضافة',
 
         // Tabs
+        tabHome: 'الرئيسية',
         tabExplore: 'استكشف',
         tabMap: 'الخريطة',
         tabPlanner: 'خطتي',
-        tabRides: 'رحلات',
+        tabRides: 'توصيلات',
         tabHotels: 'فنادق',
+
+        // Home Screen
+        searchPlaceholder: 'إلى أين؟',
+        trendingNow: 'رائج الآن',
+        recommendedForYou: 'مقترح لك',
+        categories: 'التصنيفات',
+        seeAll: 'عرض الكل',
+        randomSuggestion: 'اقتراح اليوم',
+
+        // Search Screen
+        searchTitle: 'البحث الشامل',
+        searchHint: 'ابحث عن الأماكن، الفنادق، أو المطاعم...',
+        noResults: 'لا توجد نتائج',
+        filterPlaces: 'أماكن',
+        filterHotels: 'فنادق',
+        filterDining: 'مطاعم',
 
         // Rides Screen
         tourismRides: 'رحلات سياحية',

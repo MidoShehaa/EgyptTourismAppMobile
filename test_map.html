@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+</head>
+<body>
+    <div id="map" style="height: 100vh;"></div>
+    <script>
+        var map = L.map('map', {zoomControl: false}).setView([26.8206, 30.8025], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19, attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        var markers = L.markerClusterGroup({
+            maxClusterRadius: 45,
+            showCoverageOnHover: false,
+            iconCreateFunction: function(cluster) {
+                return L.divIcon({ 
+                    html: '<div>' + cluster.getChildCount() + '</div>', 
+                    className: 'custom-cluster', 
+                    iconSize: [36, 36] 
+                });
+            }
+        });
+        
+        map.addLayer(markers);
+        console.log('Script ran successfully');
+    </script>
+</body>
+</html>

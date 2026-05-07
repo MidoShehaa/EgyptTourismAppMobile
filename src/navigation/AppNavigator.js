@@ -7,16 +7,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, DARK_COLORS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
 
+import HomeScreen from '../screens/HomeScreen';
 import PlacesScreen from '../screens/PlacesScreen';
 import PlaceDetailsScreen from '../screens/PlaceDetailsScreen';
+import SearchScreen from '../screens/SearchScreen';
 import MapScreen from '../screens/MapScreen';
 import HotelsScreen from '../screens/HotelsScreen';
+import DiningScreen from '../screens/DiningScreen';
 import PlannerScreen from '../screens/PlannerScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import RidesScreen from '../screens/RidesScreen';
 import AdminPanel from '../screens/AdminPanel';
 import AdminAuthScreen from '../screens/AdminAuthScreen';
+import EmergencyScreen from '../screens/EmergencyScreen';
+import TripStatsScreen from '../screens/TripStatsScreen';
+import TourGuideScreen from '../screens/TourGuideScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -27,7 +33,8 @@ function TabNavigator() {
     const C = isDark ? DARK_COLORS : COLORS;
 
     const TABS = [
-        { name: 'Explore',  icon: 'home',     iconO: 'home-outline',     label: t('tabExplore') },
+        { name: 'Home',     icon: 'home',      iconO: 'home-outline',     label: t('tabHome') },
+        { name: 'Explore',  icon: 'compass',   iconO: 'compass-outline',  label: t('tabExplore') },
         { name: 'Map',      icon: 'map',       iconO: 'map-outline',      label: t('tabMap') },
         { name: 'Planner',  icon: 'calendar',  iconO: 'calendar-outline', label: t('tabPlanner') },
         { name: 'Rides',    icon: 'car',       iconO: 'car-outline',      label: t('tabRides') },
@@ -70,6 +77,7 @@ function TabNavigator() {
 
             }}
         >
+            <Tab.Screen name="Home"     component={HomeScreen} />
             <Tab.Screen name="Explore"  component={PlacesScreen} />
             <Tab.Screen name="Map"      component={MapScreen} />
             <Tab.Screen name="Planner"  component={PlannerScreen} />
@@ -91,11 +99,16 @@ export default function AppNavigator() {
             >
                 <Stack.Screen name="Onboarding"   component={OnboardingScreen} />
                 <Stack.Screen name="MainTabs"     component={TabNavigator} />
+                <Stack.Screen name="Search"       component={SearchScreen} />
                 <Stack.Screen name="PlaceDetails" component={PlaceDetailsScreen} />
                 <Stack.Screen name="Profile"      component={ProfileScreen} />
                 <Stack.Screen name="HotelsCity"   component={HotelsScreen} />
+                <Stack.Screen name="Dining"       component={DiningScreen} />
                 <Stack.Screen name="AdminAuth"    component={AdminAuthScreen} />
                 <Stack.Screen name="AdminPanel"   component={AdminPanel} />
+                <Stack.Screen name="Emergency"    component={EmergencyScreen} />
+                <Stack.Screen name="TripStats"     component={TripStatsScreen} />
+                <Stack.Screen name="TourGuide"     component={TourGuideScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );

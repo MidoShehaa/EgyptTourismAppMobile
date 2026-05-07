@@ -5,7 +5,6 @@ import {
     FlatList,
     TextInput,
     TouchableOpacity,
-    Image,
     StyleSheet,
     ScrollView,
     StatusBar,
@@ -21,13 +20,12 @@ import { CATEGORIES } from '../constants/placesData';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
 import DynamicBackground from '../components/DynamicBackground';
+import SafeImage from '../components/SafeImage';
 
 
 const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggleFavorite }) => {
     const placeName = isRTL ? item.name : item.nameEn;
     const placeCity = isRTL ? item.city : item.cityEn;
-    const [imgError, setImgError] = useState(false);
-
     return (
         <TouchableOpacity 
             activeOpacity={0.9}
@@ -35,20 +33,11 @@ const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggl
             onPress={() => navigation.navigate('PlaceDetails', { place: item })}
         >
             <View style={[styles.card, { backgroundColor: C.bgCard }]}>
-                {imgError ? (
-                    <View style={[styles.cardImage, styles.imgPlaceholder, { backgroundColor: C.bgElevated }]}>
-                        <Ionicons name="image-outline" size={48} color={C.textMuted} />
-                    </View>
-                ) : (
-                    <Image 
-                        source={item.imageSource ? item.imageSource : { 
-                            uri: item.imageUrl,
-                            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
-                        }} 
-                        style={styles.cardImage}
-                        onError={() => setImgError(true)}
-                    />
-                )}
+                <SafeImage 
+                    uri={item.imageUrl}
+                    style={styles.cardImage}
+                    icon="place"
+                />
 
                 {/* Top Overlay: Favorite & Rating */}
                 <View style={[styles.cardTopOverlay, isRTL && { flexDirection: 'row-reverse' }]}>
@@ -90,28 +79,51 @@ const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggl
 });
 
 
-export default function PlacesScreen({ navigation }) {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('All');
-    const { toggleFavorite, isFavorite, t, settings, places, isLoading } = useUser();
+export default function PlacesScreen({ navigation, route }) {
+    const { settings, isFavorite, toggleFavorite, t, places } = useUser();
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
+
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState(route?.params?.category || 'All');
+    const [selectedCity, setSelectedCity] = useState('All');
+    const [minRating, setMinRating] = useState(0);
+    const [selectedPriceType, setSelectedPriceType] = useState('All');
 
     const handleTitleTap = () => {
         navigation.navigate('AdminAuth');
     };
 
+    const cities = useMemo(() => {
+        const cSet = new Set();
+        (places || []).forEach(p => {
+            if (p.cityEn) cSet.add(p.cityEn);
+            else if (p.city) cSet.add(p.city);
+        });
+        return Array.from(cSet).sort();
+    }, [places]);
+
     const filteredPlaces = useMemo(() => {
         return (places || []).filter(place => {
             const matchesCategory = selectedCategory === 'All' || place.category === selectedCategory;
+            const matchesCity = selectedCity === 'All' || place.cityEn === selectedCity || place.city === selectedCity;
+            
+            const isFree = place.price === 'Free' || place.price === 'مجاناً' || place.price === 'مجاني' || String(place.price).toLowerCase() === 'free';
+            const matchesPrice = selectedPriceType === 'All' || 
+                               (selectedPriceType === 'Free' && isFree) || 
+                               (selectedPriceType === 'Paid' && !isFree);
+            
+            const matchesRating = minRating === 0 || (place.rating || 0) >= minRating;
+
             const matchesSearch = searchQuery === '' ||
                 place.nameEn?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 place.cityEn?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 place.name?.toLowerCase().includes(searchQuery.toLowerCase());
-            return matchesCategory && matchesSearch;
+                
+            return matchesCategory && matchesCity && matchesPrice && matchesRating && matchesSearch;
         });
-    }, [searchQuery, selectedCategory, places]);
+    }, [searchQuery, selectedCategory, selectedCity, selectedPriceType, minRating, places]);
 
     useEffect(() => {
         if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -164,9 +176,11 @@ export default function PlacesScreen({ navigation }) {
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                 />
-                <TouchableOpacity style={styles.filterBtn}>
-                    <Ionicons name="options-outline" size={20} color={C.primary} />
-                </TouchableOpacity>
+                {searchQuery.length > 0 && (
+                    <TouchableOpacity style={styles.filterBtn} onPress={() => setSearchQuery('')}>
+                        <Ionicons name="close-circle" size={20} color={C.textMuted} />
+                    </TouchableOpacity>
+                )}
             </View>
 
             {/* Premium Categories */}
@@ -176,7 +190,7 @@ export default function PlacesScreen({ navigation }) {
                 style={styles.categoriesContainer}
                 contentContainerStyle={styles.categoriesContent}
             >
-                {CATEGORIES.map(category => (
+                {[{ id: 'All', name: 'All', nameEn: 'All', icon: '🗺️' }, ...CATEGORIES].map(category => (
                     <TouchableOpacity
                         key={category.id}
                         style={[
@@ -185,14 +199,67 @@ export default function PlacesScreen({ navigation }) {
                         ]}
                         onPress={() => handleCategoryChange(category.id)}
                     >
+                        <Text style={{ fontSize: 14, marginRight: 4 }}>{category.icon}</Text>
                         <Text
                             style={[
                                 styles.categoryChipText,
                                 { color: selectedCategory === category.id ? '#000' : C.textMuted }
                             ]}
                         >
-                            {t('categories.' + category.id)}
+                            {t('categories.' + category.id) !== category.id ? t('categories.' + category.id) : (category.nameEn || category.name)}
                         </Text>
+                    </TouchableOpacity>
+                ))}
+            </ScrollView>
+
+            {/* Advanced Filters */}
+            <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ marginBottom: SPACING.xl }}
+                contentContainerStyle={[styles.filterRow, isRTL && { flexDirection: 'row-reverse' }]}
+            >
+                {/* Cities */}
+                <TouchableOpacity
+                    style={[styles.filterTab, { borderColor: C.borderSoft || '#333' }, selectedCity === 'All' ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }]}
+                    onPress={() => setSelectedCity('All')}
+                >
+                    <Text style={[styles.filterTabText, selectedCity === 'All' ? styles.filterTabTextActive : { color: C.textMain }]}>{t('filterAll') || 'All Cities'}</Text>
+                </TouchableOpacity>
+                {cities.map(city => (
+                    <TouchableOpacity
+                        key={city}
+                        style={[styles.filterTab, { borderColor: C.borderSoft || '#333' }, selectedCity === city ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }]}
+                        onPress={() => setSelectedCity(city)}
+                    >
+                        <Text style={[styles.filterTabText, selectedCity === city ? styles.filterTabTextActive : { color: C.textMain }]}>{isRTL ? t(city) || city : city}</Text>
+                    </TouchableOpacity>
+                ))}
+
+                <View style={{ width: 1, backgroundColor: C.borderSoft || '#333', marginVertical: 8, marginHorizontal: 4 }} />
+
+                {/* Rating */}
+                {[4.5, 4.0].map((star) => (
+                    <TouchableOpacity
+                        key={`star-${star}`}
+                        style={[styles.filterTab, { borderColor: C.borderSoft || '#333', flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 6 }, minRating === star ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }]}
+                        onPress={() => setMinRating(prev => prev === star ? 0 : star)}
+                    >
+                        <Ionicons name="star" size={14} color={minRating === star ? '#000' : C.primary} />
+                        <Text style={[styles.filterTabText, minRating === star ? styles.filterTabTextActive : { color: C.textMain }]}>{star}+</Text>
+                    </TouchableOpacity>
+                ))}
+
+                <View style={{ width: 1, backgroundColor: C.borderSoft || '#333', marginVertical: 8, marginHorizontal: 4 }} />
+
+                {/* Price */}
+                {['Free', 'Paid'].map(pType => (
+                    <TouchableOpacity
+                        key={`price-${pType}`}
+                        style={[styles.filterTab, { borderColor: C.borderSoft || '#333' }, selectedPriceType === pType ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }]}
+                        onPress={() => setSelectedPriceType(prev => prev === pType ? 'All' : pType)}
+                    >
+                        <Text style={[styles.filterTabText, selectedPriceType === pType ? styles.filterTabTextActive : { color: C.textMain }]}>{isRTL ? (pType === 'Free' ? 'مجاني' : 'بمقابل') : pType}</Text>
                     </TouchableOpacity>
                 ))}
             </ScrollView>
@@ -201,7 +268,7 @@ export default function PlacesScreen({ navigation }) {
                 <Text style={[styles.sectionTitle, { color: C.textMain }]}>
                     {isRTL ? 'الوجهات المميزة' : 'Popular Destinations'}
                 </Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => { handleCategoryChange('All'); setSelectedCity('All'); setMinRating(0); setSelectedPriceType('All'); }}>
                     <Text style={[styles.viewAllText, { color: C.primary }]}>{isRTL ? 'عرض الكل' : 'View all'}</Text>
                 </TouchableOpacity>
             </View>
@@ -288,15 +355,36 @@ const styles = StyleSheet.create({
         fontWeight: '700',
     },
     categoriesContainer: {
-        marginBottom: SPACING.xl,
+        marginBottom: SPACING.md,
+    },
+    filterRow: {
+        flexDirection: 'row',
+        paddingHorizontal: SPACING.md,
+        gap: 10,
+    },
+    filterTab: {
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 9999,
+        borderWidth: 1,
+    },
+    filterTabText: {
+        fontSize: 13,
+        fontWeight: '700',
+    },
+    filterTabTextActive: {
+        color: '#000',
     },
     categoriesContent: {
         paddingHorizontal: SPACING.md,
         gap: 12,
+        alignItems: 'center',
     },
     categoryChip: {
-        paddingHorizontal: 24,
-        paddingVertical: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 18,
+        paddingVertical: 10,
         borderRadius: 9999,
         backgroundColor: 'rgba(18, 18, 18, 0.6)',
         borderWidth: 1,

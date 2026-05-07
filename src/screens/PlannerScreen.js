@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Modal, Alert, Share, Linking } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ScrollView, TouchableOpacity, Modal, Share, Linking, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../store/UserContext';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 import { WHATSAPP_NUMBER } from '../constants/config';
 import DynamicBackground from '../components/DynamicBackground';
+import { generateSmartItinerary } from '../utils/itineraryEngine';
+import { requestPermissions, scheduleMorningReminder } from '../utils/notificationService';
 
 export default function PlannerScreen({ navigation }) {
     const { 
@@ -16,7 +18,8 @@ export default function PlannerScreen({ navigation }) {
         settings, 
         showToast, 
         places, 
-        hotels, 
+        hotels,
+        restaurants,
     } = useUser();
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
@@ -25,7 +28,10 @@ export default function PlannerScreen({ navigation }) {
     const [isWizardVisible, setIsWizardVisible] = useState(false);
     const [duration, setDuration] = useState(3);
     const [selectedInterests, setSelectedInterests] = useState([]);
-    const [travelerType, setTravelerType] = useState('couple'); // solo, couple, family, group
+    const [travelerType, setTravelerType] = useState('couple');
+    const [tripStyle, setTripStyle] = useState('comfort'); // economy | comfort | luxury
+    const [includeHiddenGems, setIncludeHiddenGems] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
 
 
     const toggleInterest = (category) => {
@@ -36,69 +42,7 @@ export default function PlannerScreen({ navigation }) {
         );
     };
 
-    // --- GEOGRAPHIC CLUSTERING UTILITIES ---
-    
-    /** Haversine distance in km between two lat/lng points */
-    const haversineDistance = (lat1, lng1, lat2, lng2) => {
-        const toRad = (x) => (x * Math.PI) / 180;
-        const R = 6371; // Earth radius in km
-        const dLat = toRad(lat2 - lat1);
-        const dLng = toRad(lng2 - lng1);
-        const a = Math.sin(dLat / 2) ** 2 +
-                  Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                  Math.sin(dLng / 2) ** 2;
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    };
-
-    /** Parse duration string ("2-3 hours", "Full Day", "1-2 hours") into hours */
-    const parseDuration = (durationStr) => {
-        if (!durationStr) return 2;
-        const lower = durationStr.toLowerCase();
-        if (lower.includes('full day')) return 5;
-        if (lower.includes('half day')) return 3;
-        if (lower.includes('day')) {
-            const match = durationStr.match(/(\d+)/);
-            return match ? parseInt(match[1]) * 6 : 5;
-        }
-        // "2-3 hours" → take average, "1 hour" → take 1
-        const rangeMatch = durationStr.match(/(\d+)\s*-\s*(\d+)/);
-        if (rangeMatch) return (parseInt(rangeMatch[1]) + parseInt(rangeMatch[2])) / 2;
-        const singleMatch = durationStr.match(/(\d+)/);
-        if (singleMatch) return parseInt(singleMatch[1]);
-        return 2;
-    };
-
-    /** Parse price string ("400 EGP", "Free", "Variable") into a number */
-    const parsePrice = (priceStr) => {
-        if (!priceStr) return 0;
-        if (priceStr.toLowerCase() === 'free') return 0;
-        if (priceStr.toLowerCase() === 'variable') return 200; // estimate
-        const match = priceStr.match(/(\d+)/);
-        return match ? parseInt(match[1]) : 0;
-    };
-
-    /** Format minutes since midnight to "HH:MM AM/PM" */
-    const minutesToTimeStr = (totalMinutes) => {
-        const hours24 = Math.floor(totalMinutes / 60) % 24;
-        const mins = totalMinutes % 60;
-        const ampm = hours24 >= 12 ? 'PM' : 'AM';
-        let hours12 = hours24 % 12;
-        if (hours12 === 0) hours12 = 12;
-        return `${hours12.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')} ${ampm}`;
-    };
-
-    /** Estimate transit time between two places in minutes */
-    const estimateTransit = (place1, place2) => {
-        if (!place1?.lat || !place2?.lat) return 45;
-        const dist = haversineDistance(place1.lat, place1.lng, place2.lat, place2.lng);
-        if (dist < 5) return 20;       // Same area
-        if (dist < 20) return 45;      // Same city
-        if (dist < 100) return 90;     // Nearby cities
-        return 180;                     // Long distance (e.g., Cairo→Luxor implies flight/train)
-    };
-
-    // --- SMART TRIP GENERATION ---
-    
+    // --- SMART TRIP GENERATION (powered by itineraryEngine) ---
     const generateSmartTrip = () => {
         if (selectedInterests.length === 0) {
             showToast(t('selectInterests'), 'error', 'warning');
@@ -106,186 +50,70 @@ export default function PlannerScreen({ navigation }) {
         }
 
         try {
-            const newItinerary = { 
-                name: isRTL ? 'رحلتي الذكية في مصر' : 'My Smart Egypt Tour', 
-                days: [] 
-            };
-            
-            // 1. Filter places by interests + traveler type adjustments
-            let candidatePlaces = (places || [])
-                .filter(p => selectedInterests.includes(p.category) && p.lat && p.lng)
-                .sort((a, b) => b.rating - a.rating);
-            
-            // Family mode: favor shorter durations, skip nightlife/diving
-            if (travelerType === 'family') {
-                candidatePlaces = candidatePlaces.filter(p => 
-                    p.category !== 'Nightlife' && p.category !== 'Diving'
-                );
-            }
-            
-            if (candidatePlaces.length === 0) {
-                showToast(isRTL ? 'لا توجد أماكن تطابق اهتماماتك' : 'No places match your interests', 'error', 'warning');
-                return;
-            }
+            setIsGenerating(true);
 
-            // 2. Group places by City (Hub-based approach like TripAdvisor)
-            const cityHubsMap = {};
-            candidatePlaces.forEach(p => {
-                const city = p.cityEn || p.city;
-                if (!cityHubsMap[city]) cityHubsMap[city] = [];
-                cityHubsMap[city].push(p);
+            const { itinerary: newItinerary, warnings, estimatedCost } = generateSmartItinerary({
+                places,
+                duration,
+                selectedInterests,
+                travelerType,
+                tripStyle,
+                includeHiddenGems,
+                isRTL,
             });
 
-            // 3. Select top N hubs based on duration to avoid excessive travel
-            const maxHubs = duration <= 3 ? 1 : (duration <= 7 ? 2 : (duration <= 10 ? 3 : 4));
-            const sortedHubs = Object.keys(cityHubsMap)
-                .map(city => ({ city, places: cityHubsMap[city] }))
-                .sort((a, b) => b.places.length - a.places.length)
-                .slice(0, maxHubs);
-
-            // 4. Allocate days to hubs
-            let totalDays = duration;
-            const hubDays = sortedHubs.map(h => ({
-                ...h,
-                allocatedDays: Math.max(1, Math.floor(totalDays / sortedHubs.length))
-            }));
-            
-            // Adjust remainder days
-            let sumDays = hubDays.reduce((s, h) => s + h.allocatedDays, 0);
-            for (let i = 0; i < totalDays - sumDays; i++) {
-                hubDays[i % hubDays.length].allocatedDays++;
-            }
-
-            // 5. Generate daily schedule
-            let totalEstimatedCost = 0;
-            const DAY_START = 10 * 60; // 10:00 AM
-            const DAY_END = 21 * 60;  // 9:00 PM
-            const TRANSIT_BUFFER = 45; 
-            const maxPlacesPerDay = travelerType === 'family' ? 2 : (travelerType === 'solo' ? 4 : 3);
-            
-            const visitedCities = new Set();
-            
-            for (const hub of hubDays) {
-                let placeQueue = [...hub.places];
-                
-                for (let d = 0; d < hub.allocatedDays; d++) {
-                    const dayActivities = [];
-                    let currentTime = DAY_START;
-
-                    // Hotel Check-in
-                    if (d === 0 && !visitedCities.has(hub.city)) {
-                        visitedCities.add(hub.city);
-                        dayActivities.push({
-                            placeId: `CHOOSE_HOTEL_${hub.city}`,
-                            type: 'hotel_placeholder',
-                            city: hub.city,
-                            time: minutesToTimeStr(currentTime)
-                        });
-                        currentTime += 90; // 1.5 hours for transit & check-in
-                    }
-
-                    // Fill places
-                    let placesThisDay = 0;
-                    
-                    while (placeQueue.length > 0 && placesThisDay < maxPlacesPerDay) {
-                        const nextPlace = placeQueue.shift();
-                        const visitDurationMinutes = parseDuration(nextPlace.duration) * 60;
-                        
-                        if (currentTime + visitDurationMinutes > DAY_END) {
-                            placeQueue.unshift(nextPlace); // Put it back
-                            break;
-                        }
-                        
-                        dayActivities.push({
-                            placeId: nextPlace.id,
-                            type: 'place',
-                            time: minutesToTimeStr(currentTime)
-                        });
-                        
-                        totalEstimatedCost += parsePrice(nextPlace.price);
-                        currentTime += visitDurationMinutes + TRANSIT_BUFFER;
-                        placesThisDay++;
-                    }
-
-                    // Lunch
-                    const lunchTime = Math.max(currentTime, 13 * 60);
-                    if (lunchTime < 16 * 60) {
-                        dayActivities.push({
-                            placeId: 'LUNCH',
-                            type: 'meal',
-                            time: minutesToTimeStr(lunchTime)
-                        });
-                        currentTime = lunchTime + 60;
-                    }
-
-                    // If no places were available (free day)
-                    if (placesThisDay === 0) {
-                        const fallbacks = [
-                            { type: 'leisure_placeholder', title: isRTL ? `استرخاء واكتشاف حر في ${hub.city}` : `Relax & Explore ${hub.city}`, cat: isRTL ? 'وقت حر' : 'Free Time', img: '🌴' },
-                            { type: 'driver_placeholder', title: isRTL ? `جولة خاصة بسيارة في ${hub.city}` : `Private City Tour in ${hub.city}`, cat: isRTL ? 'جولة سياحية' : 'City Tour', img: '🚗' },
-                            { type: 'dining_placeholder', title: isRTL ? `تجربة طعام محلي في ${hub.city}` : `Local Dining Experience in ${hub.city}`, cat: isRTL ? 'مطاعم' : 'Dining', img: '🍽️' },
-                            { type: 'hidden_gem_placeholder', title: isRTL ? `استكشاف الجواهر الخفية في ${hub.city}` : `Discover Hidden Gems in ${hub.city}`, cat: isRTL ? 'استكشاف' : 'Exploration', img: '💎' }
-                        ];
-                        const randomFallback = fallbacks[d % fallbacks.length];
-
-                        dayActivities.push({
-                            placeId: `${randomFallback.type}_${hub.city}_${d}`,
-                            type: randomFallback.type,
-                            title: randomFallback.title,
-                            category: randomFallback.cat,
-                            image: randomFallback.img,
-                            city: hub.city,
-                            time: minutesToTimeStr(currentTime)
-                        });
-                        currentTime += 180;
-                    }
-
-                    // Dinner
-                    dayActivities.push({
-                        placeId: 'DINNER',
-                        type: 'meal',
-                        time: minutesToTimeStr(Math.max(currentTime, 20 * 60))
-                    });
-
-                    // Sort by time
-                    dayActivities.sort((a, b) => {
-                        const timeToMins = (t) => {
-                            const [time, mod] = t.split(' ');
-                            let [h, m] = time.split(':').map(Number);
-                            if (mod === 'PM' && h !== 12) h += 12;
-                            if (mod === 'AM' && h === 12) h = 0;
-                            return h * 60 + m;
-                        };
-                        return timeToMins(a.time) - timeToMins(b.time);
-                    });
-
-                    newItinerary.days.push({ activities: dayActivities });
-                }
-            }
-
-            if (newItinerary.days.length === 0) {
-                showToast(isRTL ? 'حدث خطأ في التوليد' : 'Failed to generate itinerary', 'error', 'warning');
+            if (!newItinerary) {
+                const msg = isRTL
+                    ? 'لا توجد أماكن تطابق اهتماماتك. جرب اختيار فئات أكثر.'
+                    : 'No places match. Try selecting more categories.';
+                showToast(msg, 'error', 'warning');
+                setIsGenerating(false);
                 return;
             }
 
-            // Store estimated cost for display
-            newItinerary.estimatedCost = totalEstimatedCost;
+            // Show warnings about long-distance travel
+            if (warnings.includes('LONG_DISTANCE_TRANSIT')) {
+                showToast(
+                    isRTL
+                        ? '⚠️ الرحلة تتضمن سفراً بعيداً — تأكد من حجز القطار أو الطيران مسبقاً'
+                        : '⚠️ Trip includes long-distance travel — book trains/flights in advance',
+                    'error', 'alert-circle'
+                );
+            }
 
             updateItinerary(newItinerary);
-            const costMsg = totalEstimatedCost > 0 
-                ? ` | ~${totalEstimatedCost.toLocaleString()} EGP` 
+
+            const costMsg = estimatedCost > 0
+                ? ` | ~${estimatedCost.toLocaleString()} EGP`
                 : '';
             showToast(
-                isRTL 
-                    ? `تم إنشاء رحلة ${newItinerary.days.length} أيام!${costMsg}` 
-                    : `${newItinerary.days.length}-Day Trip Created!${costMsg}`, 
-                'success', 
+                isRTL
+                    ? `✅ تم إنشاء رحلة ${newItinerary.days.length} أيام!${costMsg}`
+                    : `✅ ${newItinerary.days.length}-Day Trip Created!${costMsg}`,
+                'success',
                 'sparkles'
             );
             setIsWizardVisible(false);
+
+            // Schedule morning reminders
+            requestPermissions().then(granted => {
+                if (granted) {
+                    const firstAct = newItinerary.days?.[0]?.activities?.[0];
+                    const actName = firstAct?.placeId
+                        ? (places.find(p => p.id === firstAct.placeId)?.[isRTL ? 'name' : 'nameEn'] || '')
+                        : '';
+                    scheduleMorningReminder(
+                        newItinerary.name || (isRTL ? 'رحلتي' : 'My Trip'),
+                        actName,
+                        isRTL
+                    );
+                }
+            });
         } catch (error) {
             console.error('Smart Trip Error:', error);
             showToast(isRTL ? 'خطأ في توليد الرحلة' : 'Generation Error', 'error', 'alert');
+        } finally {
+            setIsGenerating(false);
         }
     };
 
@@ -301,10 +129,14 @@ export default function PlannerScreen({ navigation }) {
                                 ...act, 
                                 place: { 
                                     id: 'LUNCH', 
-                                    name: isRTL ? 'غداء محلي' : 'Local Lunch', 
-                                    nameEn: 'Local Lunch', 
+                                    name: isRTL ? 'غداء محلي (اضغط للاختيار)' : 'Local Lunch (Tap to Select)', 
+                                    nameEn: 'Local Lunch (Tap to Select)', 
                                     image: '🍲',
-                                    category: isRTL ? 'استراحة' : 'Break'
+                                    category: 'Selection Required',
+                                    isPlaceholder: true,
+                                    isMeal: true,
+                                    mealType: 'Lunch',
+                                    city: act.city
                                 }
                             };
                         }
@@ -313,16 +145,30 @@ export default function PlannerScreen({ navigation }) {
                                 ...act, 
                                 place: { 
                                     id: 'DINNER', 
-                                    name: isRTL ? 'عشاء فاخر' : 'Fine Dinner', 
-                                    nameEn: 'Fine Dinner', 
+                                    name: isRTL ? 'عشاء فاخر (اضغط للاختيار)' : 'Fine Dinner (Tap to Select)', 
+                                    nameEn: 'Fine Dinner (Tap to Select)', 
                                     image: '🍽️',
-                                    category: isRTL ? 'استراحة' : 'Break'
+                                    category: 'Selection Required',
+                                    isPlaceholder: true,
+                                    isMeal: true,
+                                    mealType: 'Dinner',
+                                    city: act.city
                                 }
                             };
                         }
                         
                         let place;
-                        if (act.type === 'hotel_placeholder') {
+                        if (act.type === 'restaurant') {
+                            const rest = (restaurants || []).find(r => r.id === act.placeId);
+                            if (rest) {
+                                place = {
+                                    ...rest,
+                                    nameEn: rest.name,
+                                    image: '🍽️',
+                                    category: isRTL ? 'مطعم' : 'Restaurant'
+                                };
+                            }
+                        } else if (act.type === 'hotel_placeholder') {
                             place = {
                                 id: act.placeId,
                                 name: isRTL ? `اختر فندقك في ${act.city}` : `Choose Hotel in ${act.city}`,
@@ -361,7 +207,7 @@ export default function PlannerScreen({ navigation }) {
                     .filter(item => item && item.place)
             }))
             .filter(day => day.activities.length > 0);
-    }, [itinerary, isRTL, places, hotels]);
+    }, [itinerary, isRTL, places, hotels, restaurants]);
 
     const renderActivityItem = ({ item, dayNumber }) => {
         const isMeal = item.type === 'meal';
@@ -387,7 +233,13 @@ export default function PlannerScreen({ navigation }) {
                         {item.place.isPlaceholder ? (
                             <TouchableOpacity 
                                 style={[styles.chooseBtn, { backgroundColor: C.primary }]}
-                                onPress={() => navigation.navigate('HotelsCity', { city: item.place.cityEn || item.place.city })}
+                                onPress={() => {
+                                    if (item.place.isMeal) {
+                                        navigation.navigate('Dining', { meal: item.place.mealType, city: item.place.city });
+                                    } else {
+                                        navigation.navigate('HotelsCity', { city: item.place.cityEn || item.place.city });
+                                    }
+                                }}
                             >
                                 <Ionicons name="add" size={20} color="#000" />
                             </TouchableOpacity>
@@ -418,6 +270,86 @@ export default function PlannerScreen({ navigation }) {
 
     // Determine dynamic background based on first activity
     const firstActivityPlace = groupedItinerary?.[0]?.activities?.[0]?.place;
+
+    // Calculate Trip Budget Estimate
+    const tripBudget = useMemo(() => {
+        let activitiesCost = 0;
+        let mealsCost = 0;
+        
+        groupedItinerary.forEach(day => {
+            day.activities.forEach(act => {
+                if (act.place) {
+                    if (act.place.isPlaceholder && act.place.isMeal) {
+                        mealsCost += act.place.mealType === 'Dinner' ? 600 : 300;
+                    } else if (act.place.price) {
+                        const priceStr = String(act.place.price);
+                        const match = priceStr.match(/\d+/);
+                        if (match) {
+                            activitiesCost += parseInt(match[0], 10);
+                        }
+                    }
+                }
+            });
+        });
+
+        const daysCount = groupedItinerary.length;
+        const hotelCost = daysCount * 1200; // Average 1200 EGP per night
+        const transportCost = daysCount * 400; // Average 400 EGP per day
+        const total = activitiesCost + mealsCost + hotelCost + transportCost;
+
+        return {
+            activities: activitiesCost,
+            meals: mealsCost,
+            hotel: hotelCost,
+            transport: transportCost,
+            total,
+            days: daysCount
+        };
+    }, [groupedItinerary]);
+
+    const renderBudgetEstimator = () => {
+        if (groupedItinerary.length === 0) return null;
+        
+        return (
+            <View style={[styles.budgetCard, { backgroundColor: C.bgCard }]}>
+                <View style={[styles.budgetHeader, isRTL && { flexDirection: 'row-reverse' }]}>
+                    <Ionicons name="wallet-outline" size={24} color={C.primary} />
+                    <Text style={[styles.budgetTitle, { color: C.textMain }]}>{isRTL ? 'تقدير ميزانية الرحلة' : 'Trip Budget Estimator'}</Text>
+                </View>
+
+                <View style={styles.budgetGrid}>
+                    <View style={[styles.budgetItem, isRTL && { flexDirection: 'row-reverse' }]}>
+                        <Ionicons name="ticket-outline" size={16} color={C.textMuted} />
+                        <Text style={[styles.budgetLabel, { color: C.textMuted }, isRTL && { textAlign: 'right' }]}>{isRTL ? 'الأنشطة والتذاكر' : 'Activities & Tickets'}</Text>
+                        <Text style={[styles.budgetValue, { color: C.textMain }]}>{tripBudget.activities.toLocaleString()} EGP</Text>
+                    </View>
+                    <View style={[styles.budgetItem, isRTL && { flexDirection: 'row-reverse' }]}>
+                        <Ionicons name="restaurant-outline" size={16} color={C.textMuted} />
+                        <Text style={[styles.budgetLabel, { color: C.textMuted }, isRTL && { textAlign: 'right' }]}>{isRTL ? 'الطعام (تقديري)' : 'Meals (Est.)'}</Text>
+                        <Text style={[styles.budgetValue, { color: C.textMain }]}>{tripBudget.meals.toLocaleString()} EGP</Text>
+                    </View>
+                    <View style={[styles.budgetItem, isRTL && { flexDirection: 'row-reverse' }]}>
+                        <Ionicons name="business-outline" size={16} color={C.textMuted} />
+                        <Text style={[styles.budgetLabel, { color: C.textMuted }, isRTL && { textAlign: 'right' }]}>{isRTL ? 'الفنادق (متوسط)' : 'Hotels (Avg.)'}</Text>
+                        <Text style={[styles.budgetValue, { color: C.textMain }]}>{tripBudget.hotel.toLocaleString()} EGP</Text>
+                    </View>
+                    <View style={[styles.budgetItem, isRTL && { flexDirection: 'row-reverse' }]}>
+                        <Ionicons name="car-outline" size={16} color={C.textMuted} />
+                        <Text style={[styles.budgetLabel, { color: C.textMuted }, isRTL && { textAlign: 'right' }]}>{isRTL ? 'التنقلات' : 'Transport'}</Text>
+                        <Text style={[styles.budgetValue, { color: C.textMain }]}>{tripBudget.transport.toLocaleString()} EGP</Text>
+                    </View>
+                </View>
+
+                <View style={[styles.budgetTotalRow, { borderTopColor: C.borderSoft || '#333' }, isRTL && { flexDirection: 'row-reverse' }]}>
+                    <Text style={[styles.budgetTotalLabel, { color: C.textMain }]}>{isRTL ? 'الإجمالي التقديري' : 'Estimated Total'}</Text>
+                    <Text style={[styles.budgetTotalValue, { color: C.primary }]}>{tripBudget.total.toLocaleString()} EGP</Text>
+                </View>
+                <Text style={[styles.budgetDisclaimer, { color: C.textMuted }, isRTL && { textAlign: 'right' }]}>
+                    {isRTL ? '* هذه الأسعار تقريبية وقد تتغير حسب اختيارك الفعلي للمطاعم والفنادق.' : '* These are estimated costs and may vary based on your actual hotel and dining choices.'}
+                </Text>
+            </View>
+        );
+    };
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top']}>
@@ -474,6 +406,7 @@ export default function PlannerScreen({ navigation }) {
                     keyExtractor={item => `day-${item.dayNumber}`}
                     contentContainerStyle={styles.listContent}
                     initialNumToRender={3}
+                    ListFooterComponent={renderBudgetEstimator}
                     renderItem={({ item: day }) => (
                         <View style={styles.daySection}>
                             <View style={styles.dayHeader}>
@@ -521,9 +454,12 @@ export default function PlannerScreen({ navigation }) {
             {/* Smart Wizard Modal */}
             <Modal visible={isWizardVisible} animationType="slide" transparent>
                 <View style={styles.modalOverlay}>
+                    <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
                     <View style={[styles.modalContent, { backgroundColor: C.bgCard }]}>
-                        <Text style={[styles.modalTitle, { color: C.textMain }]}>{t('smartTripWizard')}</Text>
-                        
+                        <Text style={[styles.modalTitle, { color: C.textMain }]}>
+                            {isRTL ? '✨ معالج الرحلة الذكية' : '✨ Smart Trip Wizard'}
+                        </Text>
+
                         {/* Traveler Type */}
                         <Text style={[styles.label, { color: C.textMuted }]}>{isRTL ? 'نوع المسافر' : 'TRAVELER TYPE'}</Text>
                         <View style={styles.durationRow}>
@@ -533,8 +469,8 @@ export default function PlannerScreen({ navigation }) {
                                 { key: 'family', icon: '👨‍👩‍👧‍👦', label: isRTL ? 'عائلي' : 'Family' },
                                 { key: 'group', icon: '👥', label: isRTL ? 'مجموعة' : 'Group' },
                             ].map(tt => (
-                                <TouchableOpacity 
-                                    key={tt.key} 
+                                <TouchableOpacity
+                                    key={tt.key}
                                     style={[styles.travelerChip, { backgroundColor: C.bgCard, borderWidth: 1, borderColor: C.borderSoft || '#e0e0e0' }, travelerType === tt.key && { backgroundColor: C.gold, borderColor: C.gold }]}
                                     onPress={() => setTravelerType(tt.key)}
                                 >
@@ -544,11 +480,31 @@ export default function PlannerScreen({ navigation }) {
                             ))}
                         </View>
 
+                        {/* Trip Style */}
+                        <Text style={[styles.label, { color: C.textMuted }]}>{isRTL ? 'نمط الرحلة' : 'TRIP STYLE'}</Text>
+                        <View style={styles.durationRow}>
+                            {[
+                                { key: 'economy', icon: '🚌', label: isRTL ? 'اقتصادية' : 'Economy' },
+                                { key: 'comfort', icon: '🚕', label: isRTL ? 'مريحة' : 'Comfort' },
+                                { key: 'luxury', icon: '🚗', label: isRTL ? 'فاخرة' : 'Luxury' },
+                            ].map(ts => (
+                                <TouchableOpacity
+                                    key={ts.key}
+                                    style={[styles.travelerChip, { backgroundColor: C.bgCard, borderWidth: 1, borderColor: C.borderSoft || '#e0e0e0' }, tripStyle === ts.key && { backgroundColor: C.primary, borderColor: C.primary }]}
+                                    onPress={() => setTripStyle(ts.key)}
+                                >
+                                    <Text style={styles.travelerEmoji}>{ts.icon}</Text>
+                                    <Text style={[styles.travelerLabel, { color: C.textMain }, tripStyle === ts.key && { color: '#000' }]}>{ts.label}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+
+                        {/* Duration */}
                         <Text style={[styles.label, { color: C.textMuted }]}>{t('durationDays')}</Text>
                         <View style={styles.durationRow}>
-                            {[3, 5, 7, 10, 15].map(d => (
-                                <TouchableOpacity 
-                                    key={d} 
+                            {[3, 5, 7, 10, 14].map(d => (
+                                <TouchableOpacity
+                                    key={d}
                                     style={[styles.durationBox, { backgroundColor: C.bgCard, borderWidth: 1, borderColor: C.borderSoft || '#e0e0e0' }, duration === d && { backgroundColor: C.gold, borderColor: C.gold }]}
                                     onPress={() => setDuration(d)}
                                 >
@@ -557,30 +513,66 @@ export default function PlannerScreen({ navigation }) {
                             ))}
                         </View>
 
+                        {/* Interests */}
                         <Text style={[styles.label, { color: C.textMuted }]}>{t('yourInterests')}</Text>
                         <View style={styles.interestsGrid}>
-                            {['Pharaonic', 'Islamic', 'Beach', 'Nature', 'Diving', 'Cultural', 'Medical', 'Nightlife'].map(cat => (
-                                <TouchableOpacity 
+                            {[
+                                { cat: 'Pharaonic', icon: '🏛️' }, { cat: 'Islamic', icon: '🕌' },
+                                { cat: 'Beach', icon: '🏖️' }, { cat: 'Nature', icon: '🌵' },
+                                { cat: 'Diving', icon: '🤿' }, { cat: 'Cultural', icon: '🎭' },
+                                { cat: 'Medical', icon: '♨️' }, { cat: 'Nightlife', icon: '🪩' },
+                            ].map(({ cat, icon }) => (
+                                <TouchableOpacity
                                     key={cat}
                                     style={[styles.interestChip, { backgroundColor: C.bgCard, borderWidth: 1, borderColor: C.borderSoft || '#e0e0e0' }, selectedInterests.includes(cat) && { backgroundColor: C.primary, borderColor: C.primary }]}
                                     onPress={() => toggleInterest(cat)}
                                 >
-                                    <Text style={[styles.interestText, { color: C.textMain }, selectedInterests.includes(cat) && { color: '#000' }]}>{t('categories.' + cat) || cat}</Text>
+                                    <Text style={{ fontSize: 16 }}>{icon}</Text>
+                                    <Text style={[styles.interestText, { color: C.textMain }, selectedInterests.includes(cat) && { color: '#000' }]}>
+                                        {t('categories.' + cat) || cat}
+                                    </Text>
                                 </TouchableOpacity>
                             ))}
+                        </View>
+
+                        {/* Hidden Gems Toggle */}
+                        <View style={[styles.gemRow, { borderColor: C.borderSoft || '#333' }]}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={[styles.gemTitle, { color: C.textMain }]}>
+                                    {isRTL ? '💎 اكتشف الجواهر الخفية' : '💎 Discover Hidden Gems'}
+                                </Text>
+                                <Text style={[styles.gemSub, { color: C.textMuted }]}>
+                                    {isRTL ? 'أضف أماكن أقل شهرة ولكنها مميزة' : 'Add lesser-known but unique spots'}
+                                </Text>
+                            </View>
+                            <Switch
+                                value={includeHiddenGems}
+                                onValueChange={setIncludeHiddenGems}
+                                trackColor={{ false: '#333', true: C.primary }}
+                                thumbColor={includeHiddenGems ? C.gold : '#888'}
+                            />
                         </View>
 
                         <View style={styles.modalActions}>
                             <TouchableOpacity style={styles.cancelBtn} onPress={() => setIsWizardVisible(false)}>
                                 <Text style={styles.cancelBtnText}>{t('cancel')}</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.generateBtn, { backgroundColor: C.gold }]} onPress={generateSmartTrip}>
-                                <Text style={styles.generateBtnText}>{t('generate')}</Text>
+                            <TouchableOpacity
+                                style={[styles.generateBtn, { backgroundColor: isGenerating ? '#555' : C.gold }, { opacity: isGenerating ? 0.7 : 1 }]}
+                                onPress={generateSmartTrip}
+                                disabled={isGenerating}
+                            >
+                                {isGenerating
+                                    ? <Ionicons name="hourglass-outline" size={18} color="#000" />
+                                    : <Text style={styles.generateBtnText}>{t('generate')}</Text>
+                                }
                             </TouchableOpacity>
                         </View>
                     </View>
+                    </ScrollView>
                 </View>
             </Modal>
+
         </SafeAreaView>
     );
 }
@@ -618,15 +610,18 @@ const styles = StyleSheet.create({
     durationBox: { width: 52, height: 52, borderRadius: 12, backgroundColor: '#1A1A1A', justifyContent: 'center', alignItems: 'center' },
     durationText: { fontSize: 16, fontWeight: '900', color: '#fff' },
     interestsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-    interestChip: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 30, backgroundColor: '#1A1A1A' },
+    interestChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 30, backgroundColor: '#1A1A1A' },
     interestText: { fontWeight: '700', fontSize: 13, color: 'rgba(255,255,255,0.6)' },
     modalActions: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 40, gap: 16 },
     cancelBtn: { padding: 16 },
     cancelBtnText: { fontWeight: '900', color: '#555' },
-    generateBtn: { paddingHorizontal: 32, paddingVertical: 16, borderRadius: 16 },
+    generateBtn: { paddingHorizontal: 32, paddingVertical: 16, borderRadius: 16, justifyContent: 'center', alignItems: 'center', minWidth: 120 },
     generateBtnText: { fontWeight: '900', color: '#000' },
     travelerChip: { alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 16, backgroundColor: '#1A1A1A' },
     travelerEmoji: { fontSize: 20, marginBottom: 4 },
     travelerLabel: { fontSize: 11, fontWeight: '900', color: 'rgba(255,255,255,0.6)' },
+    gemRow: { flexDirection: 'row', alignItems: 'center', marginTop: 24, padding: 16, borderRadius: 16, borderWidth: 1, gap: 12 },
+    gemTitle: { fontSize: 14, fontWeight: '800', marginBottom: 3 },
+    gemSub: { fontSize: 11, fontWeight: '600', opacity: 0.7 },
 });
 

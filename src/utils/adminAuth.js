@@ -1,24 +1,19 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import * as Crypto from 'expo-crypto';
+
 const ADMIN_KEY = 'egypt_tourism_admin_credentials';
-
-/**
- * Hash a password using a simple but consistent method.
- * For a local app, we store a salted hash to avoid plain-text storage.
- */
-function simpleHash(str) {
-    let hash = 5381;
-    for (let i = 0; i < str.length; i++) {
-        hash = ((hash << 5) + hash) + str.charCodeAt(i);
-        hash = hash & hash; // Convert to 32-bit int
-    }
-    return hash.toString(36);
-}
-
 const SALT = 'egypt_tourism_salt_2024';
 
-function hashPassword(password) {
-    return simpleHash(SALT + password + SALT);
+let loginAttempts = 0;
+let lockoutUntil = 0;
+
+async function hashPassword(password) {
+    const digest = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        SALT + password + SALT
+    );
+    return digest;
 }
 
 /**
@@ -49,9 +44,10 @@ export async function setupAdminCredentials(username, password) {
         return { ok: false, error: 'Password must be at least 6 characters.' };
     }
     try {
+        const hashed = await hashPassword(password);
         const creds = {
             username: username.trim().toLowerCase(),
-            passwordHash: hashPassword(password),
+            passwordHash: hashed,
             createdAt: new Date().toISOString(),
         };
         await AsyncStorage.setItem(ADMIN_KEY, JSON.stringify(creds));
@@ -67,15 +63,33 @@ export async function setupAdminCredentials(username, password) {
  * @param {string} password
  */
 export async function verifyAdminLogin(username, password) {
+    if (Date.now() < lockoutUntil) {
+        const mins = Math.ceil((lockoutUntil - Date.now()) / 60000);
+        return { ok: false, error: `Too many attempts. Try again in ${mins} minute(s).` };
+    }
+
     try {
         const data = await AsyncStorage.getItem(ADMIN_KEY);
         if (!data) return { ok: false, error: 'Admin not set up.' };
         const creds = JSON.parse(data);
         const usernameMatch = creds.username === username.trim().toLowerCase();
-        const passwordMatch = creds.passwordHash === hashPassword(password);
+        
+        const hashed = await hashPassword(password);
+        const passwordMatch = creds.passwordHash === hashed;
+        
         if (usernameMatch && passwordMatch) {
+            loginAttempts = 0;
+            lockoutUntil = 0;
             return { ok: true };
         }
+        
+        loginAttempts++;
+        if (loginAttempts >= 5) {
+            lockoutUntil = Date.now() + 5 * 60 * 1000;
+            loginAttempts = 0;
+            return { ok: false, error: 'Too many failed attempts. Locked for 5 minutes.' };
+        }
+
         return { ok: false, error: 'Incorrect username or password.' };
     } catch {
         return { ok: false, error: 'Login failed. Please try again.' };
@@ -92,13 +106,17 @@ export async function changeAdminPassword(oldPassword, newPassword) {
         const data = await AsyncStorage.getItem(ADMIN_KEY);
         if (!data) return { ok: false, error: 'Admin not set up.' };
         const creds = JSON.parse(data);
-        if (creds.passwordHash !== hashPassword(oldPassword)) {
+        
+        const oldHashed = await hashPassword(oldPassword);
+        if (creds.passwordHash !== oldHashed) {
             return { ok: false, error: 'Old password is incorrect.' };
         }
         if (!newPassword || newPassword.length < 6) {
             return { ok: false, error: 'New password must be at least 6 characters.' };
         }
-        creds.passwordHash = hashPassword(newPassword);
+        
+        const newHashed = await hashPassword(newPassword);
+        creds.passwordHash = newHashed;
         creds.updatedAt = new Date().toISOString();
         await AsyncStorage.setItem(ADMIN_KEY, JSON.stringify(creds));
         return { ok: true };

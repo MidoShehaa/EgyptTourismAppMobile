@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Dimensions, Modal, TextInput, Platform, StatusBar } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Dimensions, Modal, TextInput, Platform, StatusBar, Animated } from 'react-native';
 
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,8 @@ import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants
 import { useUser } from '../store/UserContext';
 import CulturalInsight from '../components/CulturalInsight';
 import DynamicBackground from '../components/DynamicBackground';
+import SafeImage from '../components/SafeImage';
+import WeatherWidget from '../components/WeatherWidget';
 
 const { width } = Dimensions.get('window');
 
@@ -18,13 +20,13 @@ export default function PlaceDetailsScreen({ route, navigation }) {
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
-    const [imgError, setImgError] = useState(false);
     const placeName = isRTL ? place.name : place.nameEn;
     const placeCity = isRTL ? place.city : place.cityEn;
     const placeDesc = isRTL ? place.description : place.descriptionEn;
 
     const [isPlannerModalVisible, setPlannerModalVisible] = useState(false);
     const [plannerDay, setPlannerDay] = useState('');
+    const [isImageViewerVisible, setImageViewerVisible] = useState(false);
 
     const handleAddToPlanner = () => {
         setPlannerDay('');
@@ -33,10 +35,10 @@ export default function PlaceDetailsScreen({ route, navigation }) {
 
     const confirmAddToPlanner = () => {
         const dayNumber = parseInt(plannerDay, 10);
-        if (!isNaN(dayNumber) && dayNumber > 0) {
-            addActivityToPlanner(dayNumber, { placeId: place.id, time: '10:00 AM', type: 'place' });
+        if (!isNaN(dayNumber) && dayNumber > 0 && dayNumber <= 30) {
+            addActivityToPlanner(dayNumber, { placeId: place.id, time: '09:00 AM', type: 'place' });
             setPlannerModalVisible(false);
-            showToast(`${placeName} ${t('addedToDay')} ${dayNumber}!`, 'success', 'calendar');
+            showToast(`${placeName} ${t('addedToDay')} ${dayNumber}! 🗓️`, 'success', 'calendar');
         } else {
             showToast(t('validDayNumber'), 'error', 'warning');
         }
@@ -49,41 +51,17 @@ export default function PlaceDetailsScreen({ route, navigation }) {
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
                 {/* Image Header - Immersive */}
                 <View style={styles.imageContainer}>
-                    {imgError ? (
-                        <View style={[styles.image, styles.imgFallback, { backgroundColor: C.bgElevated }]}>
-                            <Ionicons name="image-outline" size={80} color={C.textMuted} />
+                    <TouchableOpacity activeOpacity={0.9} onPress={() => setImageViewerVisible(true)}>
+                        <SafeImage 
+                            uri={place.imageUrl}
+                            style={styles.image}
+                            icon="place"
+                            iconSize={80}
+                        />
+                        <View style={[styles.tapHint, isRTL ? { left: 20 } : { right: 20 }, { bottom: 50 }]}>
+                            <Ionicons name="expand-outline" size={16} color="#fff" />
                         </View>
-                    ) : (
-                        place.images && place.images.length > 1 ? (
-                            <ScrollView
-                                horizontal
-                                pagingEnabled
-                                showsHorizontalScrollIndicator={false}
-                                style={styles.image}
-                            >
-                                {place.images.map((imgUrl, idx) => (
-                                    <Image
-                                        key={idx}
-                                        source={{ 
-                                            uri: imgUrl,
-                                            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
-                                        }}
-                                        style={{ width: width, height: 500, resizeMode: 'cover' }}
-                                        onError={() => setImgError(true)}
-                                    />
-                                ))}
-                            </ScrollView>
-                        ) : (
-                            <Image
-                                source={place.imageSource ? place.imageSource : { 
-                                    uri: place.imageUrl,
-                                    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
-                                }}
-                                style={styles.image}
-                                onError={() => setImgError(true)}
-                            />
-                        )
-                    )}
+                    </TouchableOpacity>
                     
                     {/* Header Controls */}
                     <View style={[styles.headerOverlay, { paddingTop: insets.top + 10 }, isRTL && { flexDirection: 'row-reverse' }]}>
@@ -152,6 +130,11 @@ export default function PlaceDetailsScreen({ route, navigation }) {
                             <Text style={[styles.statValue, { color: C.textMain }]}>{place.price}</Text>
                             <Text style={[styles.statLabel, { color: C.textMuted }]}>{t('price')}</Text>
                         </View>
+                    </View>
+
+                    {/* Weather for this city */}
+                    <View style={{ marginTop: 16 }}>
+                        <WeatherWidget city={place.cityEn || place.city} colors={C} isRTL={isRTL} />
                     </View>
 
 
@@ -236,6 +219,25 @@ export default function PlaceDetailsScreen({ route, navigation }) {
                                 <Text style={[styles.modalBtnText, { color: '#fff' }]}>{t('add')}</Text>
                             </TouchableOpacity>
                         </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Full-Screen Image Viewer */}
+            <Modal visible={isImageViewerVisible} animationType="fade" transparent={true} onRequestClose={() => setImageViewerVisible(false)}>
+                <View style={styles.imageViewerOverlay}>
+                    <TouchableOpacity style={styles.imageViewerClose} onPress={() => setImageViewerVisible(false)}>
+                        <Ionicons name="close" size={32} color="#fff" />
+                    </TouchableOpacity>
+                    <SafeImage
+                        uri={place.imageUrl}
+                        style={styles.imageViewerImage}
+                        icon="place"
+                        iconSize={120}
+                    />
+                    <View style={styles.imageViewerCaption}>
+                        <Text style={styles.imageViewerText}>{placeName}</Text>
+                        <Text style={styles.imageViewerSubtext}>{placeCity}</Text>
                     </View>
                 </View>
             </Modal>
@@ -504,6 +506,55 @@ const styles = StyleSheet.create({
     imgFallback: {
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    tapHint: {
+        position: 'absolute',
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    imageViewerOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.95)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    imageViewerClose: {
+        position: 'absolute',
+        top: 60,
+        right: 20,
+        zIndex: 10,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    imageViewerImage: {
+        width: width,
+        height: width * 0.75,
+        resizeMode: 'contain',
+    },
+    imageViewerCaption: {
+        position: 'absolute',
+        bottom: 80,
+        alignItems: 'center',
+    },
+    imageViewerText: {
+        color: '#fff',
+        fontSize: 24,
+        fontWeight: '900',
+        textAlign: 'center',
+    },
+    imageViewerSubtext: {
+        color: 'rgba(255,255,255,0.6)',
+        fontSize: 16,
+        fontWeight: '600',
+        marginTop: 4,
     },
 });
 

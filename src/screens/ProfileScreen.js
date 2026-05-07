@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useUser } from '../store/UserContext';
+import DynamicBackground from '../components/DynamicBackground';
 
 const fontFamilyHeavy = Platform.OS === 'ios' ? 'Futura' : 'sans-serif-black';
 const fontFamilyMedium = Platform.OS === 'ios' ? 'San Francisco' : 'sans-serif-medium';
@@ -19,9 +20,7 @@ export default function ProfileScreen({ navigation }) {
         updateSettings({ language: newLang });
     };
 
-    const toggleDarkMode = () => {
-        updateSettings({ darkMode: !settings.darkMode });
-    };
+
 
     const handleLogout = () => {
         Alert.alert(
@@ -35,6 +34,7 @@ export default function ProfileScreen({ navigation }) {
                     text: isRTL ? 'إعادة ضبط' : 'Reset',
                     style: 'destructive',
                     onPress: () => {
+                        clearItinerary();
                         updateSettings({ hasSeenOnboarding: false });
                         navigation.replace('Onboarding');
                     },
@@ -63,21 +63,26 @@ export default function ProfileScreen({ navigation }) {
         );
     };
 
-    const renderSettingItem = (icon, label, value, onPress = null) => (
-        <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
-            <View style={[styles.rowLeft, isRTL && { flexDirection: 'row-reverse' }]}>
-                <View style={styles.iconBox}>
-                    <Ionicons name={icon} size={22} color={C.primary} />
+    // Accepts either a translation key or a pre-translated string
+    const renderSettingItem = (icon, label, value, onPress = null) => {
+        const displayLabel = t(label) !== label ? t(label) : label;
+        return (
+            <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
+                <View style={[styles.rowLeft, isRTL && { flexDirection: 'row-reverse' }]}>
+                    <View style={styles.iconBox}>
+                        <Ionicons name={icon} size={22} color={C.primary} />
+                    </View>
+                    <Text style={[styles.rowLabel, { color: '#fff' }]}>{displayLabel}</Text>
                 </View>
-                <Text style={[styles.rowLabel, { color: '#fff' }]}>{t(label)}</Text>
-            </View>
-            {value}
-        </TouchableOpacity>
-    );
+                {value}
+            </TouchableOpacity>
+        );
+    };
 
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top', 'left', 'right']}>
+            <DynamicBackground city="Cairo" />
             <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={C.bgMain} />
             
             <View style={[styles.headerBlock, isRTL && { alignItems: 'flex-end' }]}>
@@ -103,22 +108,40 @@ export default function ProfileScreen({ navigation }) {
                         toggleLanguage
                     )}
 
-                    <View style={styles.divider} />
-
-                    {renderSettingItem(
-                        'moon-outline', 
-                        'darkMode',
-                        (
-                            <Switch
-                                trackColor={{ false: '#333', true: C.primary }}
-                                thumbColor={'#fff'}
-                                onValueChange={toggleDarkMode}
-                                value={settings.darkMode === true}
-                            />
-                        )
-                    )}
                 </View>
 
+                {/* Offline Status */}
+                <View style={[styles.section, { backgroundColor: '#0D3D1A', paddingVertical: 16 }]}>
+                    <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', paddingHorizontal: 16, gap: 12 }}>
+                        <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: '#10B98120', justifyContent: 'center', alignItems: 'center' }}>
+                            <Ionicons name="cloud-offline-outline" size={22} color="#10B981" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ color: '#10B981', fontSize: 15, fontWeight: '800' }}>
+                                {isRTL ? '✅ يعمل بدون إنترنت' : '✅ Works Offline'}
+                            </Text>
+                            <Text style={{ color: '#10B98180', fontSize: 12, fontWeight: '600', marginTop: 2 }}>
+                                {isRTL ? 'كل الأماكن والفنادق والمطاعم متاحة بدون نت' : 'All places, hotels & dining data available offline'}
+                            </Text>
+                        </View>
+                    </View>
+                </View>
+
+                <View style={styles.section}>
+                    {renderSettingItem(
+                        'stats-chart-outline',
+                        isRTL ? 'إحصائيات رحلتي' : 'My Trip Stats',
+                        <Ionicons name="chevron-forward" size={20} color="#555" />,
+                        () => navigation.navigate('TripStats')
+                    )}
+                    <View style={styles.divider} />
+                    {renderSettingItem(
+                        'shield-checkmark-outline',
+                        isRTL ? 'معلومات عملية وطوارئ' : 'Emergency & Practical Info',
+                        <Ionicons name="chevron-forward" size={20} color="#555" />,
+                        () => navigation.navigate('Emergency')
+                    )}
+                </View>
 
                 <View style={styles.section}>
                     {renderSettingItem('shield-checkmark-outline', 'privacyPolicy', <Ionicons name="chevron-forward" size={20} color="#555" />, handlePrivacyPolicy)}

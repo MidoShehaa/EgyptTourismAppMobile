@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert, Modal, TextInput, Platform, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Modal, TextInput, Platform, Dimensions, ScrollView, Linking } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,11 +8,15 @@ import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants
 import { useUser } from '../store/UserContext';
 import DynamicBackground from '../components/DynamicBackground';
 import CulturalInsight from '../components/CulturalInsight';
+import SafeImage from '../components/SafeImage';
+import { WHATSAPP_NUMBER } from '../constants/config';
 
 export default function HotelsScreen({ route, navigation }) {
     const { settings, addActivityToPlanner, t, showToast, hotels, isLoading } = useUser();
     const filterCity = route?.params?.city;
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [minRating, setMinRating] = useState(0);
+    const [selectedAmenities, setSelectedAmenities] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedHotel, setSelectedHotel] = useState(null);
     const [dayNumber, setDayNumber] = useState('1');
@@ -25,9 +29,19 @@ export default function HotelsScreen({ route, navigation }) {
         const matchesCity = !filterCity || hotel.city === filterCity || hotel.cityEn === filterCity;
         if (!matchesCity) return false;
 
-        if (selectedCategory === 'All') return true;
-        if (selectedCategory === 'Hotels') return ['luxury', 'mid-range'].includes(hotel.category);
-        if (selectedCategory === 'Hostels') return ['hostel', 'budget'].includes(hotel.category);
+        if (selectedCategory === 'All') {} 
+        else if (selectedCategory === 'Hotels' && !['luxury', 'mid-range'].includes(hotel.category)) return false;
+        else if (selectedCategory === 'Hostels' && !['hostel', 'budget'].includes(hotel.category)) return false;
+
+        if (minRating > 0 && (hotel.rating || 0) < minRating) return false;
+
+        if (selectedAmenities.length > 0) {
+            const hasAll = selectedAmenities.every(a => 
+                (hotel.amenities || []).some(ha => ha.toLowerCase().includes(a.toLowerCase()))
+            );
+            if (!hasAll) return false;
+        }
+
         return true;
     });
 
@@ -76,17 +90,11 @@ export default function HotelsScreen({ route, navigation }) {
     const renderHotelCard = ({ item }) => (
         <TouchableOpacity style={[styles.card, { backgroundColor: C.bgCard }]} activeOpacity={0.9}>
             <View style={styles.imageContainer}>
-                {imgErrors[item.id] ? (
-                    <View style={[styles.cardImage, styles.imgFallback, { backgroundColor: C.bgElevated }]}>
-                        <Ionicons name="business-outline" size={48} color={C.textMuted} />
-                    </View>
-                ) : (
-                    <Image 
-                        source={{ uri: item.image, headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' } }} 
-                        style={styles.cardImage}
-                        onError={() => setImgErrors(prev => ({ ...prev, [item.id]: true }))}
-                    />
-                )}
+                <SafeImage 
+                    uri={item.image}
+                    style={styles.cardImage}
+                    icon="hotel"
+                />
                 
                 {/* Top Overlays */}
                 <View style={[styles.cardTopOverlay, isRTL && { flexDirection: 'row-reverse' }]}>
@@ -109,17 +117,42 @@ export default function HotelsScreen({ route, navigation }) {
                                 <Text style={[styles.locationText, isRTL && { textAlign: 'right' }]}>{isRTL ? (item.cityAr || item.city) : (item.cityEn || item.city)}</Text>
                             </View>
                         </View>
-                        <TouchableOpacity 
-                            style={styles.addBtnCircle}
-                            onPress={() => handleAddToPlanner(item)}
-                        >
-                            <Ionicons name="add" size={24} color="#000" />
-                        </TouchableOpacity>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <TouchableOpacity 
+                                style={[styles.addBtnCircle, { backgroundColor: '#25D366', marginRight: isRTL ? 0 : 6, marginLeft: isRTL ? 6 : 0 }]}
+                                onPress={() => {
+                                    const message = isRTL ? `مرحباً، أود حجز ${item.nameAr || item.name} في ${item.cityAr || item.city}.` : `Hello, I'd like to book ${item.nameEn || item.name} in ${item.cityEn || item.city}.`;
+                                    Linking.openURL(`whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(message)}`).catch(() => {
+                                        showToast(isRTL ? 'تطبيق واتساب غير موجود' : 'WhatsApp is not installed', 'error');
+                                    });
+                                }}
+                            >
+                                <Ionicons name="logo-whatsapp" size={20} color="#fff" />
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                style={[styles.addBtnCircle, { backgroundColor: '#003580', marginRight: isRTL ? 0 : 6, marginLeft: isRTL ? 6 : 0 }]}
+                                onPress={() => {
+                                    const hotelSearchName = encodeURIComponent(item.nameEn || item.name);
+                                    const bookingUrl = `https://www.booking.com/search.html?ss=${hotelSearchName}+${encodeURIComponent(item.cityEn || item.city)}+Egypt`;
+                                    Linking.openURL(bookingUrl).catch(() => {
+                                        showToast(isRTL ? 'تعذر فتح Booking.com' : 'Could not open Booking.com', 'error');
+                                    });
+                                }}
+                            >
+                                <Ionicons name="globe-outline" size={20} color="#fff" />
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                style={styles.addBtnCircle}
+                                onPress={() => handleAddToPlanner(item)}
+                            >
+                                <Ionicons name="add" size={24} color="#000" />
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
                 
                 <View style={styles.priceTag}>
-                    <Text style={styles.priceAmount}>{item.price.toLocaleString()}</Text>
+                    <Text style={styles.priceAmount}>{typeof item.price === 'number' ? item.price.toLocaleString() : item.price}</Text>
                     <Text style={styles.priceUnit}> {t('currency')}</Text>
                 </View>
             </View>
@@ -150,25 +183,67 @@ export default function HotelsScreen({ route, navigation }) {
                 </View>
             </View>
 
-            <View style={[styles.filterRow, isRTL && { flexDirection: 'row-reverse' }]}>
-                {['All', 'Hotels', 'Hostels'].map((cat) => (
-                    <TouchableOpacity
-                        key={cat}
-                        style={[
-                            styles.filterTab,
-                            { borderColor: C.borderSoft || (isDark ? '#333' : '#e0e0e0') },
-                            selectedCategory === cat ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }
-                        ]}
-                        onPress={() => setSelectedCategory(cat)}
-                    >
-                        <Text style={[
-                            styles.filterTabText,
-                            selectedCategory === cat ? styles.filterTabTextActive : { color: C.textMain }
-                        ]}>
-                            {cat === 'All' ? t('filterAll') : (cat === 'Hotels' ? t('hotelsOnly') : t('hostelsOnly'))}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
+            <View style={{ paddingBottom: SPACING.xl }}>
+                <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false} 
+                    contentContainerStyle={[styles.filterRow, isRTL && { flexDirection: 'row-reverse' }, { paddingBottom: 0 }]}
+                >
+                    {['All', 'Hotels', 'Hostels'].map((cat) => (
+                        <TouchableOpacity
+                            key={cat}
+                            style={[
+                                styles.filterTab,
+                                { borderColor: C.borderSoft || (isDark ? '#333' : '#e0e0e0') },
+                                selectedCategory === cat ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }
+                            ]}
+                            onPress={() => setSelectedCategory(cat)}
+                        >
+                            <Text style={[
+                                styles.filterTabText,
+                                selectedCategory === cat ? styles.filterTabTextActive : { color: C.textMain }
+                            ]}>
+                                {cat === 'All' ? t('filterAll') : (cat === 'Hotels' ? t('hotelsOnly') : t('hostelsOnly'))}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+
+                    <View style={{ width: 1, backgroundColor: C.borderSoft || '#333', marginVertical: 8, marginHorizontal: 4 }} />
+
+                    {[4.5, 4.0].map((star) => (
+                        <TouchableOpacity
+                            key={`star-${star}`}
+                            style={[
+                                styles.filterTab, 
+                                { borderColor: C.borderSoft || '#333', flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 6 }, 
+                                minRating === star ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }
+                            ]}
+                            onPress={() => setMinRating(prev => prev === star ? 0 : star)}
+                        >
+                            <Ionicons name="star" size={14} color={minRating === star ? '#000' : C.primary} />
+                            <Text style={[styles.filterTabText, minRating === star ? styles.filterTabTextActive : { color: C.textMain }]}>{star}+</Text>
+                        </TouchableOpacity>
+                    ))}
+
+                    <View style={{ width: 1, backgroundColor: C.borderSoft || '#333', marginVertical: 8, marginHorizontal: 4 }} />
+
+                    {['Pool', 'WiFi', 'Nile View', 'Beach', 'Spa'].map((amenity) => {
+                        const isActive = selectedAmenities.includes(amenity);
+                        return (
+                            <TouchableOpacity
+                                key={`am-${amenity}`}
+                                style={[
+                                    styles.filterTab, 
+                                    { borderColor: C.borderSoft || '#333' }, 
+                                    isActive ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }
+                                ]}
+                                onPress={() => setSelectedAmenities(prev => isActive ? prev.filter(a => a !== amenity) : [...prev, amenity])}
+                            >
+                                <Text style={[styles.filterTabText, isActive ? styles.filterTabTextActive : { color: C.textMain }]}>{isRTL ? t(amenity) || amenity : amenity}</Text>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </ScrollView>
             </View>
 
             <FlatList
@@ -232,6 +307,7 @@ const styles = StyleSheet.create({
     header: {
         paddingTop: SPACING.lg,
         paddingBottom: SPACING.md,
+        paddingHorizontal: SPACING.md,
     },
     headerTop: {
         flexDirection: 'row',

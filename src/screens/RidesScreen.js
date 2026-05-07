@@ -211,12 +211,11 @@ export default function RidesScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
 
         {serviceType === 'fixed_trip' && (
-          <FlatList
-            data={FIXED_TRIPS}
-            keyExtractor={i => i.id}
-            renderItem={renderFixedTrip}
-            scrollEnabled={false}
-          />
+          FIXED_TRIPS.map(item => (
+            <View key={item.id}>
+              {renderFixedTrip({ item })}
+            </View>
+          ))
         )}
 
         {serviceType !== 'fixed_trip' && (

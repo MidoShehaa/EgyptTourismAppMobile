@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View, Text, StyleSheet, ScrollView, TouchableOpacity,
-    TextInput, Modal, FlatList, Alert, StatusBar
+    TextInput, Modal, FlatList, Alert, StatusBar, ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -58,18 +58,17 @@ function ItemCard({ title, subtitle, onEdit, onDelete, isBuiltIn }) {
                 <Text style={styles.itemTitle} numberOfLines={1}>{title}</Text>
                 <Text style={styles.itemSub} numberOfLines={1}>{subtitle}</Text>
             </View>
-            {isBuiltIn ? (
-                <View style={styles.builtInBadge}><Text style={styles.builtInText}>BUILT-IN</Text></View>
-            ) : (
-                <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <TouchableOpacity onPress={onEdit} style={styles.iconBtn}>
-                        <Ionicons name="pencil" size={16} color="#CC9933" />
-                    </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+                {isBuiltIn && <View style={styles.builtInBadge}><Text style={styles.builtInText}>BUILT-IN</Text></View>}
+                <TouchableOpacity onPress={onEdit} style={styles.iconBtn}>
+                    <Ionicons name="pencil" size={16} color="#CC9933" />
+                </TouchableOpacity>
+                {!isBuiltIn && (
                     <TouchableOpacity onPress={onDelete} style={[styles.iconBtn, { borderColor: '#EF4444' }]}>
                         <Ionicons name="trash" size={16} color="#EF4444" />
                     </TouchableOpacity>
-                </View>
-            )}
+                )}
+            </View>
         </View>
     );
 }
@@ -196,12 +195,28 @@ export default function AdminPanel({ navigation }) {
     const [activeTab, setActiveTab] = useState(0);
     const [modal, setModal] = useState(null); // { type: 'place'|'hotel'|'trip', mode: 'add'|'edit', item? }
     const [adminName, setAdminName] = useState('');
+    const [isAuthed, setIsAuthed] = useState(false);
 
-    React.useEffect(() => {
-        import('../utils/adminAuth').then(({ getAdminUsername }) => {
-            getAdminUsername().then(name => { if (name) setAdminName(name); });
+    useEffect(() => {
+        import('../utils/adminAuth').then(({ isAdminSetup, getAdminUsername }) => {
+            isAdminSetup().then(setup => {
+                if (!setup) {
+                    navigation.replace('AdminAuth');
+                } else {
+                    setIsAuthed(true);
+                    getAdminUsername().then(name => { if (name) setAdminName(name); });
+                }
+            });
         });
     }, []);
+
+    if (!isAuthed) {
+        return (
+            <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="#4CD8D0" />
+            </View>
+        );
+    }
 
     const closeModal = () => setModal(null);
 
