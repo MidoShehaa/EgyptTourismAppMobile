@@ -4,12 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { CULTURAL_DATA } from '../constants/culturalData';
 import { PHRASEBOOK_DATA } from '../constants/phrasebookData';
 import { COLORS, DARK_COLORS, SPACING, FONTS } from '../constants/theme';
-import { useUser } from '../store/UserContext';
+import { useSettings } from '../store/SettingsContext';
 
 const { width, height } = Dimensions.get('window');
 
 export default function CulturalInsight({ city }) {
-    const { settings } = useUser();
+    const { settings } = useSettings();
     const isDark = settings?.darkMode === true;
     const isRTL = settings?.language === 'ar';
     const C = isDark ? DARK_COLORS : COLORS;

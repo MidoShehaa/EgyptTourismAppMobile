@@ -1,18 +1,24 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Modal, TextInput, Platform, Dimensions, ScrollView, Linking } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, Platform, Dimensions, ScrollView, Linking, RefreshControl } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import * as Haptics from 'expo-haptics';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
-import { useUser } from '../store/UserContext';
+import { useSettings } from '../store/SettingsContext';
+import { useData } from '../store/DataContext';
+import { usePlanner } from '../store/PlannerContext';
 import DynamicBackground from '../components/DynamicBackground';
 import CulturalInsight from '../components/CulturalInsight';
 import SafeImage from '../components/SafeImage';
 import { WHATSAPP_NUMBER } from '../constants/config';
 
 export default function HotelsScreen({ route, navigation }) {
-    const { settings, addActivityToPlanner, t, showToast, hotels, isLoading } = useUser();
+    const { settings, t, showToast } = useSettings();
+    const { hotels, isLoading } = useData();
+    const { addActivityToPlanner } = usePlanner();
     const filterCity = route?.params?.city;
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [minRating, setMinRating] = useState(0);
@@ -20,6 +26,13 @@ export default function HotelsScreen({ route, navigation }) {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedHotel, setSelectedHotel] = useState(null);
     const [dayNumber, setDayNumber] = useState('1');
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        setTimeout(() => setRefreshing(false), 1000);
+    }, []);
 
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
@@ -123,7 +136,7 @@ export default function HotelsScreen({ route, navigation }) {
                                 onPress={() => {
                                     const message = isRTL ? `مرحباً، أود حجز ${item.nameAr || item.name} في ${item.cityAr || item.city}.` : `Hello, I'd like to book ${item.nameEn || item.name} in ${item.cityEn || item.city}.`;
                                     Linking.openURL(`whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(message)}`).catch(() => {
-                                        showToast(isRTL ? 'تطبيق واتساب غير موجود' : 'WhatsApp is not installed', 'error');
+                                        showToast(t('whatsappNotInstalled'), 'error');
                                     });
                                 }}
                             >
@@ -135,7 +148,7 @@ export default function HotelsScreen({ route, navigation }) {
                                     const hotelSearchName = encodeURIComponent(item.nameEn || item.name);
                                     const bookingUrl = `https://www.booking.com/search.html?ss=${hotelSearchName}+${encodeURIComponent(item.cityEn || item.city)}+Egypt`;
                                     Linking.openURL(bookingUrl).catch(() => {
-                                        showToast(isRTL ? 'تعذر فتح Booking.com' : 'Could not open Booking.com', 'error');
+                                        showToast(t('couldNotOpenBooking'), 'error');
                                     });
                                 }}
                             >
@@ -218,7 +231,10 @@ export default function HotelsScreen({ route, navigation }) {
                                 { borderColor: C.borderSoft || '#333', flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 6 }, 
                                 minRating === star ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }
                             ]}
-                            onPress={() => setMinRating(prev => prev === star ? 0 : star)}
+                            onPress={() => {
+                            Haptics.selectionAsync();
+                            setMinRating(prev => prev === star ? 0 : star);
+                        }}
                         >
                             <Ionicons name="star" size={14} color={minRating === star ? '#000' : C.primary} />
                             <Text style={[styles.filterTabText, minRating === star ? styles.filterTabTextActive : { color: C.textMain }]}>{star}+</Text>
@@ -246,12 +262,16 @@ export default function HotelsScreen({ route, navigation }) {
                 </ScrollView>
             </View>
 
-            <FlatList
+            <FlashList
                 data={filteredHotels}
                 renderItem={renderHotelCard}
                 keyExtractor={item => item.id.toString()}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
+                estimatedItemSize={400}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />
+                }
             />
 
             {/* Cultural Floating Insight - show only if a specific city is being filtered */}

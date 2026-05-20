@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 import * as Crypto from 'expo-crypto';
 
@@ -22,7 +22,7 @@ async function hashPassword(password) {
  */
 export async function isAdminSetup() {
     try {
-        const data = await AsyncStorage.getItem(ADMIN_KEY);
+        const data = await SecureStore.getItemAsync(ADMIN_KEY);
         if (!data) return false;
         const creds = JSON.parse(data);
         return !!(creds && creds.passwordHash);
@@ -50,7 +50,7 @@ export async function setupAdminCredentials(username, password) {
             passwordHash: hashed,
             createdAt: new Date().toISOString(),
         };
-        await AsyncStorage.setItem(ADMIN_KEY, JSON.stringify(creds));
+        await SecureStore.setItemAsync(ADMIN_KEY, JSON.stringify(creds));
         return { ok: true };
     } catch (e) {
         return { ok: false, error: 'Failed to save credentials.' };
@@ -69,7 +69,7 @@ export async function verifyAdminLogin(username, password) {
     }
 
     try {
-        const data = await AsyncStorage.getItem(ADMIN_KEY);
+        const data = await SecureStore.getItemAsync(ADMIN_KEY);
         if (!data) return { ok: false, error: 'Admin not set up.' };
         const creds = JSON.parse(data);
         const usernameMatch = creds.username === username.trim().toLowerCase();
@@ -103,7 +103,7 @@ export async function verifyAdminLogin(username, password) {
  */
 export async function changeAdminPassword(oldPassword, newPassword) {
     try {
-        const data = await AsyncStorage.getItem(ADMIN_KEY);
+        const data = await SecureStore.getItemAsync(ADMIN_KEY);
         if (!data) return { ok: false, error: 'Admin not set up.' };
         const creds = JSON.parse(data);
         
@@ -118,7 +118,7 @@ export async function changeAdminPassword(oldPassword, newPassword) {
         const newHashed = await hashPassword(newPassword);
         creds.passwordHash = newHashed;
         creds.updatedAt = new Date().toISOString();
-        await AsyncStorage.setItem(ADMIN_KEY, JSON.stringify(creds));
+        await SecureStore.setItemAsync(ADMIN_KEY, JSON.stringify(creds));
         return { ok: true };
     } catch {
         return { ok: false, error: 'Failed to change password.' };
@@ -130,7 +130,7 @@ export async function changeAdminPassword(oldPassword, newPassword) {
  */
 export async function getAdminUsername() {
     try {
-        const data = await AsyncStorage.getItem(ADMIN_KEY);
+        const data = await SecureStore.getItemAsync(ADMIN_KEY);
         if (!data) return null;
         const creds = JSON.parse(data);
         return creds.username || null;

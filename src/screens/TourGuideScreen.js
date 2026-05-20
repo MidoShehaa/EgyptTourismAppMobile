@@ -1,9 +1,11 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '../store/UserContext';
-import { COLORS, DARK_COLORS } from '../constants/theme';
+import { BlurView } from 'expo-blur';
+import { useSettings } from '../store/SettingsContext';
+import { COLORS, DARK_COLORS, getFontFamily } from '../constants/theme';
 import DynamicBackground from '../components/DynamicBackground';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -68,7 +70,7 @@ function findResponse(query, isRTL) {
 }
 
 export default function TourGuideScreen({ navigation }) {
-    const { settings } = useUser();
+    const { settings, t } = useSettings();
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
@@ -94,18 +96,20 @@ export default function TourGuideScreen({ navigation }) {
 
     const renderMessage = ({ item }) => {
         const isUser = item.sender === 'user';
+        const bubbleStyle = [
+            styles.messageBubble,
+            isUser ? styles.userBubble : [styles.botBubble, { backgroundColor: C.bgElevated }],
+            isUser ? (isRTL ? { alignSelf: 'flex-start' } : { alignSelf: 'flex-end' }) : (isRTL ? { alignSelf: 'flex-end' } : { alignSelf: 'flex-start' }),
+        ];
+
         return (
-            <View style={[
-                styles.messageBubble,
-                isUser ? styles.userBubble : [styles.botBubble, { backgroundColor: C.bgElevated }],
-                isUser ? (isRTL ? { alignSelf: 'flex-start' } : { alignSelf: 'flex-end' }) : (isRTL ? { alignSelf: 'flex-end' } : { alignSelf: 'flex-start' }),
-            ]}>
+            <View style={bubbleStyle}>
                 {!isUser && (
                     <View style={[styles.botAvatar, { backgroundColor: C.primary }]}>
                         <Text style={{ fontSize: 16 }}>🏛️</Text>
                     </View>
                 )}
-                <Text style={[styles.messageText, { color: isUser ? '#fff' : C.textMain }, isRTL && { textAlign: 'right' }]}>
+                <Text style={[styles.messageText, { color: isUser ? '#fff' : C.textMain, fontFamily: getFontFamily(isRTL, 'regular') }, isRTL && { textAlign: 'right' }]}>
                     {item.text}
                 </Text>
             </View>
@@ -135,17 +139,18 @@ export default function TourGuideScreen({ navigation }) {
                     <Ionicons name={isRTL ? "arrow-forward" : "arrow-back"} size={28} color={C.textMain} />
                 </TouchableOpacity>
                 <View style={{ flex: 1 }}>
-                    <Text style={[styles.title, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>
-                        {isRTL ? '🤖 المرشد السياحي' : '🤖 Tour Guide AI'}
+                    <Text style={[styles.title, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }, isRTL && { textAlign: 'right' }]}>
+                        {t('tourGuideTitle')}
                     </Text>
-                    <Text style={[styles.subtitle, { color: C.textMuted }, isRTL && { textAlign: 'right' }]}>
-                        {isRTL ? 'اسألني أي حاجة عن مصر' : 'Ask me anything about Egypt'}
+                    <Text style={[styles.subtitle, { color: C.textMuted, fontFamily: getFontFamily(isRTL, 'regular') }, isRTL && { textAlign: 'right' }]}>
+                        {t('tourGuideSubtitle')}
                     </Text>
                 </View>
             </View>
 
             <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={90}>
-                <FlatList
+                <FlashList
+                    estimatedItemSize={80}
                     ref={flatListRef}
                     data={messages}
                     keyExtractor={item => item.id}
@@ -161,26 +166,28 @@ export default function TourGuideScreen({ navigation }) {
                                     style={[styles.quickChip, { backgroundColor: C.bgElevated, borderColor: C.primary + '40' }]}
                                     onPress={() => { setInput(q); }}
                                 >
-                                    <Text style={[styles.quickText, { color: C.primary }]}>{q}</Text>
+                                    <Text style={[styles.quickText, { color: C.primary, fontFamily: getFontFamily(isRTL, 'bold') }]}>{q}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
                     )}
                 />
 
-                <View style={[styles.inputRow, { backgroundColor: C.bgElevated }, isRTL && { flexDirection: 'row-reverse' }]}>
-                    <TextInput
-                        style={[styles.textInput, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}
-                        placeholder={isRTL ? 'اكتب سؤالك هنا...' : 'Ask about Egypt...'}
-                        placeholderTextColor={C.textMuted}
-                        value={input}
-                        onChangeText={setInput}
-                        onSubmitEditing={sendMessage}
-                        returnKeyType="send"
-                    />
-                    <TouchableOpacity style={[styles.sendBtn, { backgroundColor: C.primary }]} onPress={sendMessage}>
-                        <Ionicons name={isRTL ? "arrow-back" : "arrow-forward"} size={22} color="#000" />
-                    </TouchableOpacity>
+                <View style={[styles.inputRowContainer, { marginHorizontal: 20, marginBottom: 30, borderRadius: 28, overflow: 'hidden' }]}>
+                    <BlurView intensity={isDark ? 30 : 60} tint={isDark ? "dark" : "light"} style={[styles.inputRow, { backgroundColor: isDark ? 'transparent' : 'rgba(255,255,255,0.7)', borderWidth: 1, borderColor: C.borderSoft || '#e0e0e0' }, isRTL && { flexDirection: 'row-reverse' }]}>
+                        <TextInput
+                            style={[styles.textInput, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'regular'), textAlign: isRTL ? 'right' : 'left' }]}
+                            placeholder={t('tourGuidePlaceholder')}
+                            placeholderTextColor={C.textMuted}
+                            value={input}
+                            onChangeText={setInput}
+                            onSubmitEditing={sendMessage}
+                            returnKeyType="send"
+                        />
+                        <TouchableOpacity style={[styles.sendBtn, { backgroundColor: C.primary }]} onPress={sendMessage}>
+                            <Ionicons name={isRTL ? "arrow-back" : "arrow-forward"} size={22} color="#000" />
+                        </TouchableOpacity>
+                    </BlurView>
                 </View>
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -202,7 +209,7 @@ const styles = StyleSheet.create({
     quickQuestionsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 10 },
     quickChip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, borderWidth: 1 },
     quickText: { fontSize: 13, fontWeight: '700' },
-    inputRow: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 20, marginBottom: 30, borderRadius: 28, paddingHorizontal: 6, paddingVertical: 6, gap: 8 },
+    inputRow: { flexDirection: 'row', alignItems: 'center', borderRadius: 28, paddingHorizontal: 6, paddingVertical: 6, gap: 8 },
     textInput: { flex: 1, height: 44, paddingHorizontal: 16, fontSize: 16, fontWeight: '600' },
     sendBtn: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
 });

@@ -1,11 +1,9 @@
 import React, { useState, useCallback } from 'react';
-import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet,
-  FlatList, Image, Modal, Linking, Platform, StatusBar
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Linking, Platform, StatusBar } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '../store/UserContext';
+import { useSettings } from '../store/SettingsContext';
 import { COLORS, DARK_COLORS, SPACING } from '../constants/theme';
 import {
   SERVICE_TYPES, VEHICLE_TYPES, FIXED_TRIPS,
@@ -13,6 +11,8 @@ import {
 } from '../constants/ridesData';
 import { WHATSAPP_NUMBER } from '../constants/config';
 import DynamicBackground from '../components/DynamicBackground';
+import { FlashList } from '@shopify/flash-list';
+import SafeImage from '../components/SafeImage';
 
 const CITIES = Object.keys(CITY_BASE_RATES);
 
@@ -49,7 +49,7 @@ function bookViaWhatsApp(serviceType, city, vehicle, hours, days, trip, isRTL) {
 }
 
 export default function RidesScreen() {
-  const { settings, t } = useUser();
+  const { settings, t } = useSettings();
   const isRTL = settings?.language === 'ar';
   const isDark = settings?.darkMode === true;
   const C = isDark ? DARK_COLORS : COLORS;
@@ -115,32 +115,33 @@ export default function RidesScreen() {
 
   );
 
-  const renderFixedTrip = ({ item }) => (
-    <TouchableOpacity
-      style={styles.tripCard}
-      onPress={() => { setTripModal(item); setServiceType('fixed_trip'); }}
-    >
-      <Image source={{ uri: item.imageUrl }} style={styles.tripImage} />
-      <View style={styles.tripOverlay} />
-      <View style={styles.tripContent}>
-        <View style={styles.tripMeta}>
-          <View style={[styles.durationBadge, { backgroundColor: C.primary }]}>
-            <Text style={styles.durationBadgeText}>{item.durationHours}h</Text>
+  const renderFixedTrip = ({ item, index = 0 }) => (
+    <Animated.View entering={FadeInDown.delay(Math.min(index * 50, 500)).duration(400)}>
+      <TouchableOpacity
+        style={styles.tripCard}
+        onPress={() => { setTripModal(item); setServiceType('fixed_trip'); }}
+      >
+        <SafeImage uri={item.imageUrl} style={styles.tripImage} icon="car" />
+        <View style={styles.tripOverlay} />
+        <View style={styles.tripContent}>
+          <View style={styles.tripMeta}>
+            <View style={[styles.durationBadge, { backgroundColor: C.primary }]}>
+              <Text style={styles.durationBadgeText}>{item.durationHours}h</Text>
+            </View>
+            <View style={styles.ratingRow}>
+              <Ionicons name="star" size={12} color={C.primary} />
+              <Text style={[styles.ratingText, { color: '#fff' }]}> {item.rating}</Text>
+            </View>
           </View>
-          <View style={styles.ratingRow}>
-            <Ionicons name="star" size={12} color={C.primary} />
-            <Text style={[styles.ratingText, { color: '#fff' }]}> {item.rating}</Text>
+          <Text style={styles.tripName}>{isRTL ? item.nameAr : item.nameEn}</Text>
+          <Text style={styles.tripRoute}>📍 {item.from}</Text>
+          <View style={styles.priceRow}>
+            <Text style={[styles.tripPrice, { color: C.primary }]}>{item.basePrice.toLocaleString()} EGP</Text>
+            <Ionicons name="arrow-forward-circle" size={24} color={C.primary} />
           </View>
         </View>
-        <Text style={styles.tripName}>{isRTL ? item.nameAr : item.nameEn}</Text>
-        <Text style={styles.tripRoute}>📍 {item.from}</Text>
-        <View style={styles.priceRow}>
-          <Text style={[styles.tripPrice, { color: C.primary }]}>{item.basePrice.toLocaleString()} EGP</Text>
-          <Ionicons name="arrow-forward-circle" size={24} color={C.primary} />
-        </View>
-      </View>
-    </TouchableOpacity>
-
+      </TouchableOpacity>
+    </Animated.View>
   );
 
   const renderHourStep = (step) => (
@@ -180,7 +181,7 @@ export default function RidesScreen() {
           style={[styles.whatsappBtn, { backgroundColor: C.primary }]}
           onPress={() => bookViaWhatsApp(serviceId, selectedCity, selectedVehicle, hours, days, trip, isRTL)}
         >
-          <Text style={styles.whatsappBtnText}>{isRTL ? 'احجز الآن' : 'Book Now'}</Text>
+          <Text style={styles.whatsappBtnText}>{t('bookBtn')}</Text>
           <Ionicons name="arrow-forward" size={18} color="#000" />
         </TouchableOpacity>
       </View>
@@ -194,26 +195,28 @@ export default function RidesScreen() {
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={C.bgMain} />
 
       <View style={styles.header}>
-        <Text style={[styles.title, { color: C.textMain }]}>{isRTL ? 'رحلات سياحية' : 'Tourism Rides'}</Text>
-        <Text style={[styles.subtitle, { color: C.textMuted }]}>{isRTL ? 'سيارات خاصة مع سائق محترف' : 'Private cars with professional drivers'}</Text>
+        <Text style={[styles.title, { color: C.textMain }]}>{t('tourismRides') || 'Tourism Rides'}</Text>
+        <Text style={[styles.subtitle, { color: C.textMuted }]}>{t('ridesSubtitle') || 'Private cars with professional drivers'}</Text>
       </View>
 
-      <FlatList
-        data={SERVICE_TYPES}
-        horizontal
-        keyExtractor={i => i.id}
-        renderItem={renderServiceChip}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.chipList}
-        style={styles.chipRow}
-      />
+      <View style={styles.chipRow}>
+        <FlashList
+          data={SERVICE_TYPES}
+          horizontal
+          keyExtractor={i => i.id}
+          renderItem={renderServiceChip}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipList}
+          estimatedItemSize={120}
+        />
+      </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
 
         {serviceType === 'fixed_trip' && (
-          FIXED_TRIPS.map(item => (
+          FIXED_TRIPS.map((item, index) => (
             <View key={item.id}>
-              {renderFixedTrip({ item })}
+              {renderFixedTrip({ item, index })}
             </View>
           ))
         )}
@@ -222,7 +225,7 @@ export default function RidesScreen() {
           <>
             {serviceType !== 'airport' && (
               <>
-                <Text style={[styles.sectionLabel, { color: C.textMuted }]}>{isRTL ? 'اختر المدينة' : 'SELECT CITY'}</Text>
+                <Text style={[styles.sectionLabel, { color: C.textMuted }]}>{t('selectCity')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cityRow}>
                   {CITIES.map(renderCityChip)}
                 </ScrollView>
@@ -231,7 +234,7 @@ export default function RidesScreen() {
 
             {serviceType === 'airport' && (
               <>
-                <Text style={[styles.sectionLabel, { color: C.textMuted }]}>{isRTL ? 'اختر المطار' : 'SELECT AIRPORT'}</Text>
+                <Text style={[styles.sectionLabel, { color: C.textMuted }]}>{t('selectAirport')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cityRow}>
                   {AIRPORTS.map(ap => (
                     <TouchableOpacity
@@ -252,7 +255,7 @@ export default function RidesScreen() {
 
             {serviceType === 'hourly' && (
               <>
-                <Text style={[styles.sectionLabel, { color: C.textMuted }]}>{isRTL ? 'عدد الساعات' : 'NUMBER OF HOURS'}</Text>
+                <Text style={[styles.sectionLabel, { color: C.textMuted }]}>{t('numberOfHours')}</Text>
                 <View style={styles.stepRow}>
                   {[1,2,3,4,5,6,8,10,12].map(renderHourStep)}
                 </View>
@@ -261,24 +264,24 @@ export default function RidesScreen() {
 
             {serviceType === 'multi_day' && (
               <>
-                <Text style={[styles.sectionLabel, { color: C.textMuted }]}>{isRTL ? 'عدد الأيام' : 'NUMBER OF DAYS'}</Text>
+                <Text style={[styles.sectionLabel, { color: C.textMuted }]}>{t('numberOfDays')}</Text>
                 <View style={styles.stepRow}>
                   {[2,3,4,5,6,7].map(renderDayStep)}
                 </View>
                 <View style={[styles.discountNotice, { backgroundColor: isDark ? '#1a2800' : '#f0fff0', borderColor: '#4CAF50' }]}>
                   <Text style={{ color: '#4CAF50', fontWeight: '800', fontSize: 13 }}>
-                    🎉 {days >= 5 ? '20%' : days >= 3 ? '15%' : '10%'} {isRTL ? 'خصم مضمون!' : 'Discount Applied!'}
+                    🎉 {days >= 5 ? '20%' : days >= 3 ? '15%' : '10%'} {t('discountApplied')}
                   </Text>
                 </View>
               </>
             )}
 
-            <Text style={[styles.sectionLabel, { color: C.textMuted }]}>{isRTL ? 'نوع السيارة' : 'VEHICLE TYPE'}</Text>
+            <Text style={[styles.sectionLabel, { color: C.textMuted }]}>{t('vehicleType')}</Text>
             <View style={styles.vehicleGrid}>
               {VEHICLE_TYPES.map(renderVehicle)}
             </View>
 
-            <Text style={[styles.sectionLabel, { color: C.textMuted }]}>{isRTL ? 'تشمل الخدمة' : 'WHAT\'S INCLUDED'}</Text>
+            <Text style={[styles.sectionLabel, { color: C.textMuted }]}>{t('whatsIncluded')}</Text>
             <View style={[styles.includesCard, { backgroundColor: C.bgCard, borderWidth: 1, borderColor: C.borderSoft || '#e0e0e0' }]}>
               {INCLUDED_FEATURES.map((f, i) => (
                 <View key={i} style={styles.includeRow}>
@@ -299,7 +302,7 @@ export default function RidesScreen() {
         {tripModal && (
           <View style={styles.modalOverlay}>
             <View style={[styles.modalContent, { backgroundColor: C.bgCard }]}>
-              <Image source={{ uri: tripModal.imageUrl }} style={styles.modalImage} />
+              <SafeImage uri={tripModal.imageUrl} style={styles.modalImage} icon="car" />
               <TouchableOpacity style={styles.modalClose} onPress={() => setTripModal(null)}>
                 <Ionicons name="close-circle" size={36} color={C.gold} />
               </TouchableOpacity>
@@ -309,7 +312,7 @@ export default function RidesScreen() {
                   📍 {tripModal.from}{tripModal.to !== tripModal.from ? ` → ${tripModal.to}` : ''} · ⏱ {tripModal.durationHours}h · 🛣 {tripModal.distanceKm}km
                 </Text>
 
-                <Text style={[styles.sectionLabel, { color: C.textMuted, marginTop: 16 }]}>{isRTL ? 'محطات التوقف' : 'STOPS'}</Text>
+                <Text style={[styles.sectionLabel, { color: C.textMuted, marginTop: 16 }]}>{t('stops')}</Text>
                 {tripModal.stops.map((s, i) => (
                   <View key={i} style={styles.stopRow}>
                     <View style={[styles.stopDot, { backgroundColor: C.gold }]} />
@@ -317,7 +320,7 @@ export default function RidesScreen() {
                   </View>
                 ))}
 
-                <Text style={[styles.sectionLabel, { color: C.textMuted, marginTop: 16 }]}>{isRTL ? 'نوع السيارة' : 'VEHICLE TYPE'}</Text>
+                <Text style={[styles.sectionLabel, { color: C.textMuted, marginTop: 16 }]}>{t('vehicleType')}</Text>
                 <View style={styles.vehicleGrid}>
                   {VEHICLE_TYPES.map(renderVehicle)}
                 </View>

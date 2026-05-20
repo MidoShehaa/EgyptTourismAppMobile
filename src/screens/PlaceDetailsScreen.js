@@ -1,21 +1,25 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Dimensions, Modal, TextInput, Platform, StatusBar, Animated } from 'react-native';
-
+import React, { useState, useRef } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions, Modal, TextInput, Platform, StatusBar, Animated } from 'react-native';
+import Reanimated, { FadeInDown, SlideInUp } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
+import { COLORS, DARK_COLORS, SPACING, getFontFamily } from '../constants/theme';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
-import { useUser } from '../store/UserContext';
+import { useSettings } from '../store/SettingsContext';
+import { usePlanner } from '../store/PlannerContext';
 import CulturalInsight from '../components/CulturalInsight';
 import DynamicBackground from '../components/DynamicBackground';
 import SafeImage from '../components/SafeImage';
 import WeatherWidget from '../components/WeatherWidget';
+import ReviewSection from '../components/ReviewSection';
 
 const { width } = Dimensions.get('window');
 
 export default function PlaceDetailsScreen({ route, navigation }) {
     const { place } = route.params;
-    const { toggleFavorite, isFavorite, t, settings, addActivityToPlanner, showToast } = useUser();
+    const { toggleFavorite, isFavorite, addActivityToPlanner } = usePlanner();
+    const { t, settings, showToast } = useSettings();
     const insets = useSafeAreaInsets();
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
@@ -27,8 +31,22 @@ export default function PlaceDetailsScreen({ route, navigation }) {
     const [isPlannerModalVisible, setPlannerModalVisible] = useState(false);
     const [plannerDay, setPlannerDay] = useState('');
     const [isImageViewerVisible, setImageViewerVisible] = useState(false);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const favoriteScale = useRef(new Animated.Value(1)).current;
+
+    const imageList = place.gallery || [place.imageUrl].filter(Boolean);
+
+    const handleToggleFavorite = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        toggleFavorite(place.id);
+        Animated.sequence([
+            Animated.timing(favoriteScale, { toValue: 1.3, duration: 100, useNativeDriver: true }),
+            Animated.spring(favoriteScale, { toValue: 1, friction: 3, tension: 40, useNativeDriver: true })
+        ]).start();
+    };
 
     const handleAddToPlanner = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         setPlannerDay('');
         setPlannerModalVisible(true);
     };
@@ -37,9 +55,11 @@ export default function PlaceDetailsScreen({ route, navigation }) {
         const dayNumber = parseInt(plannerDay, 10);
         if (!isNaN(dayNumber) && dayNumber > 0 && dayNumber <= 30) {
             addActivityToPlanner(dayNumber, { placeId: place.id, time: '09:00 AM', type: 'place' });
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             setPlannerModalVisible(false);
             showToast(`${placeName} ${t('addedToDay')} ${dayNumber}! 🗓️`, 'success', 'calendar');
         } else {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             showToast(t('validDayNumber'), 'error', 'warning');
         }
     };
@@ -51,17 +71,49 @@ export default function PlaceDetailsScreen({ route, navigation }) {
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
                 {/* Image Header - Immersive */}
                 <View style={styles.imageContainer}>
-                    <TouchableOpacity activeOpacity={0.9} onPress={() => setImageViewerVisible(true)}>
-                        <SafeImage 
-                            uri={place.imageUrl}
-                            style={styles.image}
-                            icon="place"
-                            iconSize={80}
-                        />
-                        <View style={[styles.tapHint, isRTL ? { left: 20 } : { right: 20 }, { bottom: 50 }]}>
-                            <Ionicons name="expand-outline" size={16} color="#fff" />
+                    {imageList.length > 1 ? (
+                        <View style={{ flex: 1 }}>
+                            <ScrollView 
+                                horizontal 
+                                pagingEnabled 
+                                showsHorizontalScrollIndicator={false}
+                                onScroll={(e) => {
+                                    const index = Math.round(e.nativeEvent.contentOffset.x / width);
+                                    setCurrentImageIndex(index);
+                                }}
+                                scrollEventThrottle={16}
+                                style={styles.image}
+                            >
+                                {imageList.map((img, idx) => (
+                                    <TouchableOpacity key={idx} activeOpacity={0.9} onPress={() => { setCurrentImageIndex(idx); setImageViewerVisible(true); }} style={{ width }}>
+                                        <SafeImage 
+                                            uri={img}
+                                            style={{ width, height: '100%' }}
+                                            icon="place"
+                                            iconSize={80}
+                                        />
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                            <View style={[styles.paginationDots, { bottom: 60, position: 'absolute', width: '100%', flexDirection: 'row', justifyContent: 'center', gap: 8 }]} pointerEvents="none">
+                                {imageList.map((_, i) => (
+                                    <View key={i} style={[styles.dot, currentImageIndex === i ? { backgroundColor: C.primary, width: 24 } : { backgroundColor: 'rgba(255,255,255,0.4)', width: 8 }]} />
+                                ))}
+                            </View>
                         </View>
-                    </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity activeOpacity={0.9} onPress={() => setImageViewerVisible(true)}>
+                            <SafeImage 
+                                uri={imageList[0]}
+                                style={styles.image}
+                                icon="place"
+                                iconSize={80}
+                            />
+                        </TouchableOpacity>
+                    )}
+                    <View style={[styles.tapHint, isRTL ? { left: 20 } : { right: 20 }, { bottom: imageList.length > 1 ? 80 : 50 }]} pointerEvents="none">
+                        <Ionicons name="expand-outline" size={16} color="#fff" />
+                    </View>
                     
                     {/* Header Controls */}
                     <View style={[styles.headerOverlay, { paddingTop: insets.top + 10 }, isRTL && { flexDirection: 'row-reverse' }]}>
@@ -71,13 +123,15 @@ export default function PlaceDetailsScreen({ route, navigation }) {
                             </BlurView>
                         </TouchableOpacity>
                         
-                        <TouchableOpacity onPress={() => toggleFavorite(place.id)}>
+                        <TouchableOpacity onPress={handleToggleFavorite}>
                             <BlurView intensity={40} tint="dark" style={styles.actionCircle}>
-                                <Ionicons
-                                    name={isFavorite(place.id) ? "heart" : "heart-outline"}
-                                    size={22}
-                                    color={isFavorite(place.id) ? '#FF5252' : '#fff'}
-                                />
+                                <Animated.View style={{ transform: [{ scale: favoriteScale }] }}>
+                                    <Ionicons
+                                        name={isFavorite(place.id) ? "heart" : "heart-outline"}
+                                        size={22}
+                                        color={isFavorite(place.id) ? '#FF5252' : '#fff'}
+                                    />
+                                </Animated.View>
                             </BlurView>
                         </TouchableOpacity>
                     </View>
@@ -85,35 +139,38 @@ export default function PlaceDetailsScreen({ route, navigation }) {
                     {/* Immersive Rating Overlay */}
                     <BlurView intensity={50} tint="dark" style={[styles.imageBadge, isRTL ? { left: 20 } : { right: 20 }]}>
                         <Ionicons name="star" size={14} color={C.primary} />
-                        <Text style={styles.imageBadgeText}>{place.rating}</Text>
+                        <Text style={[styles.imageBadgeText, { fontFamily: getFontFamily(isRTL, 'bold') }]}>{place.rating}</Text>
                     </BlurView>
                 </View>
 
 
                 {/* Content Block */}
-                <View style={[styles.detailsContainer, { backgroundColor: C.bgMain }]}>
+                <Reanimated.View 
+                    entering={SlideInUp.duration(500).springify().damping(18)}
+                    style={[styles.detailsContainer, { backgroundColor: C.bgMain }]}
+                >
                     <View style={isRTL ? { alignItems: 'flex-end' } : { alignItems: 'flex-start' }}>
-                        <Text style={[styles.title, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>
+                        <Text style={[styles.title, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }, isRTL && { textAlign: 'right' }]}>
                             {placeName}
                         </Text>
                         
                         <View style={[styles.locationRow, isRTL && { flexDirection: 'row-reverse' }]}>
                             <Ionicons name="location-sharp" size={16} color={C.primary} />
-                            <Text style={[styles.locationText, { color: C.textMuted }]}>{placeCity}</Text>
+                            <Text style={[styles.locationText, { color: C.textMuted, fontFamily: getFontFamily(isRTL, 'semibold') }]}>{placeCity}</Text>
                         </View>
                     </View>
 
 
-                    <Text style={[styles.description, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>{placeDesc}</Text>
+                    <Text style={[styles.description, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'regular') }, isRTL && { textAlign: 'right' }]}>{placeDesc}</Text>
 
                     {/* Traveler Tip Section - TripAdvisor Inspired */}
                     {place.tip && (
                         <View style={[styles.tipCard, { backgroundColor: C.bgElevated }]}>
                             <View style={[styles.tipHeader, isRTL && { flexDirection: 'row-reverse' }]}>
                                 <Ionicons name="bulb" size={20} color={C.primary} />
-                                <Text style={[styles.tipTitle, { color: C.primary }]}>{isRTL ? 'نصيحة المسافر' : 'TRAVELER TIP'}</Text>
+                                <Text style={[styles.tipTitle, { color: C.primary, fontFamily: getFontFamily(isRTL, 'bold') }]}>{t('travelTip') || 'TRAVELER TIP'}</Text>
                             </View>
-                            <Text style={[styles.tipText, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>{place.tip}</Text>
+                            <Text style={[styles.tipText, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'medium') }, isRTL && { textAlign: 'right' }]}>{place.tip}</Text>
                         </View>
                     )}
 
@@ -122,14 +179,21 @@ export default function PlaceDetailsScreen({ route, navigation }) {
                     <View style={styles.statsGrid}>
                         <View style={[styles.statItem, { backgroundColor: C.bgElevated }]}>
                             <Ionicons name="time-outline" size={20} color={C.primary} />
-                            <Text style={[styles.statValue, { color: C.textMain }]}>{place.duration}</Text>
-                            <Text style={[styles.statLabel, { color: C.textMuted }]}>{t('duration')}</Text>
+                            <Text style={[styles.statValue, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{place.duration}</Text>
+                            <Text style={[styles.statLabel, { color: C.textMuted, fontFamily: getFontFamily(isRTL, 'semibold') }]}>{t('duration')}</Text>
                         </View>
                         <View style={[styles.statItem, { backgroundColor: C.bgElevated }]}>
                             <Ionicons name="ticket-outline" size={20} color={C.primary} />
-                            <Text style={[styles.statValue, { color: C.textMain }]}>{place.price}</Text>
-                            <Text style={[styles.statLabel, { color: C.textMuted }]}>{t('price')}</Text>
+                            <Text style={[styles.statValue, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{place.price}</Text>
+                            <Text style={[styles.statLabel, { color: C.textMuted, fontFamily: getFontFamily(isRTL, 'semibold') }]}>{t('price')}</Text>
                         </View>
+                        {place.openingHours && (
+                            <View style={[styles.statItem, { backgroundColor: C.bgElevated }]}>
+                                <Ionicons name="calendar-outline" size={20} color={C.primary} />
+                                <Text style={[styles.statValue, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{place.openingHours}</Text>
+                                <Text style={[styles.statLabel, { color: C.textMuted, fontFamily: getFontFamily(isRTL, 'semibold') }]}>{t('openingHours') || 'Hours'}</Text>
+                            </View>
+                        )}
                     </View>
 
                     {/* Weather for this city */}
@@ -140,59 +204,32 @@ export default function PlaceDetailsScreen({ route, navigation }) {
 
                     {place.highlights && (
                         <View style={styles.section}>
-                            <Text style={[styles.sectionTitle, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>{t('highlights')}</Text>
+                            <Text style={[styles.sectionTitle, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }, isRTL && { textAlign: 'right' }]}>{t('highlights')}</Text>
                             <View style={styles.highlightsList}>
                                 {place.highlights.map((highlight, index) => (
                                     <View key={index} style={[styles.highlightCard, { backgroundColor: C.bgElevated }, isRTL && { flexDirection: 'row-reverse' }]}>
                                         <Ionicons name="checkmark-circle" size={18} color={C.primary} />
-                                        <Text style={[styles.highlightText, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>{highlight}</Text>
+                                        <Text style={[styles.highlightText, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'medium') }, isRTL && { textAlign: 'right' }]}>{highlight}</Text>
                                     </View>
                                 ))}
                             </View>
                         </View>
                     )}
 
+                    <ReviewSection placeId={place.id} />
 
-                    {/* Community Reviews Section */}
-                    <View style={styles.section}>
-                         <View style={[styles.sectionHeader, isRTL && { flexDirection: 'row-reverse' }]}>
-                            <Text style={[styles.sectionTitle, { color: C.textMain }]}>{isRTL ? 'آراء الزوار' : 'REVIEWS'}</Text>
-                            <View style={styles.reviewCount}>
-                                <Text style={styles.reviewCountText}>3</Text>
-                            </View>
-                        </View>
-                        
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.reviewsScroll}>
-                            {[
-                                { id: 1, name: 'SARAH J.', initial: 'S', rate: 5, comment: isRTL ? 'تجربة مذهلة وتفاصيل دقيقة جداً!' : 'Incredible experience! The history here is palpable.' },
-                                { id: 2, name: 'AHMED M.', initial: 'A', rate: 4, comment: isRTL ? 'مكان يستحق الزيارة بكل تأكيد.' : 'Absolutely stunning, must visit.' },
-                                { id: 3, name: 'ELENA R.', initial: 'E', rate: 5, comment: isRTL ? 'المرشدين هنا محترفين جداً.' : 'Great staff and very informative tours.' },
-                            ].map(review => (
-                                <View key={review.id} style={[styles.reviewCard, { backgroundColor: C.bgCard }]}>
-                                    <View style={[styles.reviewTop, isRTL && { flexDirection: 'row-reverse' }]}>
-                                        <View style={styles.ratingStars}>
-                                            {[...Array(review.rate)].map((_, i) => (
-                                                <Ionicons key={i} name="star" size={12} color="#CC9933" />
-                                            ))}
-                                        </View>
-                                        <Text style={[styles.reviewAuthor, { color: C.textMain }]}>{review.name}</Text>
-                                    </View>
-                                    <Text style={[styles.reviewText, { color: C.textMuted }, isRTL && { textAlign: 'right' }]} numberOfLines={3}>"{review.comment}"</Text>
-                                </View>
-                            ))}
-                        </ScrollView>
-                    </View>
-                </View>
+                </Reanimated.View>
             </ScrollView>
 
             {/* Floating Action Bar */}
             <SafeAreaView style={styles.fabWrapper} edges={['bottom']}>
-                <TouchableOpacity style={[styles.fab, { backgroundColor: C.primary }]} onPress={handleAddToPlanner}>
-                    <Text style={[styles.fabText, { color: '#000' }]}>{t('addToItinerary')}</Text>
-                    <Ionicons name="calendar-outline" size={20} color="#000" style={{ marginLeft: 12 }} />
-                </TouchableOpacity>
+                <Reanimated.View entering={FadeInDown.delay(300).duration(500).springify()}>
+                    <TouchableOpacity style={[styles.fab, { backgroundColor: C.primary }]} onPress={handleAddToPlanner}>
+                        <Text style={[styles.fabText, { color: '#000', fontFamily: getFontFamily(isRTL, 'bold') }]}>{t('addToItinerary')}</Text>
+                        <Ionicons name="calendar-outline" size={20} color="#000" style={{ marginLeft: 12 }} />
+                    </TouchableOpacity>
+                </Reanimated.View>
             </SafeAreaView>
-
 
             {/* Cultural Floating Insight */}
             <CulturalInsight city={place.cityEn} />
@@ -229,15 +266,47 @@ export default function PlaceDetailsScreen({ route, navigation }) {
                     <TouchableOpacity style={styles.imageViewerClose} onPress={() => setImageViewerVisible(false)}>
                         <Ionicons name="close" size={32} color="#fff" />
                     </TouchableOpacity>
-                    <SafeImage
-                        uri={place.imageUrl}
-                        style={styles.imageViewerImage}
-                        icon="place"
-                        iconSize={120}
-                    />
-                    <View style={styles.imageViewerCaption}>
+                    {imageList.length > 1 ? (
+                        <ScrollView 
+                            horizontal 
+                            pagingEnabled 
+                            showsHorizontalScrollIndicator={false}
+                            contentOffset={{ x: currentImageIndex * width, y: 0 }}
+                            onScroll={(e) => {
+                                const index = Math.round(e.nativeEvent.contentOffset.x / width);
+                                setCurrentImageIndex(index);
+                            }}
+                            scrollEventThrottle={16}
+                            style={{ flex: 1, width }}
+                        >
+                            {imageList.map((img, idx) => (
+                                <View key={idx} style={{ width, justifyContent: 'center', alignItems: 'center' }}>
+                                    <SafeImage 
+                                        uri={img} 
+                                        style={styles.imageViewerImage} 
+                                        resizeMode="contain" 
+                                    />
+                                </View>
+                            ))}
+                        </ScrollView>
+                    ) : (
+                        <SafeImage
+                            uri={imageList[0]}
+                            style={styles.imageViewerImage}
+                            icon="place"
+                            iconSize={120}
+                        />
+                    )}
+                    <View style={styles.imageViewerCaption} pointerEvents="none">
                         <Text style={styles.imageViewerText}>{placeName}</Text>
                         <Text style={styles.imageViewerSubtext}>{placeCity}</Text>
+                        {imageList.length > 1 && (
+                            <View style={[styles.paginationDots, { marginTop: 16, flexDirection: 'row', justifyContent: 'center', gap: 8 }]}>
+                                {imageList.map((_, i) => (
+                                    <View key={i} style={[styles.dot, currentImageIndex === i ? { backgroundColor: C.primary, width: 24 } : { backgroundColor: 'rgba(255,255,255,0.4)', width: 8 }]} />
+                                ))}
+                            </View>
+                        )}
                     </View>
                 </View>
             </Modal>
@@ -410,36 +479,6 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         flex: 1,
     },
-    reviewsScroll: {
-        gap: 16,
-        paddingRight: SPACING.lg,
-    },
-    reviewCard: {
-        width: 280,
-        padding: 20,
-        borderRadius: 32,
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.05)',
-    },
-    reviewTop: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    ratingStars: {
-        flexDirection: 'row',
-    },
-    reviewAuthor: {
-        fontSize: 12,
-        fontWeight: '900',
-    },
-    reviewText: {
-        fontSize: 14,
-        fontWeight: '500',
-        lineHeight: 20,
-        opacity: 0.7,
-    },
     fabWrapper: {
         position: 'absolute',
         bottom: 30,
@@ -555,6 +594,10 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         marginTop: 4,
+    },
+    dot: {
+        height: 8,
+        borderRadius: 4,
     },
 });
 

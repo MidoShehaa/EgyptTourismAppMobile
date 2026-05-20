@@ -1,16 +1,22 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Modal, TextInput, Dimensions, ScrollView } from 'react-native';
+import React, { useState, useMemo, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, Dimensions, ScrollView, RefreshControl } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, DARK_COLORS, SPACING } from '../constants/theme';
-import { useUser } from '../store/UserContext';
+import { useSettings } from '../store/SettingsContext';
+import { useData } from '../store/DataContext';
+import { usePlanner } from '../store/PlannerContext';
 import DynamicBackground from '../components/DynamicBackground';
 import SafeImage from '../components/SafeImage';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function DiningScreen({ route, navigation }) {
-    const { settings, addActivityToPlanner, t, showToast, restaurants } = useUser();
+    const { settings, t, showToast } = useSettings();
+    const { restaurants } = useData();
+    const { addActivityToPlanner } = usePlanner();
     const filterMeal = route?.params?.meal || 'All';
     const filterCity = route?.params?.city;
 
@@ -20,6 +26,13 @@ export default function DiningScreen({ route, navigation }) {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedRestaurant, setSelectedRestaurant] = useState(null);
     const [dayNumber, setDayNumber] = useState('1');
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        setTimeout(() => setRefreshing(false), 1000);
+    }, []);
 
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
@@ -127,9 +140,9 @@ export default function DiningScreen({ route, navigation }) {
                         <Ionicons name={isRTL ? 'arrow-forward' : 'arrow-back'} size={20} color={C.textMain} />
                     </TouchableOpacity>
                     <View>
-                        <Text style={[styles.title, { color: C.textMain }]}>{isRTL ? 'المطاعم والكافيهات' : 'Dining & Cafes'}</Text>
+                        <Text style={[styles.title, { color: C.textMain }]}>{t('diningCafes') || 'Dining & Cafes'}</Text>
                         <Text style={[styles.subtitle, { color: C.textMuted }]}>
-                            {filterCity ? `📍 ${filterCity}` : (isRTL ? 'اكتشف أفضل الأكلات' : 'Discover the best tastes')}
+                            {filterCity ? `📍 ${filterCity}` : (t('discoverTastes') || 'Discover the best tastes')}
                         </Text>
                     </View>
                 </View>
@@ -149,13 +162,16 @@ export default function DiningScreen({ route, navigation }) {
                                 { borderColor: C.borderSoft || (isDark ? '#333' : '#e0e0e0') },
                                 selectedMeal === meal ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }
                             ]}
-                            onPress={() => setSelectedMeal(meal)}
+                            onPress={() => {
+                                Haptics.selectionAsync();
+                                setSelectedMeal(meal);
+                            }}
                         >
                             <Text style={[
                                 styles.filterTabText,
                                 selectedMeal === meal ? styles.filterTabTextActive : { color: C.textMain }
                             ]}>
-                                {meal === 'All' ? (isRTL ? 'الكل' : 'All') : (isRTL ? (meal === 'Breakfast' ? 'فطار' : meal === 'Lunch' ? 'غداء' : 'عشاء') : meal)}
+                                {meal === 'All' ? t('mealAll') : (meal === 'Breakfast' ? t('mealBreakfast') : meal === 'Lunch' ? t('mealLunch') : t('mealDinner'))}
                             </Text>
                         </TouchableOpacity>
                     ))}
@@ -168,13 +184,16 @@ export default function DiningScreen({ route, navigation }) {
                             { borderColor: C.borderSoft || (isDark ? '#333' : '#e0e0e0') },
                             selectedCuisine === 'All' ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }
                         ]}
-                        onPress={() => setSelectedCuisine('All')}
+                        onPress={() => {
+                            Haptics.selectionAsync();
+                            setSelectedCuisine('All');
+                        }}
                     >
                         <Text style={[
                             styles.filterTabText,
                             selectedCuisine === 'All' ? styles.filterTabTextActive : { color: C.textMain }
                         ]}>
-                            {isRTL ? 'كل الأكلات' : 'All Cuisines'}
+                            {t('allCuisines')}
                         </Text>
                     </TouchableOpacity>
 
@@ -186,7 +205,10 @@ export default function DiningScreen({ route, navigation }) {
                                 { borderColor: C.borderSoft || '#333' }, 
                                 selectedCuisine === c ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }
                             ]}
-                            onPress={() => setSelectedCuisine(c)}
+                            onPress={() => {
+                                Haptics.selectionAsync();
+                                setSelectedCuisine(c);
+                            }}
                         >
                             <Text style={[styles.filterTabText, selectedCuisine === c ? styles.filterTabTextActive : { color: C.textMain }]}>{c}</Text>
                         </TouchableOpacity>
@@ -194,13 +216,17 @@ export default function DiningScreen({ route, navigation }) {
                 </ScrollView>
             </View>
 
-            <FlatList
+            <FlashList
                 data={filteredRestaurants}
                 renderItem={renderRestaurantCard}
                 keyExtractor={item => item.id.toString()}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
-                ListEmptyComponent={<Text style={{ color: C.textMuted, textAlign: 'center', marginTop: 40 }}>{isRTL ? 'لا توجد نتائج' : 'No results found'}</Text>}
+                estimatedItemSize={340}
+                ListEmptyComponent={<Text style={{ color: C.textMuted, textAlign: 'center', marginTop: 40 }}>{t('noResultsFound')}</Text>}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />
+                }
             />
 
             <Modal

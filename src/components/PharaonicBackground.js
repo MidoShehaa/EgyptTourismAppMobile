@@ -1,16 +1,17 @@
 import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Svg, { Path, Defs, Pattern, Rect, G } from 'react-native-svg';
-import { useUser } from '../store/UserContext';
+import { useSettings } from '../store/SettingsContext';
 import { COLORS, DARK_COLORS } from '../constants/theme';
 
 const { width, height } = Dimensions.get('window');
 
 export default function PharaonicBackground() {
-    const { settings } = useUser();
+    const { settings } = useSettings();
     const isDark = settings?.darkMode === true;
-    const opacity = 0.15;
-    const strokeColor = 'rgba(255, 255, 255, 0.3)';
+    const opacity = 0.2;
+    // Beige/Gold for Dark Mode, Subtle Brown/Gold for Light Mode
+    const strokeColor = isDark ? '#E8C396' : 'rgba(0, 0, 0, 0.08)';
 
     return (
         <View style={StyleSheet.absoluteFillObject} pointerEvents="none">

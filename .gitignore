@@ -30,7 +30,9 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# environment files (Firebase keys etc.)
+.env
+.env.*
 .env*.local
 
 # typescript

@@ -1,20 +1,49 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { FlashList } from '@shopify/flash-list';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '../store/UserContext';
+import { useSettings } from '../store/SettingsContext';
+import { useData } from '../store/DataContext';
 import { COLORS, DARK_COLORS, SPACING } from '../constants/theme';
 import SafeImage from '../components/SafeImage';
 import DynamicBackground from '../components/DynamicBackground';
 
 export default function SearchScreen({ navigation }) {
-    const { settings, t, places, hotels, restaurants } = useUser();
+    const { settings, t } = useSettings();
+    const { places, hotels, restaurants } = useData();
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
 
     const [query, setQuery] = useState('');
     const [filter, setFilter] = useState('All'); // 'All', 'Places', 'Hotels', 'Dining'
+    const [recentSearches, setRecentSearches] = useState([]);
+
+    useEffect(() => {
+        const loadHistory = async () => {
+            try {
+                const history = await AsyncStorage.getItem('@search_history');
+                if (history) setRecentSearches(JSON.parse(history));
+            } catch (e) {}
+        };
+        loadHistory();
+    }, []);
+
+    const saveSearch = async (term) => {
+        if (!term.trim()) return;
+        const newHistory = [term, ...recentSearches.filter(t => t !== term)].slice(0, 5);
+        setRecentSearches(newHistory);
+        await AsyncStorage.setItem('@search_history', JSON.stringify(newHistory));
+    };
+
+    const removeSearch = async (term) => {
+        const newHistory = recentSearches.filter(t => t !== term);
+        setRecentSearches(newHistory);
+        await AsyncStorage.setItem('@search_history', JSON.stringify(newHistory));
+    };
 
     const allData = useMemo(() => {
         const p = (places || []).map(item => ({ ...item, searchType: 'Places' }));
@@ -55,6 +84,7 @@ export default function SearchScreen({ navigation }) {
     };
 
     const handlePress = (item) => {
+        saveSearch(query);
         if (item.searchType === 'Places') {
             navigation.navigate('PlaceDetails', { place: item });
         } else if (item.searchType === 'Hotels') {
@@ -114,50 +144,72 @@ export default function SearchScreen({ navigation }) {
         );
     };
 
-    const renderItem = ({ item }) => {
+    const renderItem = ({ item, index }) => {
         const itemName = isRTL ? (item.nameAr || item.name) : (item.nameEn || item.name);
         const itemCity = isRTL ? (item.cityAr || item.city) : (item.cityEn || item.city);
         const iconType = item.searchType === 'Places' ? 'place' : item.searchType === 'Hotels' ? 'hotel' : 'restaurant';
 
         return (
-            <TouchableOpacity 
-                style={[styles.resultCard, { backgroundColor: C.bgCard, borderColor: 'rgba(255,255,255,0.05)' }, isRTL && { flexDirection: 'row-reverse' }]}
-                activeOpacity={0.8}
-                onPress={() => handlePress(item)}
-            >
-                <View style={styles.imageContainer}>
-                    <SafeImage uri={item.imageUrl || item.image} style={styles.image} icon={iconType} iconSize={24} />
-                </View>
-                
-                <View style={[styles.itemDetails, isRTL ? { paddingRight: 16 } : { paddingLeft: 16 }]}>
-                    <View style={[styles.titleRow, isRTL && { flexDirection: 'row-reverse' }]}>
-                        <Text style={[styles.itemTitle, { color: C.textMain }, isRTL && { textAlign: 'right' }]} numberOfLines={1}>{itemName}</Text>
+            <Animated.View entering={FadeInDown.delay(Math.min(index * 50, 500)).duration(400)}>
+                <TouchableOpacity 
+                    style={[styles.resultCard, { backgroundColor: C.bgCard, borderColor: 'rgba(255,255,255,0.05)' }, isRTL && { flexDirection: 'row-reverse' }]}
+                    activeOpacity={0.8}
+                    onPress={() => handlePress(item)}
+                >
+                    <View style={styles.imageContainer}>
+                        <SafeImage uri={item.imageUrl || item.image} style={styles.image} icon={iconType} iconSize={24} />
                     </View>
                     
-                    <View style={[styles.locationRow, isRTL && { flexDirection: 'row-reverse' }]}>
-                        <Ionicons name="location-sharp" size={14} color={C.primary} />
-                        <Text style={[styles.locationText, { color: C.textMuted }, isRTL && { textAlign: 'right' }]}>{itemCity}</Text>
-                    </View>
-                    
-                    <View style={[styles.typeRow, isRTL && { flexDirection: 'row-reverse' }]}>
-                        <View style={[styles.typeBadge, { backgroundColor: C.bgElevated }]}>
-                            <Ionicons name={getIconForType(item.searchType)} size={12} color={C.primary} />
-                            <Text style={[styles.typeText, { color: C.textMain }]}>{t(`filter${item.searchType}`) || item.searchType}</Text>
+                    <View style={[styles.itemDetails, isRTL ? { paddingRight: 16 } : { paddingLeft: 16 }]}>
+                        <View style={[styles.titleRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                            <Text style={[styles.itemTitle, { color: C.textMain }, isRTL && { textAlign: 'right' }]} numberOfLines={1}>{itemName}</Text>
                         </View>
-                        {item.rating && (
-                            <View style={styles.ratingBadge}>
-                                <Ionicons name="star" size={12} color={C.primary} />
-                                <Text style={styles.ratingText}>{item.rating}</Text>
+                        
+                        <View style={[styles.locationRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                            <Ionicons name="location-sharp" size={14} color={C.primary} />
+                            <Text style={[styles.locationText, { color: C.textMuted }, isRTL && { textAlign: 'right' }]}>{itemCity}</Text>
+                        </View>
+                        
+                        <View style={[styles.typeRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                            <View style={[styles.typeBadge, { backgroundColor: C.bgElevated }]}>
+                                <Ionicons name={getIconForType(item.searchType)} size={12} color={C.primary} />
+                                <Text style={[styles.typeText, { color: C.textMain }]}>{t(`filter${item.searchType}`) || item.searchType}</Text>
                             </View>
-                        )}
+                            {item.rating && (
+                                <View style={styles.ratingBadge}>
+                                    <Ionicons name="star" size={12} color={C.primary} />
+                                    <Text style={styles.ratingText}>{item.rating}</Text>
+                                </View>
+                            )}
+                        </View>
                     </View>
-                </View>
-            </TouchableOpacity>
+                </TouchableOpacity>
+            </Animated.View>
         );
     };
 
     const renderEmptyState = () => {
         if (query.trim() === '' && filter === 'All') {
+            if (recentSearches.length > 0) {
+                return (
+                    <View style={{ marginTop: 20 }}>
+                        <View style={[styles.historyHeader, isRTL && { flexDirection: 'row-reverse' }]}>
+                            <Text style={[styles.historyTitle, { color: C.textMain }]}>{t('recentSearches')}</Text>
+                        </View>
+                        {recentSearches.map((term, i) => (
+                            <View key={i} style={[styles.historyItem, isRTL && { flexDirection: 'row-reverse' }, { borderBottomColor: C.borderSoft || 'rgba(255,255,255,0.05)' }]}>
+                                <TouchableOpacity style={{ flex: 1, flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center' }} onPress={() => setQuery(term)}>
+                                    <Ionicons name="time-outline" size={20} color={C.textMuted} style={{ marginHorizontal: 8 }} />
+                                    <Text style={[styles.historyText, { color: C.textMain }]}>{term}</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => removeSearch(term)} style={{ padding: 4 }}>
+                                    <Ionicons name="close" size={20} color={C.textMuted} />
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                    </View>
+                );
+            }
             return (
                 <View style={styles.emptyState}>
                     <Ionicons name="search-circle-outline" size={100} color={C.textMuted} style={{ opacity: 0.2 }} />
@@ -180,7 +232,8 @@ export default function SearchScreen({ navigation }) {
             {renderFilters()}
             
             <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : null}>
-                <FlatList
+                <FlashList
+                    estimatedItemSize={100}
                     keyboardShouldPersistTaps="handled"
                     data={filteredData}
                     keyExtractor={(item, index) => `${item.searchType}-${item.id || index}`}
@@ -322,5 +375,23 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 16,
         fontWeight: '600',
+    },
+    historyHeader: {
+        paddingHorizontal: 20,
+        marginBottom: 10,
+    },
+    historyTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    historyItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        borderBottomWidth: 1,
+    },
+    historyText: {
+        fontSize: 16,
     },
 });

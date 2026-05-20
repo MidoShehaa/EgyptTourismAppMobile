@@ -1,11 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, DARK_COLORS } from '../constants/theme';
+import { COLORS, DARK_COLORS, getFontFamily } from '../constants/theme';
 import { useNavigation } from '@react-navigation/native';
-import { useUser } from '../store/UserContext';
+import { useSettings } from '../store/SettingsContext';
+import { useData } from '../store/DataContext';
+import { usePlanner } from '../store/PlannerContext';
 import DynamicBackground from '../components/DynamicBackground';
 
 // Category → emoji icon map for pins
@@ -42,17 +45,37 @@ const CITY_COORDS = {
     'Cairo/Gouna':    { lat: 27.3950, lng: 33.6743 },
 };
 
-// Add slight jitter so overlapping city pins don't stack exactly
-const jitter = (val, spread = 0.05) => val + (Math.random() - 0.5) * spread;
+// Add deterministic jitter so overlapping city pins don't stack exactly
+const pseudoRandom = (id) => {
+    const str = String(id);
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash = hash & hash;
+    }
+    const x = Math.sin(hash || 1) * 10000;
+    return x - Math.floor(x);
+};
+const jitter = (val, id, spread = 0.05) => val + (pseudoRandom(id) - 0.5) * spread;
 
 export default function MapScreen() {
     const navigation = useNavigation();
-    const { settings, places, hotels, restaurants, itinerary } = useUser();
+    const { settings, t } = useSettings();
+    const { places, hotels, restaurants } = useData();
+    const { itinerary } = usePlanner();
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
     const [selectedItem, setSelectedItem] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
+    const [isConnected, setIsConnected] = useState(true);
+
+    useEffect(() => {
+        const unsubscribe = NetInfo.addEventListener(state => {
+            setIsConnected(state.isConnected !== false);
+        });
+        return () => unsubscribe();
+    }, []);
 
     const initialRegion = { latitude: 26.8206, longitude: 30.8025, zoom: 6 };
 
@@ -75,7 +98,7 @@ export default function MapScreen() {
 
     // Minimal places with safe emoji (use category fallback)
     const placesMinimal = useMemo(() => (places || [])
-        .filter(p => p.lat && p.lng && p.category !== 'Nightlife')
+        .filter(p => p.lat && p.lng)
         .map(p => ({
             id: p.id,
             lat: p.lat,
@@ -89,7 +112,7 @@ export default function MapScreen() {
         .map(h => {
             const coords = CITY_COORDS[h.cityEn || h.city];
             if (!coords) return null;
-            return { id: h.id, lat: jitter(coords.lat), lng: jitter(coords.lng) };
+            return { id: h.id, lat: jitter(coords.lat, h.id), lng: jitter(coords.lng, h.id + 'lng') };
         })
         .filter(Boolean),
     [hotels]);
@@ -99,7 +122,7 @@ export default function MapScreen() {
         .map(r => {
             const coords = CITY_COORDS[r.city];
             if (!coords) return null;
-            return { id: r.id, lat: jitter(coords.lat, 0.04), lng: jitter(coords.lng, 0.04) };
+            return { id: r.id, lat: jitter(coords.lat, r.id, 0.04), lng: jitter(coords.lng, r.id + 'lng', 0.04) };
         })
         .filter(Boolean),
     [restaurants]);
@@ -212,10 +235,11 @@ export default function MapScreen() {
             <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
             <style>
                 * { box-sizing: border-box; }
-                body { padding: 0; margin: 0; background: #0a0a0a; }
+                body { padding: 0; margin: 0; background: ${isDark ? '#0a0a0a' : '#f0f0f0'}; }
                 #map { height: 100vh; width: 100vw; }
-                .leaflet-container { background: #0a0a0a !important; }
-                .leaflet-tile { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
+                .leaflet-container { background: ${isDark ? '#0a0a0a' : '#f0f0f0'} !important; }
+                .leaflet-tile { filter: ${isDark ? 'invert(100%) hue-rotate(180deg) sepia(0.2) brightness(95%) contrast(90%)' : 'sepia(0.15) hue-rotate(5deg) contrast(1.05)'}; }
+
                 .leaflet-div-icon { background: transparent !important; border: none !important; }
                 .marker-pin {
                     width: 38px; height: 38px; border-radius: 50%;
@@ -278,22 +302,22 @@ export default function MapScreen() {
     };
 
     const FILTERS = [
-        { key: 'all',       icon: 'globe-outline',      label: isRTL ? 'الكل'   : 'All',     count: placesMinimal.length + hotelsMinimal.length + diningMinimal.length },
-        { key: 'places',    icon: 'compass-outline',    label: isRTL ? 'أماكن'  : 'Places',  count: placesMinimal.length },
-        { key: 'hotels',    icon: 'business-outline',   label: isRTL ? 'فنادق'  : 'Hotels',  count: hotelsMinimal.length },
-        { key: 'dining',    icon: 'restaurant-outline', label: isRTL ? 'مطاعم'  : 'Dining',  count: diningMinimal.length },
-        { key: 'itinerary', icon: 'map-outline',        label: isRTL ? 'خطتي'   : 'My Plan', count: itineraryPlaces.length },
+        { key: 'all',       icon: 'globe-outline',      label: t('filterAll') || 'All',     count: placesMinimal.length + hotelsMinimal.length + diningMinimal.length },
+        { key: 'places',    icon: 'compass-outline',    label: t('filterPlaces') || 'Places',  count: placesMinimal.length },
+        { key: 'hotels',    icon: 'business-outline',   label: t('filterHotels') || 'Hotels',  count: hotelsMinimal.length },
+        { key: 'dining',    icon: 'restaurant-outline', label: t('filterDining') || 'Dining',  count: diningMinimal.length },
+        { key: 'itinerary', icon: 'map-outline',        label: t('myTrip') || 'My Plan', count: itineraryPlaces.length },
     ];
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: C.bgMain }]} edges={['top']}>
             <DynamicBackground category="Pharaonic" />
             <View style={[styles.headerBlock, isRTL && { alignItems: 'flex-end' }]}>
-                <Text style={[styles.titleLine, { color: '#fff' }]}>
-                    {isRTL ? 'الخريطة' : 'Explore'}
+                <Text style={[styles.titleLine, { color: '#fff', fontFamily: getFontFamily(isRTL, 'bold') }]}>
+                    {t('mapTitle') || 'Explore'}
                 </Text>
-                <Text style={[styles.headerSubtitle, { color: C.textMuted }]}>
-                    {isRTL ? 'اكتشف معالم مصر' : "Discover Egypt's wonders"}
+                <Text style={[styles.headerSubtitle, { color: C.textMuted, fontFamily: getFontFamily(isRTL, 'medium') }]}>
+                    {t('discoverEgypt') || "Discover Egypt's wonders"}
                 </Text>
             </View>
 
@@ -315,11 +339,11 @@ export default function MapScreen() {
                         onPress={() => { setActiveFilter(f.key); setSelectedItem(null); }}
                     >
                         <Ionicons name={f.icon} size={15} color={activeFilter === f.key ? '#000' : C.textMain} />
-                        <Text style={[styles.filterText, { color: activeFilter === f.key ? '#000' : C.textMain }]}>
+                        <Text style={[styles.filterText, { color: activeFilter === f.key ? '#000' : C.textMain, fontFamily: getFontFamily(isRTL, 'semibold') }]}>
                             {f.label}
                         </Text>
                         <View style={[styles.filterBadge, { backgroundColor: activeFilter === f.key ? 'rgba(0,0,0,0.2)' : C.primary + '30' }]}>
-                            <Text style={[styles.filterBadgeText, { color: activeFilter === f.key ? '#000' : C.primary }]}>
+                            <Text style={[styles.filterBadgeText, { color: activeFilter === f.key ? '#000' : C.primary, fontFamily: getFontFamily(isRTL, 'bold') }]}>
                                 {f.count}
                             </Text>
                         </View>
@@ -329,7 +353,17 @@ export default function MapScreen() {
         </View>
 
             <View style={styles.mapContainer}>
-                {Platform.OS === 'web' ? (
+                {!isConnected ? (
+                    <View style={[styles.emptyState, { backgroundColor: C.bgCard, zIndex: 10 }]}>
+                        <Ionicons name="cloud-offline" size={60} color={C.textMuted} style={{ marginBottom: 16 }} />
+                        <Text style={[styles.emptyTitle, { color: C.textMain }]}>
+                            {isRTL ? 'الخريطة غير متاحة' : 'Map Unavailable'}
+                        </Text>
+                        <Text style={[styles.emptySubtitle, { color: C.textMuted }]}>
+                            {isRTL ? 'يرجى الاتصال بالإنترنت لعرض الخريطة.' : 'Please connect to the internet to view the map.'}
+                        </Text>
+                    </View>
+                ) : Platform.OS === 'web' ? (
                     <iframe srcDoc={mapHtml} style={{ width: '100%', height: '100%', borderWidth: 0 }} />
                 ) : (
                     <WebView
@@ -348,16 +382,16 @@ export default function MapScreen() {
                     <View style={[styles.emptyState, { backgroundColor: 'rgba(0,0,0,0.75)' }]}>
                         <Text style={styles.emptyIcon}>🗺️</Text>
                         <Text style={styles.emptyTitle}>
-                            {isRTL ? 'مفيش خطة رحلة لسه' : 'No Trip Plan Yet'}
+                            {t('noTripPlanYet')}
                         </Text>
                         <Text style={styles.emptySubtitle}>
-                            {isRTL ? 'روح التبويب "خطتي" وأنشئ رحلة ذكية' : 'Go to Planner tab and generate a smart trip'}
+                            {t('goToPlannerHint')}
                         </Text>
                         <TouchableOpacity
                             style={[styles.emptyBtn, { backgroundColor: C.primary }]}
                             onPress={() => navigation.navigate('Planner')}
                         >
-                            <Text style={styles.emptyBtnText}>{isRTL ? 'ابدأ التخطيط' : 'Start Planning'}</Text>
+                            <Text style={styles.emptyBtnText}>{t('startPlanning')}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -388,7 +422,7 @@ export default function MapScreen() {
                             onPress={handleItemPress}
                         >
                             <Text style={styles.detailsButtonText}>
-                                {isRTL ? 'عرض التفاصيل' : 'View Details'}
+                                {t('viewDetails')}
                             </Text>
                             <Ionicons name="arrow-forward" size={18} color="#000" />
                         </TouchableOpacity>

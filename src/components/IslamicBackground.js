@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Svg, { Path, Defs, Pattern, Rect, G, Circle, Polygon } from 'react-native-svg';
-import { useUser } from '../store/UserContext';
+import { useSettings } from '../store/SettingsContext';
 
 const { width, height } = Dimensions.get('window');
 
 export default function IslamicBackground() {
-    const { settings } = useUser();
+    const { settings } = useSettings();
     const isDark = settings?.darkMode === true;
     const opacity = 0.15;
     const strokeColor = 'rgba(255, 255, 255, 0.3)';

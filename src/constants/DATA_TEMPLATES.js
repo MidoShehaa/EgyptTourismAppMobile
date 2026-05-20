@@ -18,6 +18,9 @@ export const PLACE_CATEGORIES = [
     'Medical',
     'Nightlife',
     'Cultural',
+    'Historical',
+    'Snorkeling',
+    'Christian',
 ];
 
 export const HOTEL_CATEGORIES = [
@@ -193,7 +196,7 @@ export function validatePlace(p) {
                                       errors.push(`category must be one of: ${PLACE_CATEGORIES.join(', ')}`);
     if (!p.description?.trim())       errors.push('Arabic description is required');
     if (!p.descriptionEn?.trim())     errors.push('English description is required');
-    if (!p.imageUrl?.startsWith('http')) errors.push('imageUrl must be a valid URL');
+    if (p.imageUrl && !p.imageUrl.startsWith('http') && !p.imageUrl.startsWith('file://') && !p.imageUrl.startsWith('content://')) errors.push('imageUrl must be a valid URL or local image');
     if (typeof p.rating !== 'number' || p.rating < 1 || p.rating > 5)
                                       errors.push('rating must be 1.0 – 5.0');
     if (!p.duration?.trim())          errors.push('duration is required');
@@ -217,7 +220,7 @@ export function validateHotel(h) {
                                      errors.push('rating must be 1.0 – 5.0');
     if (typeof h.price !== 'number' || h.price <= 0)
                                      errors.push('price must be a positive number (EGP per night)');
-    if (!h.image?.startsWith('http')) errors.push('image must be a valid URL');
+    if (h.image && !h.image.startsWith('http') && !h.image.startsWith('file://') && !h.image.startsWith('content://')) errors.push('image must be a valid URL or local image');
     if (!Array.isArray(h.amenities) || h.amenities.length < 1)
                                      errors.push('at least 1 amenity is required');
     return errors;
@@ -238,6 +241,18 @@ export function validateTrip(t) {
                                      errors.push('basePrice must be a positive number');
     if (!Array.isArray(t.stops) || t.stops.length < 1)
                                      errors.push('at least 1 stop is required');
-    if (!t.imageUrl?.startsWith('http')) errors.push('imageUrl must be a valid URL');
+    if (t.imageUrl && !t.imageUrl.startsWith('http') && !t.imageUrl.startsWith('file://') && !t.imageUrl.startsWith('content://')) errors.push('imageUrl must be a valid URL');
+    return errors;
+}
+
+export function validateRestaurant(r) {
+    const errors = [];
+    if (!r.id || r.id <= 0)          errors.push('id must be a positive number');
+    if (!r.name?.trim())             errors.push('name is required');
+    if (!r.city?.trim())             errors.push('city is required');
+    if (!r.cuisine?.trim())          errors.push('cuisine is required');
+    if (typeof r.rating !== 'number' || r.rating < 1 || r.rating > 5)
+                                     errors.push('rating must be 1.0 – 5.0');
+    if (!r.description?.trim())      errors.push('description is required');
     return errors;
 }

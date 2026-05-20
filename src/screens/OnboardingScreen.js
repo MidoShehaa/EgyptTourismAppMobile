@@ -1,40 +1,41 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, Animated, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { FlashList } from '@shopify/flash-list';
+import SafeImage from '../components/SafeImage';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
-import { useUser } from '../store/UserContext';
+import { useSettings } from '../store/SettingsContext';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
-
-const PLACEHOLDER = 'https://via.placeholder.com/800x600/1A1410/CC9933?text=Egypt+Tourism';
 
 const ONBOARDING_DATA = [
     {
         id: '1',
         titleKey: 'onboarding1Title',
         descKey: 'onboarding1Desc',
-        image: 'https://images.unsplash.com/photo-1539650116574-8efeb43e2b45?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Pyramids
-        fallback: PLACEHOLDER,
+        imageUri: 'https://images.unsplash.com/photo-1539650116574-8efeb43e2b50?w=1200&q=80',
+        fallbackColors: ['#1a0a00', '#3d1f00'],
     },
     {
         id: '2',
         titleKey: 'onboarding2Title',
         descKey: 'onboarding2Desc',
-        image: 'https://images.unsplash.com/photo-1596409548398-9fb472c6e61d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Luxor Temple
-        fallback: PLACEHOLDER,
+        imageUri: 'https://images.unsplash.com/photo-1568322445389-f64e0de96218?w=1200&q=80',
+        fallbackColors: ['#0d0d1a', '#1a1a3e'],
     },
     {
         id: '3',
         titleKey: 'onboarding3Title',
         descKey: 'onboarding3Desc',
-        image: 'https://images.unsplash.com/photo-1682687982501-1e58f8100c8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80', // Red Sea / Coral
-        fallback: PLACEHOLDER,
+        imageUri: 'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=1200&q=80',
+        fallbackColors: ['#001a1a', '#003d3d'],
     }
 ];
 
 export default function OnboardingScreen({ navigation }) {
-    const { t, settings, updateSettings } = useUser();
+    const { t, settings, updateSettings } = useSettings();
     const isRTL = settings?.language === 'ar';
     const [currentIndex, setCurrentIndex] = useState(0);
     const [imgErrors, setImgErrors] = useState({});
@@ -44,9 +45,19 @@ export default function OnboardingScreen({ navigation }) {
         navigation.replace('MainTabs');
     };
 
+    const flatListRef = useRef(null);
+
+    const onViewableItemsChanged = useRef(({ viewableItems }) => {
+        if (viewableItems[0]) {
+            setCurrentIndex(viewableItems[0].index);
+        }
+    }).current;
+
+    const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current;
+
     const nextSlide = () => {
         if (currentIndex < ONBOARDING_DATA.length - 1) {
-            setCurrentIndex(currentIndex + 1);
+            flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true });
         } else {
             handleFinish();
         }
@@ -62,20 +73,49 @@ export default function OnboardingScreen({ navigation }) {
         <View style={styles.container}>
             <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
             
-            {/* Background Image */}
-            <Image 
-                key={currentData.id}
-                source={{ 
-                    uri: imgErrors[currentData.id] ? currentData.fallback : currentData.image,
-                    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
-                }} 
-                style={styles.backgroundImage}
-                onError={() => setImgErrors(prev => ({ ...prev, [currentData.id]: true }))}
-            />
-            <View style={styles.darkOverlay} />
+            <View style={{ flex: 1 }}>
+                <FlashList
+                    ref={flatListRef}
+                    data={ONBOARDING_DATA}
+                    horizontal
+                    pagingEnabled
+                    showsHorizontalScrollIndicator={false}
+                    bounces={false}
+                    onViewableItemsChanged={onViewableItemsChanged}
+                    viewabilityConfig={viewabilityConfig}
+                    keyExtractor={item => item.id}
+                    estimatedItemSize={width}
+                    renderItem={({ item }) => (
+                        <View style={{ width, height: '100%' }}>
+                            <LinearGradient colors={item.fallbackColors} style={styles.backgroundImage} />
+                            <SafeImage 
+                                uri={item.imageUri}
+                                style={styles.backgroundImage} 
+                                resizeMode="cover"
+                            />
+                            <View style={styles.darkOverlay} />
+                            <SafeAreaView style={styles.safeArea}>
+                                <View style={{ height: 60 }} />
+                                <View style={styles.centerContent}>
+                                    <View style={styles.contentBox}>
+                                        <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>
+                                            {t(item.titleKey)}
+                                        </Text>
+                                        <View style={[styles.divider, isRTL && { alignSelf: 'flex-end' }]} />
+                                        <Text style={[styles.description, { textAlign: isRTL ? 'right' : 'left' }]}>
+                                            {t(item.descKey)}
+                                        </Text>
+                                    </View>
+                                </View>
+                                <View style={{ height: 100 }} />
+                            </SafeAreaView>
+                        </View>
+                    )}
+                />
+            </View>
 
-            <SafeAreaView style={styles.safeArea}>
-                <View style={[styles.topBar, isRTL && { flexDirection: 'row-reverse' }]}>
+            <View style={[styles.absoluteTop, isRTL && { flexDirection: 'row-reverse' }]}>
+                <SafeAreaView edges={['top']}>
                     <View style={styles.langPill}>
                         <TouchableOpacity 
                             style={[styles.langBtn, settings?.language === 'en' && styles.langBtnActive]}
@@ -90,49 +130,41 @@ export default function OnboardingScreen({ navigation }) {
                             <Text style={[styles.langText, settings?.language === 'ar' && styles.langTextActive]}>AR</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </SafeAreaView>
+            </View>
 
-                <View style={styles.centerContent}>
-                    <View style={styles.contentBox}>
-                        <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>
-                            {t(currentData.titleKey)}
-                        </Text>
-                        <View style={[styles.divider, isRTL && { alignSelf: 'flex-end' }]} />
-                        <Text style={[styles.description, { textAlign: isRTL ? 'right' : 'left' }]}>
-                            {t(currentData.descKey)}
-                        </Text>
-                    </View>
-                </View>
+            <View style={[styles.absoluteBottom, isRTL && { flexDirection: 'row-reverse' }]}>
+                <SafeAreaView edges={['bottom']}>
+                    <View style={[styles.bottomBar, isRTL && { flexDirection: 'row-reverse' }]}>
+                        <View style={styles.indicatorRow}>
+                            {ONBOARDING_DATA.map((_, i) => (
+                                <View
+                                    key={i}
+                                    style={[styles.dot, { 
+                                        width: currentIndex === i ? 24 : 8, 
+                                        backgroundColor: currentIndex === i ? '#CC9933' : 'rgba(255,255,255,0.5)' 
+                                    }]}
+                                />
+                            ))}
+                        </View>
 
-                <View style={[styles.bottomBar, isRTL && { flexDirection: 'row-reverse' }]}>
-                    <View style={styles.indicatorRow}>
-                        {ONBOARDING_DATA.map((_, i) => (
-                            <View
-                                key={i}
-                                style={[styles.dot, { 
-                                    width: currentIndex === i ? 24 : 8, 
-                                    backgroundColor: currentIndex === i ? '#CC9933' : 'rgba(255,255,255,0.5)' 
-                                }]}
+                        <TouchableOpacity 
+                            style={[styles.actionBtn, { backgroundColor: currentIndex === ONBOARDING_DATA.length - 1 ? '#CC9933' : '#333' }]} 
+                            onPress={nextSlide}
+                        >
+                            <Text style={[styles.actionBtnText, { color: currentIndex === ONBOARDING_DATA.length - 1 ? '#000' : '#fff' }]}>
+                                {currentIndex === ONBOARDING_DATA.length - 1 ? t('getStarted') : t('next')}
+                            </Text>
+                            <Ionicons 
+                                name={isRTL ? "arrow-back" : "arrow-forward"} 
+                                size={20} 
+                                color={currentIndex === ONBOARDING_DATA.length - 1 ? '#000' : '#fff'} 
+                                style={isRTL ? { marginRight: 8 } : { marginLeft: 8 }} 
                             />
-                        ))}
+                        </TouchableOpacity>
                     </View>
-
-                    <TouchableOpacity 
-                        style={[styles.actionBtn, { backgroundColor: currentIndex === ONBOARDING_DATA.length - 1 ? '#CC9933' : '#333' }]} 
-                        onPress={nextSlide}
-                    >
-                        <Text style={[styles.actionBtnText, { color: currentIndex === ONBOARDING_DATA.length - 1 ? '#000' : '#fff' }]}>
-                            {currentIndex === ONBOARDING_DATA.length - 1 ? t('getStarted') : t('next')}
-                        </Text>
-                        <Ionicons 
-                            name={isRTL ? "arrow-back" : "arrow-forward"} 
-                            size={20} 
-                            color={currentIndex === ONBOARDING_DATA.length - 1 ? '#000' : '#fff'} 
-                            style={isRTL ? { marginRight: 8 } : { marginLeft: 8 }} 
-                        />
-                    </TouchableOpacity>
-                </View>
-            </SafeAreaView>
+                </SafeAreaView>
+            </View>
         </View>
     );
 }
@@ -154,6 +186,20 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         justifyContent: 'space-between',
+        paddingHorizontal: SPACING.lg,
+    },
+    absoluteTop: {
+        position: 'absolute',
+        top: Platform.OS === 'android' ? StatusBar.currentHeight + SPACING.md : SPACING.xl,
+        left: 0,
+        right: 0,
+        paddingHorizontal: SPACING.lg,
+    },
+    absoluteBottom: {
+        position: 'absolute',
+        bottom: Platform.OS === 'android' ? SPACING.xl : SPACING.xxl,
+        left: 0,
+        right: 0,
         paddingHorizontal: SPACING.lg,
     },
     topBar: {

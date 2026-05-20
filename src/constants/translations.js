@@ -20,11 +20,28 @@ export const TRANSLATIONS = {
         tabRides: 'Rides',
         tabHotels: 'Hotels',
 
+        // New keys
+        explorerTitle: 'Explorer',
+        featuredDestinations: 'Featured Destinations',
+        travelTip: 'Travel Tip',
+        bookFullTrip: 'Book Full Trip',
+        discoverEgypt: 'Discover Egypt',
+        diningCafes: 'Dining & Cafes',
+        discoverTastes: 'Discover the best tastes',
+        practicalInfo: 'Practical Info',
+        allPlaces: 'All Places',
+        nearby: 'Nearby',
+        free: 'Free',
+        paid: 'Paid',
+        emergencyNumbers: 'Emergency Numbers',
+        visaInformation: 'Visa Information',
+        safetyTips: 'Safety Tips',
+
         // Home Screen
-        searchPlaceholder: 'Where to?',
+        homeSearchPlaceholder: 'Where to?',
         trendingNow: 'Trending Now',
         recommendedForYou: 'Recommended for You',
-        categories: 'Categories',
+        categoriesTitle: 'Categories',
         seeAll: 'See All',
         randomSuggestion: 'Daily Suggestion',
 
@@ -79,6 +96,7 @@ export const TRANSLATIONS = {
             Beach: 'Beach',
             Christian: 'Christian / Coptic'
         },
+        // (note: categoriesTitle is the plain string for section headers)
 
         // Place Details
         about: 'About',
@@ -121,12 +139,77 @@ export const TRANSLATIONS = {
         planYourPerfectTrip: 'Plan your perfect trip',
         customItinerary: 'Custom Itinerary',
 
+        // Planner – Traveler Types
+        travelerType: 'TRAVELER TYPE',
+        travelerSolo: 'Solo',
+        travelerCouple: 'Couple',
+        travelerFamily: 'Family',
+        travelerGroup: 'Group',
+
+        // Planner – Trip Style
+        tripStyleLabel: 'TRIP STYLE',
+        tripEconomy: 'Economy',
+        tripComfort: 'Comfort',
+        tripLuxury: 'Luxury',
+
+        // Planner – Hidden Gems
+        hiddenGemsTitle: '💎 Discover Hidden Gems',
+        hiddenGemsSub: 'Add lesser-known but unique spots',
+
+        // Planner – Meal placeholders
+        localLunch: 'Local Lunch (Tap to Select)',
+        fineDinner: 'Fine Dinner (Tap to Select)',
+        chooseHotelIn: 'Choose Hotel in',
+        restaurantLabel: 'Restaurant',
+        checkInHotel: 'Check-in (Hotel)',
+
+        // Planner – Day header
+        dayLabel: 'Day',
+
+        // Planner – Share / Export
+        createdWith: 'Created with Egypt Tourism App',
+        bookBtn: 'Book',
+
+        // Planner – Budget Estimator
+        budgetEstimator: 'Trip Budget Estimator',
+        budgetActivities: 'Activities & Tickets',
+        budgetMeals: 'Meals (Est.)',
+        budgetHotels: 'Hotels (Avg.)',
+        budgetTransport: 'Transport',
+        budgetTotal: 'Estimated Total',
+        budgetDisclaimer: '* These are estimated costs and may vary based on your actual hotel and dining choices.',
+
+        // Planner – Generation messages
+        noMatchPlaces: 'No places match. Try selecting more categories.',
+        longDistanceWarning: '⚠️ Trip includes long-distance travel — book trains/flights in advance',
+        generationError: 'Generation Error',
+        myTripDefault: 'My Trip',
+
+        // Profile – Header
+        settingsSubtitle: 'Personalize your Egypt experience',
+        resetApp: 'Reset App',
+        resetAppMsg: 'This will clear your itinerary and restart the onboarding. Are you sure?',
+        reset: 'Reset',
+        worksOffline: '✅ Works Offline',
+        worksOfflineDesc: 'All places, hotels & dining data available offline',
+
+        // Profile – Nav items
+        myTripStats: 'My Trip Stats',
+        arabicPhrasebook: 'Arabic Phrasebook',
+        currencyConverter: 'Currency Converter',
+        emergencyPractical: 'Emergency & Practical Info',
+
+        // Privacy / Terms dialogs
+        privacyPolicyContent: 'This app does not collect any personal data. All data is stored locally on your device only.',
+        termsContent: 'By using this app, you acknowledge that all information is for guidance only. Prices and schedules may vary.',
+
         // Map
         mapTitle: 'Egypt Map',
         mapSubtitle: 'Discover places nearby',
 
         // Hotels
         hotelsAndStays: 'Hotels & Stays',
+        openingHours: 'Opening Hours',
         findAccommodation: 'Find your perfect accommodation',
         filterAll: 'All',
         hotelsOnly: '🏨 Hotels',
@@ -172,6 +255,65 @@ export const TRANSLATIONS = {
         noPlanToSubmit: 'Your plan is empty. Please add some places first.',
         requestSubmitted: 'Your trip request has been submitted for approval!',
         submissionFailed: 'Failed to submit request. Please try again later.',
+
+        // Hotels / Booking
+        whatsappNotInstalled: 'WhatsApp is not installed',
+        couldNotOpenBooking: 'Could not open Booking.com',
+
+        // Search
+        recentSearches: 'Recent Searches',
+
+        // TripStats Screen
+        myTripStats: 'My Trip Stats',
+        statFavorites: 'Favorites',
+        statCities: 'Cities',
+        statDaysPlanned: 'Days Planned',
+        statActivities: 'Activities',
+        categoryBreakdown: '📊 Category Breakdown',
+        achievements: '🏆 Achievements',
+
+        // MapScreen
+        noTripPlanYet: 'No Trip Plan Yet',
+        goToPlannerHint: 'Go to Planner tab and generate a smart trip',
+        startPlanning: 'Start Planning',
+        viewDetails: 'View Details',
+
+        // DiningScreen
+        allCuisines: 'All Cuisines',
+        noRestaurantsFound: 'No restaurants found in this area.',
+
+        // TourGuideScreen
+        tourGuideTitle: '🧑\u200d🎓 Tour Guide AI',
+        tourGuideSubtitle: 'Ask me anything about Egypt',
+        tourGuidePlaceholder: 'Ask about Egypt...',
+
+        // CurrencyConverterScreen
+        currencyConverterTitle: 'Currency Converter',
+
+        // PhrasebookScreen
+        phrasebookTitle: 'Arabic Phrasebook',
+
+        // RidesScreen
+        selectCity: 'SELECT CITY',
+        selectAirport: 'SELECT AIRPORT',
+        numberOfHours: 'NUMBER OF HOURS',
+        numberOfDays: 'NUMBER OF DAYS',
+        vehicleType: 'VEHICLE TYPE',
+        whatsIncluded: "WHAT'S INCLUDED",
+        stops: 'STOPS',
+        discountApplied: 'Discount Applied!',
+
+        // DiningScreen
+        mealAll: 'All',
+        mealBreakfast: 'Breakfast',
+        mealLunch: 'Lunch',
+        mealDinner: 'Dinner',
+        noResultsFound: 'No results found',
+
+        // EmergencyScreen
+        museumHoursPrices: '🏰 Museum Hours & Prices',
+        embassiesTitle: '🏦 Embassies',
+        publicHolidaysTitle: '📅 Public Holidays',
     },
     ar: {
         // General
@@ -194,11 +336,28 @@ export const TRANSLATIONS = {
         tabRides: 'توصيلات',
         tabHotels: 'فنادق',
 
+        // New keys
+        explorerTitle: 'المستكشف',
+        featuredDestinations: 'الوجهات المميزة',
+        travelTip: 'نصيحة المسافر',
+        bookFullTrip: 'احجز رحلتك كاملة',
+        discoverEgypt: 'اكتشف معالم مصر',
+        diningCafes: 'المطاعم والكافيهات',
+        discoverTastes: 'اكتشف أفضل الأكلات',
+        practicalInfo: 'معلومات عملية',
+        allPlaces: 'كل الأماكن',
+        nearby: 'قريب مني',
+        free: 'مجاني',
+        paid: 'بمقابل',
+        emergencyNumbers: 'أرقام الطوارئ',
+        visaInformation: 'معلومات التأشيرات',
+        safetyTips: 'نصائح أمان',
+
         // Home Screen
-        searchPlaceholder: 'إلى أين؟',
+        homeSearchPlaceholder: 'إلى أين؟',
         trendingNow: 'رائج الآن',
         recommendedForYou: 'مقترح لك',
-        categories: 'التصنيفات',
+        categoriesTitle: 'التصنيفات',
         seeAll: 'عرض الكل',
         randomSuggestion: 'اقتراح اليوم',
 
@@ -253,6 +412,7 @@ export const TRANSLATIONS = {
             Beach: 'شواطئ',
             Christian: 'مسيحي/قبطي'
         },
+        // (note: categoriesTitle is the plain string for section headers)
 
         // Place Details
         about: 'عن المكان',
@@ -295,12 +455,77 @@ export const TRANSLATIONS = {
         planYourPerfectTrip: 'خطط لرحلتك المثالية',
         customItinerary: 'خطة مخصصة',
 
+        // Planner – Traveler Types
+        travelerType: 'نوع المسافر',
+        travelerSolo: 'فردي',
+        travelerCouple: 'ثنائي',
+        travelerFamily: 'عائلي',
+        travelerGroup: 'مجموعة',
+
+        // Planner – Trip Style
+        tripStyleLabel: 'نمط الرحلة',
+        tripEconomy: 'اقتصادية',
+        tripComfort: 'مريحة',
+        tripLuxury: 'فاخرة',
+
+        // Planner – Hidden Gems
+        hiddenGemsTitle: '💎 اكتشف الجواهر الخفية',
+        hiddenGemsSub: 'أضف أماكن أقل شهرة ولكنها مميزة',
+
+        // Planner – Meal placeholders
+        localLunch: 'غداء محلي (اضغط للاختيار)',
+        fineDinner: 'عشاء فاخر (اضغط للاختيار)',
+        chooseHotelIn: 'اختر فندقك في',
+        restaurantLabel: 'مطعم',
+        checkInHotel: 'تسجيل الدخول (فندق)',
+
+        // Planner – Day header
+        dayLabel: 'اليوم',
+
+        // Planner – Share / Export
+        createdWith: 'تم إنشاؤها بواسطة Egypt Tourism App',
+        bookBtn: 'احجز',
+
+        // Planner – Budget Estimator
+        budgetEstimator: 'تقدير ميزانية الرحلة',
+        budgetActivities: 'الأنشطة والتذاكر',
+        budgetMeals: 'الطعام (تقديري)',
+        budgetHotels: 'الفنادق (متوسط)',
+        budgetTransport: 'التنقلات',
+        budgetTotal: 'الإجمالي التقديري',
+        budgetDisclaimer: '* هذه الأسعار تقريبية وقد تتغير حسب اختيارك الفعلي للمطاعم والفنادق.',
+
+        // Planner – Generation messages
+        noMatchPlaces: 'لا توجد أماكن تطابق اهتماماتك. جرب اختيار فئات أكثر.',
+        longDistanceWarning: '⚠️ الرحلة تتضمن سفراً بعيداً — تأكد من حجز القطار أو الطيران مسبقاً',
+        generationError: 'خطأ في توليد الرحلة',
+        myTripDefault: 'رحلتي',
+
+        // Profile – Header
+        settingsSubtitle: 'تخصيص تجربتك في مصر',
+        resetApp: 'إعادة ضبط التطبيق',
+        resetAppMsg: 'سيتم مسح خطتك وإعادة عرض شاشة التعريف. هل أنت متأكد؟',
+        reset: 'إعادة ضبط',
+        worksOffline: '✅ يعمل بدون إنترنت',
+        worksOfflineDesc: 'كل الأماكن والفنادق والمطاعم متاحة بدون نت',
+
+        // Profile – Nav items
+        myTripStats: 'إحصائيات رحلتي',
+        arabicPhrasebook: 'العبارات الشائعة (قاموس)',
+        currencyConverter: 'محول العملات',
+        emergencyPractical: 'معلومات عملية وطوارئ',
+
+        // Privacy / Terms dialogs
+        privacyPolicyContent: 'هذا التطبيق لا يجمع أي بيانات شخصية. جميع البيانات مخزنة محلياً على جهازك فقط.',
+        termsContent: 'باستخدام هذا التطبيق، تقر بأن جميع المعلومات المقدمة للأغراض الإرشادية فقط. الأسعار والمواعيد قد تتغير.',
+
         // Map
         mapTitle: 'خريطة مصر',
         mapSubtitle: 'استكشف الأماكن القريبة',
 
         // Hotels
         hotelsAndStays: 'فنادق وإقامات',
+        openingHours: 'ساعات العمل',
         findAccommodation: 'ابحث عن مكان إقامتك المثالي',
         filterAll: 'الكل',
         hotelsOnly: '🏨 فنادق',
@@ -346,5 +571,64 @@ export const TRANSLATIONS = {
         noPlanToSubmit: 'خطتك فارغة. يرجى إضافة بعض الأماكن أولاً.',
         requestSubmitted: 'تم إرسال طلب رحلتك للمراجعة بنجاح!',
         submissionFailed: 'فشل إرسال الطلب. يرجى المحاولة مرة أخرى لاحقاً.',
+
+        // Hotels / Booking
+        whatsappNotInstalled: 'واتساب غير مثبت',
+        couldNotOpenBooking: 'تعذر فتح Booking.com',
+
+        // Search
+        recentSearches: 'عمليات البحث الأخيرة',
+
+        // TripStats Screen
+        myTripStats: 'إحصائيات رحلتي',
+        statFavorites: 'مكان مفضل',
+        statCities: 'مدينة',
+        statDaysPlanned: 'يوم مخطط',
+        statActivities: 'نشاط في الخطة',
+        categoryBreakdown: '📊 توزيع التصنيفات',
+        achievements: '🏆 الإنجازات',
+
+        // MapScreen
+        noTripPlanYet: 'مفيش خطة رحلة لسه',
+        goToPlannerHint: 'روح التبويب "خطتي" وأنشئ رحلة ذكية',
+        startPlanning: 'ابدأ التخطيط',
+        viewDetails: 'عرض التفاصيل',
+
+        // DiningScreen
+        allCuisines: 'كل المطابخ',
+        noRestaurantsFound: 'لا توجد مطاعم في هذه المنطقة.',
+
+        // TourGuideScreen
+        tourGuideTitle: '🧑\u200d🎓 مرشد سياحي بالذكاء الاصطناعي',
+        tourGuideSubtitle: 'اسألني أي شيء عن مصر',
+        tourGuidePlaceholder: 'اسأل عن مصر...',
+
+        // CurrencyConverterScreen
+        currencyConverterTitle: 'محول العملات',
+
+        // PhrasebookScreen
+        phrasebookTitle: 'قاموس العبارات العربية',
+
+        // RidesScreen
+        selectCity: 'اختر المدينة',
+        selectAirport: 'اختر المطار',
+        numberOfHours: 'عدد الساعات',
+        numberOfDays: 'عدد الأيام',
+        vehicleType: 'نوع السيارة',
+        whatsIncluded: 'تشمل الخدمة',
+        stops: 'محطات التوقف',
+        discountApplied: 'خصم مضمون!',
+
+        // DiningScreen
+        mealAll: 'الكل',
+        mealBreakfast: 'فطور',
+        mealLunch: 'غداء',
+        mealDinner: 'عشاء',
+        noResultsFound: 'لا توجد نتائج',
+
+        // EmergencyScreen
+        museumHoursPrices: '🏰 مواعيد وأسعار المتاحف',
+        embassiesTitle: '🏦 السفارات',
+        publicHolidaysTitle: '📅 الإجازات الرسمية',
     }
 };

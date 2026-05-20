@@ -2,8 +2,11 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '../store/UserContext';
-import { COLORS, DARK_COLORS } from '../constants/theme';
+import Animated, { FadeInDown, FadeInRight, ZoomIn } from 'react-native-reanimated';
+import { useSettings } from '../store/SettingsContext';
+import { useData } from '../store/DataContext';
+import { usePlanner } from '../store/PlannerContext';
+import { COLORS, DARK_COLORS, getFontFamily } from '../constants/theme';
 import { CATEGORIES } from '../constants/placesData';
 import DynamicBackground from '../components/DynamicBackground';
 
@@ -26,7 +29,9 @@ const ACHIEVEMENTS = [
 ];
 
 export default function TripStatsScreen({ navigation }) {
-    const { settings, favorites, itinerary, places } = useUser();
+    const { settings } = useSettings();
+    const { places } = useData();
+    const { favorites, itinerary } = usePlanner();
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
@@ -83,50 +88,50 @@ export default function TripStatsScreen({ navigation }) {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
                     <Ionicons name={isRTL ? "arrow-forward" : "arrow-back"} size={28} color={C.textMain} />
                 </TouchableOpacity>
-                <Text style={[styles.title, { color: C.textMain }]}>{isRTL ? 'إحصائيات رحلتي' : 'My Trip Stats'}</Text>
+                <Text style={[styles.title, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{t('myTripStats') || 'My Trip Stats'}</Text>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
                 {/* Summary Cards */}
-                <View style={styles.statsGrid}>
+                <Animated.View entering={FadeInDown.delay(100).duration(500)} style={styles.statsGrid}>
                     <View style={[styles.statCard, { backgroundColor: C.bgCard }]}>
                         <View style={[styles.statIconCircle, { backgroundColor: '#FFD70020' }]}>
                             <Text style={{ fontSize: 28 }}>❤️</Text>
                         </View>
-                        <Text style={[styles.statNumber, { color: C.textMain }]}>{stats.favCount}</Text>
-                        <Text style={[styles.statLabel, { color: C.textMuted }]}>{isRTL ? 'مكان مفضل' : 'Favorites'}</Text>
+                        <Text style={[styles.statNumber, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{stats.favCount}</Text>
+                        <Text style={[styles.statLabel, { color: C.textMuted, fontFamily: getFontFamily(isRTL, 'medium') }]}>{t('statFavorites') || 'Favorites'}</Text>
                     </View>
 
                     <View style={[styles.statCard, { backgroundColor: C.bgCard }]}>
                         <View style={[styles.statIconCircle, { backgroundColor: '#4A90D920' }]}>
                             <Text style={{ fontSize: 28 }}>🏙️</Text>
                         </View>
-                        <Text style={[styles.statNumber, { color: C.textMain }]}>{stats.citiesCount}</Text>
-                        <Text style={[styles.statLabel, { color: C.textMuted }]}>{isRTL ? 'مدينة' : 'Cities'}</Text>
+                        <Text style={[styles.statNumber, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{stats.citiesCount}</Text>
+                        <Text style={[styles.statLabel, { color: C.textMuted, fontFamily: getFontFamily(isRTL, 'medium') }]}>{t('statCities') || 'Cities'}</Text>
                     </View>
 
                     <View style={[styles.statCard, { backgroundColor: C.bgCard }]}>
                         <View style={[styles.statIconCircle, { backgroundColor: '#2ECC7120' }]}>
                             <Text style={{ fontSize: 28 }}>📅</Text>
                         </View>
-                        <Text style={[styles.statNumber, { color: C.textMain }]}>{stats.daysPlanned}</Text>
-                        <Text style={[styles.statLabel, { color: C.textMuted }]}>{isRTL ? 'يوم مخطط' : 'Days Planned'}</Text>
+                        <Text style={[styles.statNumber, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{stats.daysPlanned}</Text>
+                        <Text style={[styles.statLabel, { color: C.textMuted, fontFamily: getFontFamily(isRTL, 'medium') }]}>{t('statDaysPlanned') || 'Days Planned'}</Text>
                     </View>
 
                     <View style={[styles.statCard, { backgroundColor: C.bgCard }]}>
                         <View style={[styles.statIconCircle, { backgroundColor: '#E74C3C20' }]}>
                             <Text style={{ fontSize: 28 }}>📍</Text>
                         </View>
-                        <Text style={[styles.statNumber, { color: C.textMain }]}>{stats.totalActivities}</Text>
-                        <Text style={[styles.statLabel, { color: C.textMuted }]}>{isRTL ? 'نشاط في الخطة' : 'Activities'}</Text>
+                        <Text style={[styles.statNumber, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{stats.totalActivities}</Text>
+                        <Text style={[styles.statLabel, { color: C.textMuted, fontFamily: getFontFamily(isRTL, 'medium') }]}>{t('statActivities') || 'Activities'}</Text>
                     </View>
-                </View>
+                </Animated.View>
 
                 {/* Category Breakdown */}
                 {Object.keys(stats.categoryBreakdown).length > 0 && (
-                    <View style={styles.section}>
-                        <Text style={[styles.sectionTitle, { color: C.textMain }]}>{isRTL ? '📊 توزيع التصنيفات' : '📊 Category Breakdown'}</Text>
+                    <Animated.View entering={FadeInDown.delay(200).duration(500)} style={styles.section}>
+                        <Text style={[styles.sectionTitle, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }, isRTL && { textAlign: 'right' }]}>{t('categoryBreakdown') || 'Category Breakdown'}</Text>
                         <View style={[styles.breakdownCard, { backgroundColor: C.bgCard }]}>
                             {Object.entries(stats.categoryBreakdown)
                                 .sort(([,a], [,b]) => b - a)
@@ -138,34 +143,35 @@ export default function TripStatsScreen({ navigation }) {
                                         <View key={cat} style={styles.breakdownRow}>
                                             <View style={[styles.breakdownLabel, isRTL && { flexDirection: 'row-reverse' }]}>
                                                 <Text style={{ fontSize: 18 }}>{catInfo?.icon || '📌'}</Text>
-                                                <Text style={[styles.breakdownText, { color: C.textMain }]}>
+                                                <Text style={[styles.breakdownText, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'medium') }]}>
                                                     {isRTL ? (catInfo?.name || cat) : (catInfo?.nameEn || cat)}
                                                 </Text>
                                             </View>
                                             <View style={styles.barContainer}>
-                                                <View style={[styles.barFill, { width: `${barWidth}%`, backgroundColor: C.primary }]} />
+                                                <Animated.View entering={FadeInRight.delay(300).duration(800)} style={[styles.barFill, { width: `${barWidth}%`, backgroundColor: C.primary }]} />
                                             </View>
-                                            <Text style={[styles.breakdownCount, { color: C.primary }]}>{count}</Text>
+                                            <Text style={[styles.breakdownCount, { color: C.primary, fontFamily: getFontFamily(isRTL, 'bold') }]}>{count}</Text>
                                         </View>
                                     );
                                 })}
                         </View>
-                    </View>
+                    </Animated.View>
                 )}
 
                 {/* Achievements */}
-                <View style={styles.section}>
+                <Animated.View entering={FadeInDown.delay(300).duration(500)} style={styles.section}>
                     <View style={[styles.achievementHeader, isRTL && { flexDirection: 'row-reverse' }]}>
-                        <Text style={[styles.sectionTitle, { color: C.textMain }]}>{isRTL ? '🏆 الإنجازات' : '🏆 Achievements'}</Text>
+                        <Text style={[styles.sectionTitle, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{t('achievements') || 'Achievements'}</Text>
                         <View style={[styles.achievementCounter, { backgroundColor: C.primary }]}>
-                            <Text style={styles.achievementCounterText}>{unlockedCount}/{achievements.length}</Text>
+                            <Text style={[styles.achievementCounterText, { fontFamily: getFontFamily(isRTL, 'bold') }]}>{unlockedCount}/{achievements.length}</Text>
                         </View>
                     </View>
 
                     <View style={styles.achievementGrid}>
-                        {achievements.map(ach => (
-                            <View
+                        {achievements.map((ach, index) => (
+                            <Animated.View
                                 key={ach.id}
+                                entering={ZoomIn.delay(400 + index * 50).duration(400)}
                                 style={[
                                     styles.achievementCard,
                                     { backgroundColor: C.bgCard, opacity: ach.unlocked ? 1 : 0.5 },
@@ -173,10 +179,10 @@ export default function TripStatsScreen({ navigation }) {
                                 ]}
                             >
                                 <Text style={styles.achievementIcon}>{ach.icon}</Text>
-                                <Text style={[styles.achievementName, { color: C.textMain }, isRTL && { textAlign: 'center' }]}>
+                                <Text style={[styles.achievementName, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }, isRTL && { textAlign: 'center' }]}>
                                     {isRTL ? ach.nameAr : ach.nameEn}
                                 </Text>
-                                <Text style={[styles.achievementDesc, { color: C.textMuted }, isRTL && { textAlign: 'center' }]}>
+                                <Text style={[styles.achievementDesc, { color: C.textMuted, fontFamily: getFontFamily(isRTL, 'medium') }, isRTL && { textAlign: 'center' }]}>
                                     {isRTL ? ach.descAr : ach.descEn}
                                 </Text>
 
@@ -184,7 +190,7 @@ export default function TripStatsScreen({ navigation }) {
                                 <View style={styles.progressBar}>
                                     <View style={[styles.progressFill, { width: `${ach.progress * 100}%`, backgroundColor: ach.unlocked ? C.primary : C.textMuted }]} />
                                 </View>
-                                <Text style={[styles.progressText, { color: ach.unlocked ? C.primary : C.textMuted }]}>
+                                <Text style={[styles.progressText, { color: ach.unlocked ? C.primary : C.textMuted, fontFamily: getFontFamily(isRTL, 'bold') }]}>
                                     {ach.current}/{ach.threshold}
                                 </Text>
 
@@ -193,10 +199,10 @@ export default function TripStatsScreen({ navigation }) {
                                         <Ionicons name="checkmark" size={12} color="#000" />
                                     </View>
                                 )}
-                            </View>
+                            </Animated.View>
                         ))}
                     </View>
-                </View>
+                </Animated.View>
 
                 <View style={{ height: 100 }} />
             </ScrollView>

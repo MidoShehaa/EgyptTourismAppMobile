@@ -3,19 +3,24 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Platf
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { useUser } from '../store/UserContext';
-import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
+import { useSettings } from '../store/SettingsContext';
+import { useData } from '../store/DataContext';
+import { usePlanner } from '../store/PlannerContext';
+import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS, getFontFamily } from '../constants/theme';
 import { CATEGORIES } from '../constants/placesData';
 import DynamicBackground from '../components/DynamicBackground';
 import SafeImage from '../components/SafeImage';
 import WeatherWidget from '../components/WeatherWidget';
+import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const CARD_WIDTH = SCREEN_WIDTH * 0.7;
 
 export default function HomeScreen({ navigation }) {
-    const { settings, t, places, hotels, isFavorite } = useUser();
+    const { settings, t } = useSettings();
+    const { places, hotels } = useData();
+    const { isFavorite } = usePlanner();
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
@@ -39,17 +44,18 @@ export default function HomeScreen({ navigation }) {
     // Random Suggestion
     const dailySuggestion = useMemo(() => {
         if (!places || places.length === 0) return null;
-        const randomIndex = Math.floor(Math.random() * places.length);
+        const dayOfYear = Math.floor(Date.now() / 86400000);
+        const randomIndex = dayOfYear % places.length;
         return places[randomIndex];
     }, [places]);
 
     const renderHeader = () => (
         <View style={[styles.header, isRTL && { flexDirection: 'row-reverse' }]}>
             <View style={{ flex: 1 }}>
-                <Text style={[styles.greeting, { color: C.textMain, textAlign: isRTL ? 'right' : 'left' }]}>
+                <Text style={[styles.greeting, { color: C.textMain, textAlign: isRTL ? 'right' : 'left', fontFamily: getFontFamily(isRTL, 'semibold') }]}>
                     {t('welcome')}
                 </Text>
-                <Text style={[styles.title, { color: C.primary, textAlign: isRTL ? 'right' : 'left' }]}>
+                <Text style={[styles.title, { color: C.primary, textAlign: isRTL ? 'right' : 'left', fontFamily: getFontFamily(isRTL, 'bold') }]}>
                     {t('appName')}
                 </Text>
             </View>
@@ -83,8 +89,8 @@ export default function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Search')}
         >
             <Ionicons name="search" size={24} color={C.textMuted} />
-            <Text style={[styles.searchText, { color: C.textMuted, textAlign: isRTL ? 'right' : 'left', flex: 1, paddingHorizontal: 12 }]}>
-                {t('searchPlaceholder')}
+            <Text style={[styles.searchText, { color: C.textMuted, textAlign: isRTL ? 'right' : 'left', flex: 1, paddingHorizontal: 12, fontFamily: getFontFamily(isRTL, 'medium') }]}>
+                {t('homeSearchPlaceholder')}
             </Text>
             <View style={[styles.searchFilter, { backgroundColor: C.primary }]}>
                 <Ionicons name="options" size={20} color="#000" />
@@ -95,18 +101,19 @@ export default function HomeScreen({ navigation }) {
     const renderCategories = () => (
         <View style={styles.section}>
             <View style={[styles.sectionHeader, isRTL && { flexDirection: 'row-reverse' }]}>
-                <Text style={[styles.sectionTitle, { color: C.textMain }]}>{t('categories')}</Text>
+                <Text style={[styles.sectionTitle, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{t('categoriesTitle')}</Text>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.categoriesScroll, isRTL && { flexDirection: 'row-reverse' }]}>
-                {CATEGORIES.map(cat => (
-                    <TouchableOpacity 
-                        key={cat.id} 
-                        style={[styles.categoryCard, { backgroundColor: C.bgElevated }]}
-                        onPress={() => navigation.navigate('Explore', { category: cat.id })}
-                    >
-                        <Text style={styles.categoryIcon}>{cat.icon}</Text>
-                        <Text style={[styles.categoryText, { color: C.textMain }]}>{isRTL ? cat.name : cat.nameEn}</Text>
-                    </TouchableOpacity>
+                {CATEGORIES.map((cat, index) => (
+                    <Animated.View key={cat.id} entering={FadeInRight.delay(index * 100).duration(400)}>
+                        <TouchableOpacity 
+                            style={[styles.categoryCard, { backgroundColor: C.bgElevated }]}
+                            onPress={() => navigation.navigate('Explore', { category: cat.id })}
+                        >
+                            <Text style={styles.categoryIcon}>{cat.icon}</Text>
+                            <Text style={[styles.categoryText, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'semibold') }]}>{isRTL ? cat.name : cat.nameEn}</Text>
+                        </TouchableOpacity>
+                    </Animated.View>
                 ))}
             </ScrollView>
         </View>
@@ -211,32 +218,40 @@ export default function HomeScreen({ navigation }) {
                         </TouchableOpacity>
                     </View>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.horizontalScroll, isRTL && { flexDirection: 'row-reverse' }]}>
-                        {trendingPlaces.map(item => renderPlaceCard(item))}
+                        {trendingPlaces.map((item, index) => (
+                            <Animated.View key={item.id} entering={FadeInRight.delay(index * 150).duration(500)}>
+                                {renderPlaceCard(item)}
+                            </Animated.View>
+                        ))}
                     </ScrollView>
                 </View>
 
                 {/* Daily Suggestion */}
                 {dailySuggestion && (
-                    <View style={styles.section}>
+                    <Animated.View entering={FadeInDown.delay(300).duration(500)} style={styles.section}>
                         <View style={[styles.sectionHeader, isRTL && { flexDirection: 'row-reverse' }]}>
-                            <Text style={[styles.sectionTitle, { color: C.textMain }]}>{t('randomSuggestion')}</Text>
+                            <Text style={[styles.sectionTitle, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{t('randomSuggestion')}</Text>
                         </View>
                         <View style={{ paddingHorizontal: 20 }}>
                             {renderPlaceCard(dailySuggestion, true)}
                         </View>
-                    </View>
+                    </Animated.View>
                 )}
 
                 {/* Recommended Hotels */}
                 <View style={[styles.section, { paddingBottom: 100 }]}>
                     <View style={[styles.sectionHeader, isRTL && { flexDirection: 'row-reverse' }]}>
-                        <Text style={[styles.sectionTitle, { color: C.textMain }]}>{t('recommendedForYou')}</Text>
+                        <Text style={[styles.sectionTitle, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{t('recommendedForYou')}</Text>
                         <TouchableOpacity onPress={() => navigation.navigate('Hotels')}>
-                            <Text style={[styles.seeAllText, { color: C.primary }]}>{t('seeAll')}</Text>
+                            <Text style={[styles.seeAllText, { color: C.primary, fontFamily: getFontFamily(isRTL, 'bold') }]}>{t('seeAll')}</Text>
                         </TouchableOpacity>
                     </View>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.horizontalScroll, isRTL && { flexDirection: 'row-reverse' }]}>
-                        {recommendedHotels.map(item => renderHotelCard(item))}
+                        {recommendedHotels.map((item, index) => (
+                            <Animated.View key={item.id} entering={FadeInRight.delay(index * 150).duration(500)}>
+                                {renderHotelCard(item)}
+                            </Animated.View>
+                        ))}
                     </ScrollView>
                 </View>
 

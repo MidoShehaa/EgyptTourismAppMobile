@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '../store/UserContext';
+import { useSettings } from '../store/SettingsContext';
 import { COLORS, DARK_COLORS, SPACING } from '../constants/theme';
 import {
     isAdminSetup,
@@ -15,7 +15,7 @@ import {
 } from '../utils/adminAuth';
 
 export default function AdminAuthScreen({ navigation }) {
-    const { settings, showToast } = useUser();
+    const { settings, showToast } = useSettings();
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
 
@@ -193,6 +193,9 @@ export default function AdminAuthScreen({ navigation }) {
                                         autoCapitalize="none"
                                         autoCorrect={false}
                                     />
+                                    <TouchableOpacity onPress={() => setShowPassword(p => !p)} style={styles.eyeBtn}>
+                                        <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={C.textMuted} />
+                                    </TouchableOpacity>
                                 </View>
                             </>
                         )}

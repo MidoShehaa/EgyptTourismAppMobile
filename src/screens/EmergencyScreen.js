@@ -2,8 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '../store/UserContext';
-import { COLORS, DARK_COLORS } from '../constants/theme';
+import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
+import { useSettings } from '../store/SettingsContext';
+import { COLORS, DARK_COLORS, getFontFamily } from '../constants/theme';
 import DynamicBackground from '../components/DynamicBackground';
 
 const EMERGENCY_NUMBERS = [
@@ -77,7 +78,7 @@ const VISA_INFO_EN = `Most nationalities can obtain a visa on arrival at Egyptia
 const VISA_INFO_AR = `معظم الجنسيات يمكنها الحصول على تأشيرة عند الوصول بالمطارات المصرية مقابل 25$ (دخول واحد) أو 60$ (دخول متعدد). التأشيرة الإلكترونية متاحة على visa2egypt.gov.eg. جواز السفر يجب أن يكون صالحاً لأكثر من 6 أشهر. مواطنو بعض الدول (ماليزيا، كوريا الجنوبية، هونغ كونغ) يحصلون على إعفاء من التأشيرة لمدة 30 يوماً.`;
 
 export default function EmergencyScreen({ navigation }) {
-    const { settings } = useUser();
+    const { settings, t } = useSettings();
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
@@ -86,14 +87,14 @@ export default function EmergencyScreen({ navigation }) {
         Linking.openURL(`tel:${number}`);
     };
 
-    const renderSection = (title, icon, children) => (
-        <View style={styles.section}>
+    const renderSection = (title, icon, children, index) => (
+        <Animated.View entering={FadeInDown.delay(index * 150).duration(500)} style={styles.section}>
             <View style={[styles.sectionHeader, isRTL && { flexDirection: 'row-reverse' }]}>
                 <Ionicons name={icon} size={22} color={C.primary} />
-                <Text style={[styles.sectionTitle, { color: C.textMain }]}>{title}</Text>
+                <Text style={[styles.sectionTitle, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{title}</Text>
             </View>
             {children}
-        </View>
+        </Animated.View>
     );
 
     return (
@@ -104,82 +105,87 @@ export default function EmergencyScreen({ navigation }) {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
                     <Ionicons name={isRTL ? "arrow-forward" : "arrow-back"} size={28} color={C.textMain} />
                 </TouchableOpacity>
-                <Text style={[styles.title, { color: C.textMain }]}>{isRTL ? 'معلومات عملية' : 'Practical Info'}</Text>
+                <Text style={[styles.title, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{t('practicalInfo') || 'Practical Info'}</Text>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
                 {/* Emergency Numbers */}
                 {renderSection(
-                    isRTL ? '📞 أرقام الطوارئ' : '📞 Emergency Numbers',
+                    '📞 ' + (t('emergencyNumbers') || 'Emergency Numbers'),
                     'call-outline',
                     <View style={styles.emergencyGrid}>
-                        {EMERGENCY_NUMBERS.map(item => (
-                            <TouchableOpacity
-                                key={item.id}
-                                style={[styles.emergencyCard, { backgroundColor: C.bgCard }]}
-                                onPress={() => callNumber(item.number)}
-                                activeOpacity={0.8}
-                            >
-                                <View style={[styles.emergencyIconCircle, { backgroundColor: item.color + '20' }]}>
-                                    <Ionicons name={item.icon} size={24} color={item.color} />
-                                </View>
-                                <Text style={[styles.emergencyName, { color: C.textMain }]}>{isRTL ? item.nameAr : item.nameEn}</Text>
-                                <Text style={[styles.emergencyNumber, { color: C.primary }]}>{item.number}</Text>
-                            </TouchableOpacity>
+                        {EMERGENCY_NUMBERS.map((item, idx) => (
+                            <Animated.View entering={ZoomIn.delay(idx * 100).duration(400)} key={item.id} style={{ width: '48%' }}>
+                                <TouchableOpacity
+                                    style={[styles.emergencyCard, { backgroundColor: C.bgCard, width: '100%' }]}
+                                    onPress={() => callNumber(item.number)}
+                                    activeOpacity={0.8}
+                                >
+                                    <View style={[styles.emergencyIconCircle, { backgroundColor: item.color + '20' }]}>
+                                        <Ionicons name={item.icon} size={24} color={item.color} />
+                                    </View>
+                                    <Text style={[styles.emergencyName, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{isRTL ? item.nameAr : item.nameEn}</Text>
+                                    <Text style={[styles.emergencyNumber, { color: C.primary, fontFamily: getFontFamily(isRTL, 'bold') }]}>{item.number}</Text>
+                                </TouchableOpacity>
+                            </Animated.View>
                         ))}
-                    </View>
+                    </View>,
+                    1
                 )}
 
                 {/* Visa Information */}
                 {renderSection(
-                    isRTL ? '🛂 معلومات التأشيرات' : '🛂 Visa Information',
+                    '🛂 ' + (t('visaInformation') || 'Visa Information'),
                     'document-text-outline',
                     <View style={[styles.infoCard, { backgroundColor: C.bgCard }]}>
-                        <Text style={[styles.infoText, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>
+                        <Text style={[styles.infoText, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'medium') }, isRTL && { textAlign: 'right' }]}>
                             {isRTL ? VISA_INFO_AR : VISA_INFO_EN}
                         </Text>
-                    </View>
+                    </View>,
+                    2
                 )}
 
                 {/* Safety Tips */}
                 {renderSection(
-                    isRTL ? '🛡️ نصائح أمان' : '🛡️ Safety Tips',
+                    '🛡️ ' + (t('safetyTips') || 'Safety Tips'),
                     'shield-outline',
                     <View style={[styles.infoCard, { backgroundColor: C.bgCard }]}>
                         {(isRTL ? SAFETY_TIPS_AR : SAFETY_TIPS_EN).map((tip, i) => (
-                            <Text key={i} style={[styles.tipItem, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>
+                            <Text key={i} style={[styles.tipItem, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'medium') }, isRTL && { textAlign: 'right' }]}>
                                 {tip}
                             </Text>
                         ))}
-                    </View>
+                    </View>,
+                    3
                 )}
 
                 {/* Museum Hours & Prices */}
                 {renderSection(
-                    isRTL ? '🏛️ ساعات عمل المتاحف' : '🏛️ Museum Hours & Prices',
+                    t('museumHoursPrices'),
                     'time-outline',
                     <View style={{ gap: 12 }}>
                         {MUSEUM_HOURS.map((m, i) => (
                             <View key={i} style={[styles.museumCard, { backgroundColor: C.bgCard }]}>
-                                <Text style={[styles.museumName, { color: C.textMain }, isRTL && { textAlign: 'right' }]}>
+                                <Text style={[styles.museumName, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }, isRTL && { textAlign: 'right' }]}>
                                     {isRTL ? m.nameAr : m.nameEn}
                                 </Text>
                                 <View style={[styles.museumRow, isRTL && { flexDirection: 'row-reverse' }]}>
                                     <View style={[styles.museumTag, { backgroundColor: C.primary + '20' }]}>
                                         <Ionicons name="time" size={12} color={C.primary} />
-                                        <Text style={[styles.museumTagText, { color: C.primary }]}>{m.hours}</Text>
+                                        <Text style={[styles.museumTagText, { color: C.primary, fontFamily: getFontFamily(isRTL, 'bold') }]}>{m.hours}</Text>
                                     </View>
-                                    <Text style={[styles.museumPrice, { color: C.textMuted }]}>{isRTL ? m.priceAr : m.priceEn}</Text>
+                                    <Text style={[styles.museumPrice, { color: C.textMuted, fontFamily: getFontFamily(isRTL, 'medium') }]}>{isRTL ? m.priceAr : m.priceEn}</Text>
                                 </View>
                             </View>
                         ))}
-                    </View>
+                    </View>,
+                    4
                 )}
 
                 {/* Embassies */}
                 {renderSection(
-                    isRTL ? '🏢 السفارات' : '🏢 Embassies',
+                    t('embassiesTitle'),
                     'business-outline',
                     <View style={{ gap: 12 }}>
                         {EMBASSIES.map((e, i) => (
@@ -188,26 +194,28 @@ export default function EmergencyScreen({ navigation }) {
                                 style={[styles.embassyCard, { backgroundColor: C.bgCard }]}
                                 onPress={() => callNumber(e.phone)}
                             >
-                                <Text style={[styles.embassyCountry, { color: C.textMain }]}>{e.country}</Text>
-                                <Text style={[styles.embassyPhone, { color: C.primary }]}>{e.phone}</Text>
-                                <Text style={[styles.embassyAddress, { color: C.textMuted }]}>{e.address}</Text>
+                                <Text style={[styles.embassyCountry, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'bold') }]}>{e.country}</Text>
+                                <Text style={[styles.embassyPhone, { color: C.primary, fontFamily: getFontFamily(isRTL, 'bold') }]}>{e.phone}</Text>
+                                <Text style={[styles.embassyAddress, { color: C.textMuted, fontFamily: getFontFamily(isRTL, 'medium') }]}>{e.address}</Text>
                             </TouchableOpacity>
                         ))}
-                    </View>
+                    </View>,
+                    5
                 )}
 
                 {/* Public Holidays */}
                 {renderSection(
-                    isRTL ? '📅 الإجازات الرسمية' : '📅 Public Holidays',
+                    t('publicHolidaysTitle'),
                     'calendar-outline',
                     <View style={[styles.infoCard, { backgroundColor: C.bgCard }]}>
                         {HOLIDAYS.map((h, i) => (
                             <View key={i} style={[styles.holidayRow, isRTL && { flexDirection: 'row-reverse' }]}>
-                                <Text style={[styles.holidayDate, { color: C.primary }]}>{h.dateEn}</Text>
-                                <Text style={[styles.holidayName, { color: C.textMain }]}>{isRTL ? h.nameAr : h.nameEn}</Text>
+                                <Text style={[styles.holidayDate, { color: C.primary, fontFamily: getFontFamily(isRTL, 'bold') }]}>{h.dateEn}</Text>
+                                <Text style={[styles.holidayName, { color: C.textMain, fontFamily: getFontFamily(isRTL, 'medium') }]}>{isRTL ? h.nameAr : h.nameEn}</Text>
                             </View>
                         ))}
-                    </View>
+                    </View>,
+                    6
                 )}
 
                 <View style={{ height: 100 }} />

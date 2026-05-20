@@ -3,9 +3,10 @@ import { Text, Platform, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import * as Linking from 'expo-linking';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, DARK_COLORS } from '../constants/theme';
-import { useUser } from '../store/UserContext';
+import { useSettings } from '../store/SettingsContext';
 
 import HomeScreen from '../screens/HomeScreen';
 import PlacesScreen from '../screens/PlacesScreen';
@@ -23,12 +24,16 @@ import AdminAuthScreen from '../screens/AdminAuthScreen';
 import EmergencyScreen from '../screens/EmergencyScreen';
 import TripStatsScreen from '../screens/TripStatsScreen';
 import TourGuideScreen from '../screens/TourGuideScreen';
+import PhrasebookScreen from '../screens/PhrasebookScreen';
+import CurrencyConverterScreen from '../screens/CurrencyConverterScreen';
+import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function TabNavigator() {
-    const { t, settings } = useUser();
+    const { t, settings } = useSettings();
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
 
@@ -88,13 +93,48 @@ function TabNavigator() {
 }
 
 export default function AppNavigator() {
-    const { settings } = useUser();
+    const { settings } = useSettings();
     const hasSeenOnboarding = settings?.hasSeenOnboarding === true;
 
+    const prefix = (() => {
+        try {
+            return Linking.createURL('/');
+        } catch (e) {
+            return 'egypttourism://';
+        }
+    })();
+    const linking = {
+        prefixes: [prefix, 'egypttourism://'],
+        config: {
+            screens: {
+                MainTabs: {
+                    screens: {
+                        Home: 'home',
+                        Explore: 'explore',
+                        Map: 'map',
+                        Planner: 'planner',
+                        Rides: 'rides',
+                        Hotels: 'hotels',
+                    }
+                },
+                PlaceDetails: 'place/:id',
+                Search: 'search',
+                Profile: 'profile',
+                Dining: 'dining/:city',
+                HotelsCity: 'hotels/:city',
+                Emergency: 'emergency',
+                TripStats: 'stats',
+                TourGuide: 'guide',
+                Phrasebook: 'phrasebook',
+                CurrencyConverter: 'currency',
+            }
+        }
+    };
+
     return (
-        <NavigationContainer>
+        <NavigationContainer linking={linking}>
             <Stack.Navigator
-                screenOptions={{ headerShown: false }}
+                screenOptions={{ headerShown: false, animation: 'fade' }}
                 initialRouteName={hasSeenOnboarding ? 'MainTabs' : 'Onboarding'}
             >
                 <Stack.Screen name="Onboarding"   component={OnboardingScreen} />
@@ -109,6 +149,10 @@ export default function AppNavigator() {
                 <Stack.Screen name="Emergency"    component={EmergencyScreen} />
                 <Stack.Screen name="TripStats"     component={TripStatsScreen} />
                 <Stack.Screen name="TourGuide"     component={TourGuideScreen} />
+                <Stack.Screen name="Phrasebook"    component={PhrasebookScreen} />
+                <Stack.Screen name="CurrencyConverter" component={CurrencyConverterScreen} />
+                <Stack.Screen name="Login"         component={LoginScreen} />
+                <Stack.Screen name="Register"      component={RegisterScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );

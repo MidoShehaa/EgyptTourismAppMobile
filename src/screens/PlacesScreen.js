@@ -2,7 +2,6 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
     View,
     Text,
-    FlatList,
     TextInput,
     TouchableOpacity,
     StyleSheet,
@@ -10,20 +9,35 @@ import {
     StatusBar,
     LayoutAnimation,
     Platform,
-    UIManager
+    UIManager,
+    ActivityIndicator,
+    RefreshControl
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 
+import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { CATEGORIES } from '../constants/placesData';
 import { COLORS, DARK_COLORS, SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
-import { useUser } from '../store/UserContext';
+import { useSettings } from '../store/SettingsContext';
+import { useData } from '../store/DataContext';
+import { usePlanner } from '../store/PlannerContext';
 import DynamicBackground from '../components/DynamicBackground';
 import SafeImage from '../components/SafeImage';
+import * as Location from 'expo-location';
 
-
-const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggleFavorite }) => {
+const getDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+};const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggleFavorite }) => {
     const placeName = isRTL ? item.name : item.nameEn;
     const placeCity = isRTL ? item.city : item.cityEn;
     return (
@@ -34,7 +48,7 @@ const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggl
         >
             <View style={[styles.card, { backgroundColor: C.bgCard }]}>
                 <SafeImage 
-                    uri={item.imageUrl}
+                    uri={item.imageUrl || item.image}
                     style={styles.cardImage}
                     icon="place"
                 />
@@ -65,7 +79,9 @@ const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggl
                             <Text style={[styles.cardTitle, isRTL && { textAlign: 'right' }]} numberOfLines={1}>{placeName}</Text>
                             <View style={[styles.locationRow, isRTL && { flexDirection: 'row-reverse' }]}>
                                 <Ionicons name="location-sharp" size={12} color={C.primary} />
-                                <Text style={[styles.locationText, isRTL && { textAlign: 'right' }]}>{placeCity}</Text>
+                                <Text style={[styles.locationText, isRTL && { textAlign: 'right' }]}>
+                                    {placeCity} {item.distance !== undefined ? ` • ${Math.round(item.distance)} km` : ''}
+                                </Text>
                             </View>
                         </View>
                         <View style={styles.priceContainer}>
@@ -80,7 +96,9 @@ const PlaceCard = React.memo(({ item, isRTL, C, t, navigation, isFavorite, toggl
 
 
 export default function PlacesScreen({ navigation, route }) {
-    const { settings, isFavorite, toggleFavorite, t, places } = useUser();
+    const { settings, t, showToast } = useSettings();
+    const { places } = useData();
+    const { isFavorite, toggleFavorite } = usePlanner();
     const isRTL = settings?.language === 'ar';
     const isDark = settings?.darkMode === true;
     const C = isDark ? DARK_COLORS : COLORS;
@@ -90,6 +108,38 @@ export default function PlacesScreen({ navigation, route }) {
     const [selectedCity, setSelectedCity] = useState('All');
     const [minRating, setMinRating] = useState(0);
     const [selectedPriceType, setSelectedPriceType] = useState('All');
+    const [userLocation, setUserLocation] = useState(null);
+    const [isLocating, setIsLocating] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        setTimeout(() => setRefreshing(false), 1000);
+    }, []);
+
+    const handleCityChange = async (city) => {
+        Haptics.selectionAsync();
+        setSelectedCity(city);
+        if (city === 'Nearby' && !userLocation) {
+            setIsLocating(true);
+            try {
+                let { status } = await Location.requestForegroundPermissionsAsync();
+                if (status !== 'granted') {
+                    showToast('Location permission denied', 'error', 'warning');
+                    setSelectedCity('All');
+                    setIsLocating(false);
+                    return;
+                }
+                let location = await Location.getCurrentPositionAsync({});
+                setUserLocation(location.coords);
+            } catch (err) {
+                showToast('Could not fetch location', 'error', 'warning');
+                setSelectedCity('All');
+            }
+            setIsLocating(false);
+        }
+    };
 
     const handleTitleTap = () => {
         navigation.navigate('AdminAuth');
@@ -105,9 +155,9 @@ export default function PlacesScreen({ navigation, route }) {
     }, [places]);
 
     const filteredPlaces = useMemo(() => {
-        return (places || []).filter(place => {
+        let result = (places || []).filter(place => {
             const matchesCategory = selectedCategory === 'All' || place.category === selectedCategory;
-            const matchesCity = selectedCity === 'All' || place.cityEn === selectedCity || place.city === selectedCity;
+            const matchesCity = selectedCity === 'All' || selectedCity === 'Nearby' || place.cityEn === selectedCity || place.city === selectedCity;
             
             const isFree = place.price === 'Free' || place.price === 'مجاناً' || place.price === 'مجاني' || String(place.price).toLowerCase() === 'free';
             const matchesPrice = selectedPriceType === 'All' || 
@@ -123,7 +173,18 @@ export default function PlacesScreen({ navigation, route }) {
                 
             return matchesCategory && matchesCity && matchesPrice && matchesRating && matchesSearch;
         });
-    }, [searchQuery, selectedCategory, selectedCity, selectedPriceType, minRating, places]);
+
+        if (selectedCity === 'Nearby' && userLocation) {
+            result = result.map(p => ({
+                ...p,
+                distance: p.lat && p.lng ? getDistance(userLocation.latitude, userLocation.longitude, p.lat, p.lng) : 9999
+            }))
+            .sort((a, b) => a.distance - b.distance)
+            .filter(p => p.distance < 100);
+        }
+
+        return result;
+    }, [searchQuery, selectedCategory, selectedCity, selectedPriceType, minRating, places, userLocation]);
 
     useEffect(() => {
         if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -132,6 +193,7 @@ export default function PlacesScreen({ navigation, route }) {
     }, []);
 
     const handleCategoryChange = (category) => {
+        Haptics.selectionAsync();
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setSelectedCategory(category);
     };
@@ -155,7 +217,7 @@ export default function PlacesScreen({ navigation, route }) {
                 <View>
                     <Text style={[styles.greetingText, { color: C.textMuted }]}>{t('welcome')},</Text>
                     <TouchableOpacity onPress={handleTitleTap}>
-                        <Text style={[styles.userNameText, { color: C.textMain }]}>Explorer</Text>
+                        <Text style={[styles.userNameText, { color: C.textMain }]}>{t('explorerTitle') || 'Explorer'}</Text>
                     </TouchableOpacity>
                 </View>
                 <TouchableOpacity 
@@ -222,15 +284,28 @@ export default function PlacesScreen({ navigation, route }) {
                 {/* Cities */}
                 <TouchableOpacity
                     style={[styles.filterTab, { borderColor: C.borderSoft || '#333' }, selectedCity === 'All' ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }]}
-                    onPress={() => setSelectedCity('All')}
+                    onPress={() => handleCityChange('All')}
                 >
                     <Text style={[styles.filterTabText, selectedCity === 'All' ? styles.filterTabTextActive : { color: C.textMain }]}>{t('filterAll') || 'All Cities'}</Text>
                 </TouchableOpacity>
+
+                {/* Nearby Toggle */}
+                <TouchableOpacity
+                    style={[styles.filterTab, { borderColor: C.borderSoft || '#333', flexDirection: 'row', alignItems: 'center', gap: 6 }, selectedCity === 'Nearby' ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }]}
+                    onPress={() => handleCityChange('Nearby')}
+                >
+                    <Ionicons name="location" size={14} color={selectedCity === 'Nearby' ? '#000' : C.primary} />
+                    <Text style={[styles.filterTabText, selectedCity === 'Nearby' ? styles.filterTabTextActive : { color: C.textMain }]}>
+                        {t('nearby') || 'Nearby'}
+                    </Text>
+                    {isLocating && <ActivityIndicator size="small" color="#000" />}
+                </TouchableOpacity>
+
                 {cities.map(city => (
                     <TouchableOpacity
                         key={city}
                         style={[styles.filterTab, { borderColor: C.borderSoft || '#333' }, selectedCity === city ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }]}
-                        onPress={() => setSelectedCity(city)}
+                        onPress={() => handleCityChange(city)}
                     >
                         <Text style={[styles.filterTabText, selectedCity === city ? styles.filterTabTextActive : { color: C.textMain }]}>{isRTL ? t(city) || city : city}</Text>
                     </TouchableOpacity>
@@ -243,7 +318,10 @@ export default function PlacesScreen({ navigation, route }) {
                     <TouchableOpacity
                         key={`star-${star}`}
                         style={[styles.filterTab, { borderColor: C.borderSoft || '#333', flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 6 }, minRating === star ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }]}
-                        onPress={() => setMinRating(prev => prev === star ? 0 : star)}
+                        onPress={() => {
+                            Haptics.selectionAsync();
+                            setMinRating(prev => prev === star ? 0 : star);
+                        }}
                     >
                         <Ionicons name="star" size={14} color={minRating === star ? '#000' : C.primary} />
                         <Text style={[styles.filterTabText, minRating === star ? styles.filterTabTextActive : { color: C.textMain }]}>{star}+</Text>
@@ -257,19 +335,22 @@ export default function PlacesScreen({ navigation, route }) {
                     <TouchableOpacity
                         key={`price-${pType}`}
                         style={[styles.filterTab, { borderColor: C.borderSoft || '#333' }, selectedPriceType === pType ? { backgroundColor: C.primary, borderColor: C.primary } : { backgroundColor: C.bgCard }]}
-                        onPress={() => setSelectedPriceType(prev => prev === pType ? 'All' : pType)}
+                        onPress={() => {
+                            Haptics.selectionAsync();
+                            setSelectedPriceType(prev => prev === pType ? 'All' : pType);
+                        }}
                     >
-                        <Text style={[styles.filterTabText, selectedPriceType === pType ? styles.filterTabTextActive : { color: C.textMain }]}>{isRTL ? (pType === 'Free' ? 'مجاني' : 'بمقابل') : pType}</Text>
+                        <Text style={[styles.filterTabText, selectedPriceType === pType ? styles.filterTabTextActive : { color: C.textMain }]}>{pType === 'Free' ? (t('free') || 'Free') : (t('paid') || 'Paid')}</Text>
                     </TouchableOpacity>
                 ))}
             </ScrollView>
 
             <View style={[styles.sectionHeader, isRTL && { flexDirection: 'row-reverse' }]}>
                 <Text style={[styles.sectionTitle, { color: C.textMain }]}>
-                    {isRTL ? 'الوجهات المميزة' : 'Popular Destinations'}
+                    {t('featuredDestinations') || 'Popular Destinations'}
                 </Text>
                 <TouchableOpacity onPress={() => { handleCategoryChange('All'); setSelectedCity('All'); setMinRating(0); setSelectedPriceType('All'); }}>
-                    <Text style={[styles.viewAllText, { color: C.primary }]}>{isRTL ? 'عرض الكل' : 'View all'}</Text>
+                    <Text style={[styles.viewAllText, { color: C.primary }]}>{t('allPlaces') || 'View all'}</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -281,17 +362,17 @@ export default function PlacesScreen({ navigation, route }) {
             <DynamicBackground category={selectedCategory !== 'All' ? selectedCategory : undefined} />
             <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={C.bgMain} />
 
-            <FlatList
+            <FlashList
                 data={filteredPlaces}
                 renderItem={renderPlaceCard}
                 keyExtractor={item => item.id.toString()}
                 ListHeaderComponent={renderHeader}
                 contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: SPACING.md }}
                 showsVerticalScrollIndicator={false}
-                removeClippedSubviews={true}
-                initialNumToRender={5}
-                maxToRenderPerBatch={5}
-                windowSize={5}
+                estimatedItemSize={400}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} colors={[C.primary]} />
+                }
             />
         </SafeAreaView>
     );

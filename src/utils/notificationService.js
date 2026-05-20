@@ -61,9 +61,9 @@ export async function scheduleMorningReminder(tripName, firstActivity, isRTL) {
         await Notifications.scheduleNotificationAsync({
             content: { title, body, sound: true },
             trigger: {
-                type: 'daily',
                 hour: 8,
                 minute: 0,
+                repeats: true,
             },
         });
 

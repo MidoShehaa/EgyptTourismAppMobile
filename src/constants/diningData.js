@@ -3,7 +3,8 @@ export const RESTAURANTS = [
     { id: 101, name: "Tabali", city: "Cairo", cuisine: "Egyptian", meal: "Breakfast", highlightDish: "Fava Beans & Taameya", rating: 4.8, image: "https://images.unsplash.com/photo-1541167760496-162955ed8a9f?w=600&q=80", description: "Authentic Egyptian breakfast with a modern touch in Heliopolis & New Cairo." },
     { id: 102, name: "Zooba", city: "Cairo", cuisine: "Egyptian", meal: "Breakfast", highlightDish: "Gourmet Ful & Taameya", rating: 4.7, image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80", description: "World-famous gourmet Egyptian street food." },
     { id: 103, name: "Felfela", city: "Cairo", cuisine: "Egyptian", meal: "Breakfast", highlightDish: "Traditional Breakfast Plate", rating: 4.6, image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80", description: "A legendary downtown spot for classic Egyptian breakfast staples." },
-    { id: 104, name: "Ralph's German Bakery", city: "Dahab", cuisine: "German/Bakery", meal: "Breakfast", highlightDish: "Fresh Pretzels & Eggs", rating: 4.9, image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80", description: "Authentic Bavarian bakery experience by the Red Sea." },
+    { id: 104, name: "Ralph's German Bakery", city: "Dahab", cuisine: "German/Bakery", meal: "Breakfast", highlightDish: "Fresh Pretzels & Eggs", rating: 4.9,
+        image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80", description: "Authentic Bavarian bakery experience by the Red Sea." },
     { id: 105, name: "Mohamed Ahmed", city: "Alexandria", cuisine: "Egyptian", meal: "Breakfast", highlightDish: "Special Ful & Falafel", rating: 4.9, image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=80", description: "The most iconic traditional breakfast destination in Alexandria." },
     { id: 106, name: "Délices", city: "Alexandria", cuisine: "Greek/Bakery", meal: "Breakfast", highlightDish: "Continental Breakfast", rating: 4.8, image: "https://images.unsplash.com/photo-1495147466023-ac5c588e2e94?w=600&q=80", description: "Historic Greek-owned bakery and restaurant in the heart of Alexandria." },
     { id: 107, name: "Qahwa", city: "Cairo", cuisine: "International", meal: "Breakfast", highlightDish: "Omelets & Pancakes", rating: 4.7, image: "https://images.unsplash.com/photo-1493770348161-369560ae357d?w=600&q=80", description: "Sophisticated brunch and artisan coffee in Sheikh Zayed & New Cairo." },
@@ -27,10 +28,14 @@ export const RESTAURANTS = [
 
     // --- NEW CITIES ---
     { id: 30902, name: "Ali Baba", city: "Dahab", cuisine: "Seafood", meal: "Dinner", highlightDish: "Grilled Fish", rating: 4.7, image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80", description: "أشهر مطاعم الأسماك على ممشى دهب." },
-    { id: 31001, name: "Magdy Seafood", city: "Matrouh", cuisine: "Seafood", meal: "Lunch", highlightDish: "Fish & Rice", rating: 4.8, image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80", description: "أسطورة الأسماك في مرسى مطروح." },
-    { id: 31002, name: "Sachi by the Sea", city: "North Coast", cuisine: "Fine Dining", meal: "Dinner", highlightDish: "Sushi & Steak", rating: 4.9, image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80", description: "تجربة طعام صيفية فاخرة في هاسيندا." },
-    { id: 31201, name: "حلويات البدري", city: "Ras El Bar", cuisine: "Desserts", meal: "Breakfast", highlightDish: "المشبك الدمياطي", rating: 4.9, image: "https://images.unsplash.com/photo-1579372786545-d24232daf58c?w=600&q=80", description: "أشهر صانعي الحلويات الشرقية والمشبك في دمياط." },
-    { id: 31202, name: "خلود النيل", city: "Ras El Bar", cuisine: "Seafood", meal: "Lunch", highlightDish: "Mixed Seafood", rating: 4.7, image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80", description: "مطعم سمك شهير يطل على النيل مباشرة." },
+    { id: 31001, name: "Magdy Seafood", city: "Matrouh", cuisine: "Seafood", meal: "Lunch", highlightDish: "Fish & Rice", rating: 4.8,
+        image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80", description: "أسطورة الأسماك في مرسى مطروح." },
+    { id: 31002, name: "Sachi by the Sea", city: "North Coast", cuisine: "Fine Dining", meal: "Dinner", highlightDish: "Sushi & Steak", rating: 4.9,
+        image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80", description: "تجربة طعام صيفية فاخرة في هاسيندا." },
+    { id: 31201, name: "حلويات البدري", city: "Ras El Bar", cuisine: "Desserts", meal: "Breakfast", highlightDish: "المشبك الدمياطي", rating: 4.9,
+        image: "https://images.unsplash.com/photo-1579372786545-d24232daf58c?w=600&q=80", description: "أشهر صانعي الحلويات الشرقية والمشبك في دمياط." },
+    { id: 31202, name: "خلود النيل", city: "Ras El Bar", cuisine: "Seafood", meal: "Lunch", highlightDish: "Mixed Seafood", rating: 4.7,
+        image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80", description: "مطعم سمك شهير يطل على النيل مباشرة." },
 ];
 
 export const CRUISES = [
